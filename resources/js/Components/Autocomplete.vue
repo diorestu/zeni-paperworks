@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { IconChevronDown } from '@tabler/icons-vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     items: {
@@ -18,10 +18,22 @@ const props = defineProps({
     itemLabel: {
         type: String,
         default: 'name'
+    },
+    showAddOption: {
+        type: Boolean,
+        default: false
+    },
+    addOptionLabel: {
+        type: String,
+        default: 'Add'
+    },
+    inputClass: {
+        type: String,
+        default: 'rounded-lg px-3 py-3 text-sm font-semibold'
     }
 });
 
-const emit = defineEmits(['update:modelValue', 'select']);
+const emit = defineEmits(['update:modelValue', 'select', 'add']);
 
 const searchQuery = ref(props.modelValue);
 const isOpen = ref(false);
@@ -107,19 +119,26 @@ onUnmounted(() => {
                 @focus="isOpen = true"
                 @keydown="onKeydown"
                 :placeholder="placeholder"
-                class="w-full bg-slate-50 border-none rounded-lg px-3 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none shadow-sm"
+                :class="['w-full bg-slate-50 border-none text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none shadow-sm', inputClass]"
             >
              <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                <IconChevronDown :size="16" />
+                <Icon icon="si:expand-more-line" :width="16" :height="16"  />
             </div>
         </div>
 
         <div 
-            v-if="isOpen && filteredItems.length > 0"
+            v-if="isOpen && (filteredItems.length > 0 || showAddOption)"
             ref="listRef"
             class="absolute z-10 w-full mt-1 bg-white rounded-xl border border-slate-100 shadow-xl overflow-hidden"
         >
             <ul>
+                <li
+                    v-if="showAddOption"
+                    @click="emit('add')"
+                    class="px-4 py-3 cursor-pointer transition-colors text-xs font-semibold uppercase tracking-widest text-[#023e8a] hover:bg-slate-50 border-b border-slate-100"
+                >
+                    {{ addOptionLabel }}
+                </li>
                 <li 
                     v-for="(item, index) in filteredItems" 
                     :key="index"

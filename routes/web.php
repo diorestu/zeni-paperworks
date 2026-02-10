@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\DashboardController;
 
 Route::redirect('/', '/dashboard');
 
@@ -18,13 +19,15 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('clients', ClientController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('role:super_admin,admin');
     Route::resource('products', ProductController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('role:super_admin,admin');
     Route::resource('invoices', InvoiceController::class)->only(['index', 'create', 'store'])->middleware('role:super_admin,admin,user');
+    Route::patch('/invoices/{invoice}', [InvoiceController::class, 'update'])
+        ->name('invoices.update')
+        ->middleware('role:super_admin,admin,user')
+        ->where('invoice', '.*');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show')->middleware('role:super_admin,admin,user')->where('invoice', '.*');
 
     Route::resource('quotations', App\Http\Controllers\QuotationController::class)->only(['index', 'create', 'store'])->middleware('role:super_admin,admin,user');

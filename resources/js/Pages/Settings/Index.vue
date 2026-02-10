@@ -2,21 +2,7 @@
 import { ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
-import { 
-    IconSettings, 
-    IconDeviceFloppy, 
-    IconUser, 
-    IconBuilding,
-    IconHash,
-    IconMapPin,
-    IconPhone,
-    IconMail,
-    IconWorld,
-    IconFileText,
-    IconPlus,
-    IconTrash,
-    IconReceipt
-} from '@tabler/icons-vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     invoice_prefix: String,
@@ -170,7 +156,7 @@ const deleteTax = (tax) => {
                         <div class="flex items-center gap-6">
                             <div class="flex-shrink-0">
                                 <div class="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center">
-                                    <IconUser :size="32" class="text-slate-400" />
+                                    <Icon icon="si:user-line" :width="32" :height="32" class="text-slate-400"  />
                                 </div>
                             </div>
                             <div class="flex-1">
@@ -192,7 +178,7 @@ const deleteTax = (tax) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Invoice Prefix</label>
                             <div class="relative">
-                                <IconHash :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <Icon icon="si:text-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="text" 
                                     v-model="profileForm.invoice_prefix"
@@ -206,7 +192,7 @@ const deleteTax = (tax) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Quotation Prefix</label>
                             <div class="relative">
-                                <IconHash :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <Icon icon="si:text-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="text" 
                                     v-model="profileForm.quotation_prefix"
@@ -223,7 +209,7 @@ const deleteTax = (tax) => {
                                 :disabled="profileForm.processing"
                                 class="flex items-center gap-2 rounded-xl bg-[#023e8a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                             >
-                                <IconDeviceFloppy :size="18" />
+                                <Icon icon="si:archive-line" :width="18" :height="18"  />
                                 <span>{{ profileForm.processing ? 'Saving...' : 'Save Changes' }}</span>
                             </button>
                         </div>
@@ -242,7 +228,7 @@ const deleteTax = (tax) => {
                         <div class="space-y-2 md:col-span-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Company Name</label>
                             <div class="relative">
-                                <IconBuilding :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <Icon icon="si:building-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="text" 
                                     v-model="companyForm.company_name"
@@ -256,7 +242,7 @@ const deleteTax = (tax) => {
                         <div class="space-y-2 md:col-span-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Company Address</label>
                             <div class="relative">
-                                <IconMapPin :size="18" class="absolute left-4 top-4 text-slate-400" />
+                                <Icon icon="si:pin-line" :width="18" :height="18" class="absolute left-4 top-4 text-slate-400"  />
                                 <textarea 
                                     v-model="companyForm.company_address"
                                     rows="3"
@@ -270,7 +256,7 @@ const deleteTax = (tax) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Phone Number</label>
                             <div class="relative">
-                                <IconPhone :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <Icon icon="si:phone-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="text" 
                                     v-model="companyForm.company_phone"
@@ -284,7 +270,7 @@ const deleteTax = (tax) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Email Address</label>
                             <div class="relative">
-                                <IconMail :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <Icon icon="si:mail-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="email" 
                                     v-model="companyForm.company_email"
@@ -298,7 +284,7 @@ const deleteTax = (tax) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Website</label>
                             <div class="relative">
-                                <IconWorld :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <Icon icon="si:globe-detailed-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="url" 
                                     v-model="companyForm.company_website"
@@ -312,7 +298,7 @@ const deleteTax = (tax) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tax ID / Registration Number</label>
                             <div class="relative">
-                                <IconFileText :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <Icon icon="si:quote-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="text" 
                                     v-model="companyForm.company_tax_id"
@@ -329,7 +315,7 @@ const deleteTax = (tax) => {
                             :disabled="companyForm.processing"
                             class="flex items-center gap-2 rounded-xl bg-[#023e8a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                         >
-                            <IconDeviceFloppy :size="18" />
+                            <Icon icon="si:archive-line" :width="18" :height="18"  />
                             <span>{{ companyForm.processing ? 'Saving...' : 'Save Company Info' }}</span>
                         </button>
                     </div>
@@ -387,7 +373,7 @@ const deleteTax = (tax) => {
                                     :disabled="taxForm.processing"
                                     class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#023e8a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                                 >
-                                    <IconDeviceFloppy :size="18" />
+                                    <Icon icon="si:archive-line" :width="18" :height="18"  />
                                     <span>{{ editingTax ? 'Update' : 'Add Tax' }}</span>
                                 </button>
                                 <button 
@@ -410,7 +396,7 @@ const deleteTax = (tax) => {
                         </div>
                         <div class="divide-y divide-slate-100">
                             <div v-if="taxes.length === 0" class="p-12 text-center">
-                                <IconReceipt :size="48" class="mx-auto text-slate-300 mb-4" />
+                                <Icon icon="si:checklist-line" :width="48" :height="48" class="mx-auto text-slate-300 mb-4"  />
                                 <p class="text-sm font-semibold text-slate-900">No taxes configured</p>
                                 <p class="text-xs text-slate-400 mt-1">Add your first tax to get started.</p>
                             </div>
@@ -443,7 +429,7 @@ const deleteTax = (tax) => {
                                             @click="deleteTax(tax)"
                                             class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                                         >
-                                            <IconTrash :size="18" />
+                                            <Icon icon="si:bin-line" :width="18" :height="18"  />
                                         </button>
                                     </div>
                                 </div>

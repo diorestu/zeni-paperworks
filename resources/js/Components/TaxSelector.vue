@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { IconX, IconCheck, IconReceipt } from '@tabler/icons-vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     taxes: Array,
@@ -36,18 +36,18 @@ const applySelection = () => {
             <!-- Header -->
             <div class="bg-[#023e8a] px-6 py-5 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <IconReceipt :size="24" class="text-white" />
+                    <Icon icon="si:checklist-line" :width="24" :height="24" class="text-white"  />
                     <h3 class="text-lg font-semibold text-white">Select Taxes</h3>
                 </div>
                 <button @click="$emit('close')" class="text-white/70 hover:text-white transition-colors">
-                    <IconX :size="24" />
+                    <Icon icon="si:close-line" :width="24" :height="24"  />
                 </button>
             </div>
 
             <!-- Tax List -->
             <div class="p-6 max-h-96 overflow-y-auto">
                 <div v-if="taxes.length === 0" class="text-center py-12">
-                    <IconReceipt :size="48" class="mx-auto text-slate-300 mb-4" />
+                    <Icon icon="si:checklist-line" :width="48" :height="48" class="mx-auto text-slate-300 mb-4"  />
                     <p class="text-sm font-semibold text-slate-900">No taxes available</p>
                     <p class="text-xs text-slate-400 mt-1">Configure taxes in Settings first.</p>
                 </div>
@@ -86,7 +86,7 @@ const applySelection = () => {
                                         : 'border-slate-300'
                                 ]"
                             >
-                                <IconCheck v-if="isTaxSelected(tax.id)" :size="14" class="text-white" :stroke-width="3" />
+                                <Icon icon="si:check-line" v-if="isTaxSelected(tax.id)" :width="14" :height="14" class="text-white"  />
                             </div>
                         </div>
                     </button>

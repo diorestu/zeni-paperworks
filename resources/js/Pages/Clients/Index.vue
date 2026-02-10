@@ -1,18 +1,9 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import Autocomplete from '@/Components/Autocomplete.vue';
 import { ref, computed } from 'vue';
 import { router, useForm, Head } from '@inertiajs/vue3';
-import { 
-    IconPlus, 
-    IconSearch, 
-    IconX, 
-    IconArrowUp, 
-    IconArrowDown, 
-    IconArrowsSort,
-    IconFolderOff,
-    IconDeviceFloppy,
-    IconTrash
-} from '@tabler/icons-vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     clients: {
@@ -26,6 +17,7 @@ const form = useForm({
     email: '',
     phone: '',
     company: '',
+    industry_sector: '',
     address: '',
 });
 
@@ -35,6 +27,7 @@ const editForm = useForm({
     email: '',
     phone: '',
     company: '',
+    industry_sector: '',
     address: '',
 });
 
@@ -90,9 +83,28 @@ const startEdit = (client) => {
     editForm.email = client.email;
     editForm.phone = client.phone;
     editForm.company = client.company;
+    editForm.industry_sector = client.industry_sector || '';
     editForm.address = client.address;
     showEdit.value = true;
 };
+
+const industryOptions = [
+    'Farm',
+    'Health',
+    'Finance',
+    'Hospitality',
+    'Retail',
+    'Education',
+    'Technology',
+    'Manufacturing',
+    'Construction',
+    'Transportation',
+    'Real Estate',
+    'Professional Services',
+    'Government',
+    'Non-Profit',
+    'Other',
+];
 
 const closeModals = () => {
     showCreate.value = false;
@@ -147,7 +159,7 @@ const deleteClient = () => {
                 @click="startCreate"
             >
                 <span class="relative z-10 flex items-center gap-2">
-                    <IconPlus :size="18" :stroke-width="3" />
+                    <Icon icon="si:add-line" :width="18" :height="18"  />
                     <span>Add New Client</span>
                 </span>
                 <div class="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
@@ -164,10 +176,10 @@ const deleteClient = () => {
                 <input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Search by name, email or company..."
+                    placeholder="Search by name, email or tax number..."
                     class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-normal text-slate-700 shadow-sm ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] focus:bg-white transition-all outline-none"
                 />
-                <IconSearch :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a] transition-colors" />
+                <Icon icon="si:search-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a] transition-colors"  />
                 <button 
                     v-if="searchQuery" 
                     @click="searchQuery = ''"
@@ -193,9 +205,9 @@ const deleteClient = () => {
                                 <div class="flex items-center gap-2">
                                     Name
                                     <span class="transition-all" :class="sortConfig.key === 'name' ? 'opacity-100 text-[#023e8a]' : 'opacity-0 group-hover:opacity-100'">
-                                        <IconArrowUp v-if="sortConfig.key === 'name' && sortConfig.direction === 'asc'" :size="14" />
-                                        <IconArrowDown v-else-if="sortConfig.key === 'name' && sortConfig.direction === 'desc'" :size="14" />
-                                        <IconArrowsSort v-else :size="14" />
+                                        <Icon icon="si:arrow-upward-line" v-if="sortConfig.key === 'name' && sortConfig.direction === 'asc'" :width="14" :height="14"  />
+                                        <Icon icon="si:arrow-downward-line" v-else-if="sortConfig.key === 'name' && sortConfig.direction === 'desc'" :width="14" :height="14"  />
+                                        <Icon icon="si:sort-line" v-else :width="14" :height="14"  />
                                     </span>
                                 </div>
                             </th>
@@ -203,20 +215,20 @@ const deleteClient = () => {
                                 <div class="flex items-center gap-2">
                                     Email Address
                                     <span class="transition-all" :class="sortConfig.key === 'email' ? 'opacity-100 text-[#023e8a]' : 'opacity-0 group-hover:opacity-100'">
-                                        <IconArrowUp v-if="sortConfig.key === 'email' && sortConfig.direction === 'asc'" :size="14" />
-                                        <IconArrowDown v-else-if="sortConfig.key === 'email' && sortConfig.direction === 'desc'" :size="14" />
-                                        <IconArrowsSort v-else :size="14" />
+                                        <Icon icon="si:arrow-upward-line" v-if="sortConfig.key === 'email' && sortConfig.direction === 'asc'" :width="14" :height="14"  />
+                                        <Icon icon="si:arrow-downward-line" v-else-if="sortConfig.key === 'email' && sortConfig.direction === 'desc'" :width="14" :height="14"  />
+                                        <Icon icon="si:sort-line" v-else :width="14" :height="14"  />
                                     </span>
                                 </div>
                             </th>
                             <th class="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Phone</th>
                             <th @click="toggleSort('company')" class="group cursor-pointer px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 select-none hover:text-[#023e8a] transition-colors">
                                 <div class="flex items-center gap-2">
-                                    Company
+                                    Tax Number
                                     <span class="transition-all" :class="sortConfig.key === 'company' ? 'opacity-100 text-[#023e8a]' : 'opacity-0 group-hover:opacity-100'">
-                                        <IconArrowUp v-if="sortConfig.key === 'company' && sortConfig.direction === 'asc'" :size="14" />
-                                        <IconArrowDown v-else-if="sortConfig.key === 'company' && sortConfig.direction === 'desc'" :size="14" />
-                                        <IconArrowsSort v-else :size="14" />
+                                        <Icon icon="si:arrow-upward-line" v-if="sortConfig.key === 'company' && sortConfig.direction === 'asc'" :width="14" :height="14"  />
+                                        <Icon icon="si:arrow-downward-line" v-else-if="sortConfig.key === 'company' && sortConfig.direction === 'desc'" :width="14" :height="14"  />
+                                        <Icon icon="si:sort-line" v-else :width="14" :height="14"  />
                                     </span>
                                 </div>
                             </th>
@@ -241,14 +253,14 @@ const deleteClient = () => {
                             <td class="px-8 py-6 text-sm text-slate-500 font-normal">{{ client.phone || '—' }}</td>
                             <td class="px-8 py-6">
                                 <span class="rounded-md bg-sky-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-sky-600 border border-sky-100 group-hover:bg-sky-100 transition-colors">
-                                    {{ client.company || 'Private Entity' }}
+                                    {{ client.company || '—' }}
                                 </span>
                             </td>
                         </tr>
                     </tbody>
                 </table>
                 <div v-if="!filteredClients.length" class="flex flex-col items-center justify-center py-20 px-4 bg-white">
-                    <IconFolderOff :size="48" class="text-slate-200 mb-4" />
+                    <Icon icon="si:archive-line" :width="48" :height="48" class="text-slate-200 mb-4"  />
                     <p class="text-lg font-semibold text-slate-400">No matching clients found.</p>
                     <p class="text-sm text-slate-300 mt-1">Try adjusting your search query.</p>
                 </div>
@@ -284,7 +296,7 @@ const deleteClient = () => {
                             </h3>
                         </div>
                         <button class="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all active:scale-90" @click="closeModals">
-                            <IconX :size="20" />
+                            <Icon icon="si:close-line" :width="20" :height="20"  />
                         </button>
                     </div>
 
@@ -306,16 +318,26 @@ const deleteClient = () => {
                             <input v-model="form.phone" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="+1 (555) 000-0000" />
                         </div>
                         <div>
-                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Working Company</label>
-                            <input v-model="form.company" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="Company Ltd." />
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Tax Number</label>
+                            <input v-model="form.company" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="Tax number" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Industry Sector</label>
+                            <Autocomplete
+                                v-model="form.industry_sector"
+                                :items="industryOptions.map(option => ({ name: option }))"
+                                item-label="name"
+                                placeholder="Select industry"
+                                input-class="rounded-xl px-6 pr-10 py-4 text-sm font-semibold"
+                            />
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Physical Address</label>
-                            <input v-model="form.address" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="123 Street Ave." />
+                            <textarea v-model="form.address" rows="3" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none resize-none" placeholder="123 Street Ave."></textarea>
                         </div>
                         <div class="col-span-2 flex justify-end pt-4">
                             <button type="submit" class="flex items-center gap-3 rounded-xl bg-[#023e8a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#023e8a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95">
-                                <IconDeviceFloppy :size="18" />
+                                <Icon icon="si:archive-line" :width="18" :height="18"  />
                                 <span>Save Profile</span>
                             </button>
                         </div>
@@ -339,12 +361,22 @@ const deleteClient = () => {
                             <input v-model="editForm.phone" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="+1 (555) 000-0000" />
                         </div>
                         <div>
-                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Working Company</label>
-                            <input v-model="editForm.company" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="Company Ltd." />
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Tax Number</label>
+                            <input v-model="editForm.company" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="Tax number" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Industry Sector</label>
+                            <Autocomplete
+                                v-model="editForm.industry_sector"
+                                :items="industryOptions.map(option => ({ name: option }))"
+                                item-label="name"
+                                placeholder="Select industry"
+                                input-class="rounded-xl px-6 pr-10 py-4 text-sm font-semibold"
+                            />
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Physical Address</label>
-                            <input v-model="editForm.address" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="123 Street Ave." />
+                            <textarea v-model="editForm.address" rows="3" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none resize-none" placeholder="123 Street Ave."></textarea>
                         </div>
                         <div class="col-span-2 flex justify-between pt-4">
                             <button
@@ -352,11 +384,11 @@ const deleteClient = () => {
                                 class="flex items-center gap-3 rounded-xl bg-rose-50 px-8 py-5 text-sm font-semibold text-rose-500 hover:bg-rose-100 transition-all"
                                 @click="deleteClient"
                             >
-                                <IconTrash :size="18" />
+                                <Icon icon="si:bin-line" :width="18" :height="18"  />
                                 <span>Delete Record</span>
                             </button>
                             <button type="submit" class="flex items-center gap-3 rounded-xl bg-[#023e8a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#023e8a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95">
-                                <IconDeviceFloppy :size="18" />
+                                <Icon icon="si:archive-line" :width="18" :height="18"  />
                                 <span>Save Changes</span>
                             </button>
                         </div>

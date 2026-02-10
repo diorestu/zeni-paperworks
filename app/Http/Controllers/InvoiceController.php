@@ -13,6 +13,7 @@ use Inertia\Response;
 use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 
 class InvoiceController extends Controller
 {
@@ -87,6 +88,19 @@ class InvoiceController extends Controller
         return Inertia::render('Invoices/Show', [
             'invoice' => $invoice->load(['client', 'items.product']),
         ]);
+    }
+
+    public function update(Request $request, Invoice $invoice): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', Rule::in(['draft', 'sent', 'paid', 'overdue', 'cancelled'])],
+        ]);
+
+        $invoice->update([
+            'status' => $validated['status'],
+        ]);
+
+        return redirect()->back()->with('status', 'Invoice status updated');
     }
     private function generateInvoiceNumber(): string
     {

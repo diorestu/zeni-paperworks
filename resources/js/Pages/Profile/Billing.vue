@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { IconHistory, IconCircleCheck, IconChevronDown } from '@tabler/icons-vue';
+import { Icon } from '@iconify/vue';
 
 const isYearly = ref(false);
 
@@ -144,7 +144,7 @@ const getDayPrice = (plan) => {
                         <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-5 px-1">Documents</p>
                         <ul class="space-y-4">
                             <li v-for="doc in plan.docs" :key="doc" class="flex items-center gap-3 text-xs font-semibold text-slate-600">
-                                <IconCircleCheck :size="18" class="text-emerald-500 shrink-0" />
+                                <Icon icon="si:check-circle-line" :width="18" :height="18" class="text-emerald-500 shrink-0"  />
                                 {{ doc }}
                             </li>
                         </ul>
@@ -155,7 +155,7 @@ const getDayPrice = (plan) => {
                         <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-5 px-1">Features</p>
                         <ul class="space-y-4">
                             <li v-for="feat in plan.features" :key="feat" class="flex items-center gap-3 text-xs font-semibold text-slate-600">
-                                <IconCircleCheck :size="18" class="text-emerald-500 shrink-0" />
+                                <Icon icon="si:check-circle-line" :width="18" :height="18" class="text-emerald-500 shrink-0"  />
                                 {{ feat }}
                             </li>
                         </ul>
@@ -168,7 +168,7 @@ const getDayPrice = (plan) => {
                 <div class="p-10 border-b border-slate-50 flex items-center justify-between">
                     <div class="flex items-center gap-4">
                         <div class="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
-                            <IconHistory :size="24" />
+                            <Icon icon="si:clock-line" :width="24" :height="24"  />
                         </div>
                         <h2 class="text-lg font-semibold text-slate-900">Payment History</h2>
                     </div>

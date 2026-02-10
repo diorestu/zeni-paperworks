@@ -1,7 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { IconShieldLock, IconDeviceFloppy, IconLock } from '@tabler/icons-vue';
+import { Icon } from '@iconify/vue';
 
 const form = useForm({
     current_password: '',
@@ -31,7 +31,7 @@ const submit = () => {
                 <div class="p-8 border-b border-slate-50 bg-slate-50/30">
                     <div class="flex items-center gap-4">
                         <div class="h-16 w-16 rounded-full bg-rose-50 flex items-center justify-center text-rose-500">
-                            <IconShieldLock :size="32" />
+                            <Icon icon="si:shield-line" :width="32" :height="32"  />
                         </div>
                         <div>
                             <h2 class="text-lg font-semibold text-slate-900">Update Password</h2>
@@ -51,7 +51,7 @@ const submit = () => {
                                     required
                                     class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
                                 />
-                                <IconLock :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a]" />
+                                <Icon icon="si:lock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a]"  />
                             </div>
                         </div>
 
@@ -64,7 +64,7 @@ const submit = () => {
                                     required
                                     class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
                                 />
-                                <IconLock :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a]" />
+                                <Icon icon="si:lock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a]"  />
                             </div>
                         </div>
 
@@ -77,7 +77,7 @@ const submit = () => {
                                     required
                                     class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
                                 />
-                                <IconLock :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a]" />
+                                <Icon icon="si:lock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a]"  />
                             </div>
                         </div>
                     </div>
@@ -88,7 +88,7 @@ const submit = () => {
                             :disabled="form.processing"
                             class="flex items-center gap-3 rounded-xl bg-[#023e8a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#023e8a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95 disabled:opacity-50"
                         >
-                            <IconDeviceFloppy :size="18" />
+                            <Icon icon="si:archive-line" :width="18" :height="18"  />
                             <span>Update Password</span>
                         </button>
                     </div>

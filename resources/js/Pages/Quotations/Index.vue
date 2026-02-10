@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { IconPlus, IconFileText, IconChevronRight, IconSearch } from '@tabler/icons-vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     quotations: Array,
@@ -57,7 +57,7 @@ const statusCounts = computed(() => {
                 :href="route('quotations.create')"
                 class="flex items-center gap-2 rounded-xl bg-[#023e8a] px-6 py-4 text-sm font-semibold text-white shadow-xl shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95"
             >
-                <IconPlus :size="18" :stroke-width="3" />
+                <Icon icon="si:add-line" :width="18" :height="18"  />
                 <span>Create Quotation</span>
             </Link>
         </div>
@@ -158,7 +158,7 @@ const statusCounts = computed(() => {
 
             <!-- Search Bar -->
             <div class="relative max-w-md">
-                <IconSearch :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Icon icon="si:search-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                 <input 
                     v-model="searchQuery"
                     type="text" 
@@ -186,7 +186,7 @@ const statusCounts = computed(() => {
                         <td class="px-8 py-6">
                             <div class="flex items-center gap-3">
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-[#023e8a] group-hover:bg-white group-hover:shadow-sm transition-all">
-                                    <IconFileText :size="18" />
+                                    <Icon icon="si:quote-line" :width="18" :height="18"  />
                                 </div>
                                 <span class="text-sm font-semibold text-slate-900">{{ quotation.quotation_number }}</span>
                             </div>
@@ -221,14 +221,14 @@ const statusCounts = computed(() => {
                             </span>
                         </td>
                         <td class="px-8 py-6 text-right">
-                            <IconChevronRight :size="18" class="text-slate-300 group-hover:text-[#023e8a] transition-colors inline-block" />
+                            <Icon icon="si:chevron-right-line" :width="18" :height="18" class="text-slate-300 group-hover:text-[#023e8a] transition-colors inline-block"  />
                         </td>
                     </tr>
                     <tr v-if="filteredQuotations.length === 0">
                         <td colspan="6" class="px-8 py-20 text-center">
                             <div class="flex flex-col items-center gap-4">
                                 <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-300">
-                                    <IconFileText :size="32" />
+                                    <Icon icon="si:quote-line" :width="32" :height="32"  />
                                 </div>
                                 <div>
                                     <p class="text-sm font-semibold text-slate-900">No quotations found</p>

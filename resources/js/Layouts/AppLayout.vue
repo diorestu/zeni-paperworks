@@ -1,42 +1,26 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
-import { 
-    IconLayoutDashboard, 
-    IconUsers, 
-    IconBox, 
-    IconBell, 
-    IconChevronRight, 
-    IconCircleX,
-    IconSearch,
-    IconDotsVertical,
-    IconChevronDown,
-    IconUser,
-    IconCreditCard,
-    IconShieldLock,
-    IconLogout,
-    IconFileText,
-    IconBuildingBank,
-    IconSettings
-} from '@tabler/icons-vue';
+import { Icon } from '@iconify/vue';
 
 const page = usePage();
 const userName = computed(() => page.props.auth?.user?.name || 'Ava Moore');
 const showDropdown = ref(false);
+const showNotifications = ref(false);
 
 const navItems = computed(() => {
     const role = page.props.auth?.user?.role;
     const items = [
-        { name: 'Dashboard', href: '/dashboard', icon: IconLayoutDashboard },
-        { name: 'Invoices', href: '/invoices', icon: IconFileText },
-        { name: 'Quotations', href: '/quotations', icon: IconFileText },
+        { name: 'Dashboard', href: '/dashboard', icon: 'si:bar-chart-line' },
+        { name: 'Invoices', href: '/invoices', icon: 'si:ballot-line' },
+        { name: 'Quotations', href: '/quotations', icon: 'si:assignment-line' },
     ];
 
     if (role === 'super_admin' || role === 'admin') {
         items.push(
-            { name: 'Clients', href: '/clients', icon: IconUsers },
-            { name: 'Products', href: '/products', icon: IconBox },
-            { name: 'Settings', href: '/settings', icon: IconSettings }
+            { name: 'Clients', href: '/clients', icon: 'si:user-alt-line' },
+            { name: 'Products', href: '/products', icon: 'si:inventory-line' },
+            { name: 'Settings', href: '/settings', icon: 'si:settings-line' }
         );
     }
     
@@ -73,8 +57,13 @@ onUnmounted(() => {
 const closeDropdownHandler = (e) => {
     const dropdown = document.getElementById('user-menu-dropdown');
     const toggle = document.getElementById('user-menu-toggle');
+    const notifDropdown = document.getElementById('notif-dropdown');
+    const notifToggle = document.getElementById('notif-toggle');
     if (dropdown && !dropdown.contains(e.target) && !toggle.contains(e.target)) {
         showDropdown.value = false;
+    }
+    if (notifDropdown && !notifDropdown.contains(e.target) && !notifToggle.contains(e.target)) {
+        showNotifications.value = false;
     }
 };
 </script>
@@ -91,7 +80,7 @@ const closeDropdownHandler = (e) => {
                 <div class="flex h-full flex-col px-6 py-8">
                     <!-- Brand -->
                     <div class="flex items-center gap-3">
-                        <img src="/img/logo/logo_text_blue.png" alt="Paperwork Logo" class="h-16 w-auto">
+                        <img src="/img/logo/logo_text_blue.png" alt="Paperwork Logo" class="h-12 w-auto max-w-[180px] object-contain shrink-0">
                     </div>
 
                     <!-- Navigation -->
@@ -106,7 +95,7 @@ const closeDropdownHandler = (e) => {
                                 : 'text-slate-500 hover:bg-white hover:text-slate-900 hover:shadow-sm'"
                         >
                             <div class="flex items-center gap-3">
-                                <component :is="item.icon" :size="18" :stroke-width="2.5" />
+                                <Icon :icon="item.icon" :width="21" :height="21" />
                                 <span>{{ item.name }}</span>
                             </div>
                             <span v-if="isActive(item.href)" class="h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"></span>
@@ -123,17 +112,36 @@ const closeDropdownHandler = (e) => {
 
             <!-- Main Content Area (Now White) -->
             <div class="flex-1 ml-64 min-h-screen transition-all duration-300">
-                <!-- Top Header -->
+                    <!-- Top Header -->
                 <header class="sticky top-0 z-30 flex h-20 w-full items-center justify-between bg-white/80 px-10 backdrop-blur-md border-b border-slate-100">
-                    <div class="flex items-center gap-2">
-                        <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <p class="text-xs font-semibold text-slate-400">System Live</p>
-                    </div>
+                    <div></div>
 
                     <div class="flex items-center gap-6">
-                        <button class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
-                            <IconBell :size="18" />
-                        </button>
+                        <div class="relative">
+                            <button
+                                id="notif-toggle"
+                                @click="showNotifications = !showNotifications"
+                                class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                                :aria-expanded="showNotifications ? 'true' : 'false'"
+                                aria-haspopup="menu"
+                            >
+                                <Icon icon="si:notifications-line" :width="18" :height="18"  />
+                            </button>
+                            <transition name="scale-fade">
+                                <div
+                                    v-if="showNotifications"
+                                    id="notif-dropdown"
+                                    class="absolute right-0 mt-3 w-72 origin-top-right rounded-2xl border border-slate-100 bg-white p-3 shadow-2xl ring-1 ring-black/5 z-50"
+                                >
+                                    <div class="px-3 py-2 border-b border-slate-50 mb-1">
+                                        <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Notifications</p>
+                                    </div>
+                                    <div class="px-3 py-4 text-sm text-slate-500">
+                                        No new notifications.
+                                    </div>
+                                </div>
+                            </transition>
+                        </div>
                         
                         <div class="h-8 w-[1px] bg-slate-200"></div>
 
@@ -151,7 +159,7 @@ const closeDropdownHandler = (e) => {
                                     <div class="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#023e8a] to-sky-400 opacity-20 blur transition duration-300 group-hover:opacity-40"></div>
                                     <img :src="avatarUrl" alt="avatar" class="relative h-11 w-11 rounded-full border-2 border-white object-cover shadow-md" />
                                     <div class="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-slate-100 text-slate-400">
-                                        <IconChevronDown :size="10" :stroke-width="3" />
+                                        <Icon icon="si:expand-more-line" :width="10" :height="10"  />
                                     </div>
                                 </div>
                             </button>
@@ -167,24 +175,24 @@ const closeDropdownHandler = (e) => {
                                         <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Account Control</p>
                                     </div>
                                     <Link :href="route('profile.edit')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#023e8a]">
-                                        <IconUser :size="18" :stroke-width="2" />
+                                        <Icon icon="si:user-line" :width="18" :height="18"  />
                                         My Profile
                                     </Link>
                                     <Link :href="route('profile.billing')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#023e8a]">
-                                        <IconCreditCard :size="18" :stroke-width="2" />
+                                        <Icon icon="si:credit-card-line" :width="18" :height="18"  />
                                         Billing
                                     </Link>
                                     <Link :href="route('profile.bank-accounts.index')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#023e8a]">
-                                        <IconBuildingBank :size="18" :stroke-width="2" />
+                                        <Icon icon="si:building-line" :width="18" :height="18"  />
                                         Bank Accounts
                                     </Link>
                                     <Link :href="route('profile.security')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#023e8a]">
-                                        <IconShieldLock :size="18" :stroke-width="2" />
+                                        <Icon icon="si:shield-line" :width="18" :height="18"  />
                                         Security
                                     </Link>
                                     <div class="my-1 border-t border-slate-50"></div>
                                     <Link :href="route('logout')" method="post" as="button" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-500 transition hover:bg-rose-50">
-                                        <IconLogout :size="18" :stroke-width="2" />
+                                        <Icon icon="si:arrow-left-line" :width="18" :height="18"  />
                                         Log out
                                     </Link>
                                 </div>

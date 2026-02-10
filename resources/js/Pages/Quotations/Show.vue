@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { IconArrowLeft, IconPrinter, IconFileInvoice, IconSend } from '@tabler/icons-vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     quotation: Object,
@@ -36,7 +36,7 @@ const convertToInvoice = () => {
             <div class="mb-10 flex items-center justify-between no-print">
                 <div class="flex items-center gap-4">
                     <Link :href="route('quotations.index')" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 transition-all border border-slate-100">
-                        <IconArrowLeft :size="18" />
+                        <Icon icon="si:arrow-left-line" :width="18" :height="18"  />
                     </Link>
                     <div>
                         <h1 class="text-3xl font-semibold text-slate-900 tracking-tight">Quotation Details</h1>
@@ -49,7 +49,7 @@ const convertToInvoice = () => {
                         @click="window.print()"
                         class="flex items-center gap-2 rounded-xl bg-slate-100 px-6 py-3 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-200 active:scale-95"
                     >
-                        <IconPrinter :size="18" />
+                        <Icon icon="si:file-download-line" :width="18" :height="18"  />
                         <span>Print</span>
                     </button>
 
@@ -58,7 +58,7 @@ const convertToInvoice = () => {
                         @click="convertToInvoice"
                         class="flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-xl shadow-emerald-500/20 transition-all hover:bg-emerald-600 active:scale-95"
                     >
-                        <IconFileInvoice :size="18" />
+                        <Icon icon="si:text-line" :width="18" :height="18"  />
                         <span>Convert to Invoice</span>
                     </button>
 
@@ -67,7 +67,7 @@ const convertToInvoice = () => {
                         :href="route('invoices.show', quotation.invoice)"
                         class="flex items-center gap-2 rounded-xl bg-[#023e8a] px-6 py-3 text-sm font-semibold text-white shadow-xl shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95"
                     >
-                        <IconFileInvoice :size="18" />
+                        <Icon icon="si:text-line" :width="18" :height="18"  />
                         <span>View Invoice</span>
                     </Link>
                 </div>

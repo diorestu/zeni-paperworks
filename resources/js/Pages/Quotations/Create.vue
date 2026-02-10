@@ -4,17 +4,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import Autocomplete from '@/Components/Autocomplete.vue';
 import TaxSelector from '@/Components/TaxSelector.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
-import { 
-    IconTrash, 
-    IconPlus, 
-    IconCalendar, 
-    IconHash, 
-    IconUser, 
-    IconNote,
-    IconDeviceFloppy,
-    IconArrowLeft,
-    IconReceipt
-} from '@tabler/icons-vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     clients: Array,
@@ -89,7 +79,7 @@ const submit = () => {
             <div class="mb-10 flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <Link :href="route('quotations.index')" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 transition-all border border-slate-100">
-                        <IconArrowLeft :size="18" />
+                        <Icon icon="si:arrow-left-line" :width="18" :height="18"  />
                     </Link>
                     <div>
                         <h1 class="text-3xl font-semibold text-slate-900 tracking-tight">New Quotation</h1>
@@ -102,7 +92,7 @@ const submit = () => {
                     :disabled="form.processing"
                     class="flex items-center gap-2 rounded-xl bg-[#023e8a] px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                 >
-                    <IconDeviceFloppy :size="18" />
+                    <Icon icon="si:archive-line" :width="18" :height="18"  />
                     <span>{{ form.processing ? 'Saving...' : 'Save Quotation' }}</span>
                 </button>
             </div>
@@ -116,7 +106,7 @@ const submit = () => {
                             <div class="space-y-2">
                                 <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Client</label>
                                 <div class="relative">
-                                    <IconUser :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <Icon icon="si:user-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                     <select 
                                          v-model="form.client_id"
                                          class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
@@ -131,7 +121,7 @@ const submit = () => {
                             <div class="space-y-2">
                                 <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Quotation Number</label>
                                 <div class="relative">
-                                    <IconHash :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <Icon icon="si:text-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                     <input 
                                         type="text" 
                                         v-model="form.quotation_number"
@@ -142,7 +132,7 @@ const submit = () => {
                             <div class="space-y-2">
                                 <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Quotation Date</label>
                                 <div class="relative">
-                                    <IconCalendar :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                     <input 
                                         type="date" 
                                         v-model="form.quotation_date"
@@ -153,7 +143,7 @@ const submit = () => {
                             <div class="space-y-2">
                                 <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Valid Until</label>
                                 <div class="relative">
-                                    <IconCalendar :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                     <input 
                                         type="date" 
                                         v-model="form.valid_until"
@@ -206,7 +196,7 @@ const submit = () => {
                                         @click="removeItem(index)"
                                         class="p-2 text-rose-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                                     >
-                                        <IconTrash :size="18" />
+                                        <Icon icon="si:bin-line" :width="18" :height="18"  />
                                     </button>
                                 </div>
                             </div>
@@ -215,7 +205,7 @@ const submit = () => {
                                 @click="addItem"
                                 class="w-full py-4 border-2 border-dashed border-slate-100 rounded-[1.5rem] text-xs font-semibold text-slate-400 uppercase tracking-widest hover:bg-slate-50 hover:border-slate-200 transition-all flex items-center justify-center gap-2"
                             >
-                                <IconPlus :size="14" :stroke-width="4" />
+                                <Icon icon="si:add-line" :width="14" :height="14"  />
                                 Add Item
                             </button>
                         </div>
@@ -239,7 +229,7 @@ const submit = () => {
                                 class="w-full flex justify-between items-center text-sm font-semibold py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
                             >
                                 <div class="flex items-center gap-2">
-                                    <IconReceipt :size="16" />
+                                    <Icon icon="si:checklist-line" :width="16" :height="16"  />
                                     <span class="text-white/70">Tax</span>
                                     <span v-if="selectedTaxes.length > 0" class="px-2 py-0.5 bg-white/20 rounded-md text-xs">
                                         {{ selectedTaxes.length }}
@@ -273,7 +263,7 @@ const submit = () => {
                     <div class="bg-white rounded-[2rem] border border-slate-100 p-8 shadow-xl shadow-slate-200/20">
                         <div class="space-y-4">
                             <label class="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
-                                <IconNote :size="14" />
+                                <Icon icon="si:ai-note-line" :width="14" :height="14"  />
                                 Notes / Terms
                             </label>
                             <textarea 

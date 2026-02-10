@@ -2,14 +2,7 @@
 import { ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { 
-    IconBuildingBank, 
-    IconPlus, 
-    IconTrash, 
-    IconEdit, 
-    IconCheck,
-    IconDotsVertical
-} from '@tabler/icons-vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     bankAccounts: Array,
@@ -149,7 +142,7 @@ const deleteAccount = (id) => {
 
                     <div v-if="bankAccounts.length === 0" class="flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-slate-200 p-20 text-center">
                         <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-300 mb-4">
-                            <IconBuildingBank :size="32" />
+                            <Icon icon="si:building-line" :width="32" :height="32"  />
                         </div>
                         <p class="text-sm font-semibold text-slate-900">No bank accounts added</p>
                         <p class="text-xs font-normal text-slate-400 mt-1">Add your bank details to show them on your invoices.</p>
@@ -163,7 +156,7 @@ const deleteAccount = (id) => {
                         <div class="flex items-start justify-between">
                             <div class="flex items-center gap-5">
                                 <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-[#023e8a] transition-all group-hover:bg-[#023e8a] group-hover:text-white">
-                                    <IconBuildingBank :size="24" />
+                                    <Icon icon="si:building-line" :width="24" :height="24"  />
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-3">
@@ -177,10 +170,10 @@ const deleteAccount = (id) => {
                             
                             <div class="flex items-center gap-2">
                                 <button @click="editAccount(account)" class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-all">
-                                    <IconEdit :size="16" />
+                                    <Icon icon="si:ai-edit-line" :width="16" :height="16"  />
                                 </button>
                                 <button @click="deleteAccount(account.id)" class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 text-rose-300 hover:bg-rose-50 hover:text-rose-500 transition-all">
-                                    <IconTrash :size="16" />
+                                    <Icon icon="si:bin-line" :width="16" :height="16"  />
                                 </button>
                             </div>
                         </div>

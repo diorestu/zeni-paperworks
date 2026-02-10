@@ -3,18 +3,8 @@ import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Autocomplete from '@/Components/Autocomplete.vue';
 import TaxSelector from '@/Components/TaxSelector.vue';
-import { Head, useForm, Link } from '@inertiajs/vue3';
-import { 
-    IconTrash, 
-    IconPlus, 
-    IconCalendar, 
-    IconHash, 
-    IconUser, 
-    IconNote,
-    IconDeviceFloppy,
-    IconArrowLeft,
-    IconReceipt
-} from '@tabler/icons-vue';
+import { Head, useForm, Link, router } from '@inertiajs/vue3';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     clients: Array,
@@ -26,6 +16,9 @@ const props = defineProps({
 
 const showTaxSelector = ref(false);
 const selectedTaxIds = ref([]);
+const showAddClient = ref(false);
+const showAddProduct = ref(false);
+const clientSearch = ref('');
 
 const form = useForm({
     client_id: '',
@@ -38,6 +31,40 @@ const form = useForm({
         { product_id: null, description: '', quantity: 1, unit_price: 0 }
     ],
 });
+
+const clientForm = useForm({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    industry_sector: '',
+    address: '',
+});
+
+const productForm = useForm({
+    name: '',
+    sku: '',
+    price: 0,
+    description: '',
+});
+
+const industryOptions = [
+    'Farm',
+    'Health',
+    'Finance',
+    'Hospitality',
+    'Retail',
+    'Education',
+    'Technology',
+    'Manufacturing',
+    'Construction',
+    'Transportation',
+    'Real Estate',
+    'Professional Services',
+    'Government',
+    'Non-Profit',
+    'Other',
+];
 
 const addItem = () => {
     form.items.push({ product_id: null, description: '', quantity: 1, unit_price: 0 });
@@ -81,17 +108,47 @@ const total = computed(() => subtotal.value + taxAmount.value);
 const submit = () => {
     form.post(route('invoices.store'));
 };
+
+const submitClient = () => {
+    clientForm.post(route('clients.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showAddClient.value = false;
+            clientForm.reset();
+            router.reload({ only: ['clients'] });
+        },
+    });
+};
+
+const submitProduct = () => {
+    productForm.post(route('products.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showAddProduct.value = false;
+            productForm.reset();
+            router.reload({ only: ['products'] });
+        },
+    });
+};
+
+const openAddProduct = () => {
+    showAddProduct.value = true;
+};
+
+const openAddClient = () => {
+    showAddClient.value = true;
+};
 </script>
 
 <template>
     <AppLayout>
         <Head title="Create Invoice" />
 
-        <div class="max-w-5xl mx-auto">
+        <div class="w-full">
             <div class="mb-10 flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <Link :href="route('invoices.index')" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 transition-all border border-slate-100">
-                        <IconArrowLeft :size="18" />
+                        <Icon icon="si:arrow-left-line" :width="18" :height="18"  />
                     </Link>
                     <div>
                         <h1 class="text-3xl font-semibold text-slate-900 tracking-tight">New Invoice</h1>
@@ -104,7 +161,7 @@ const submit = () => {
                     :disabled="form.processing"
                     class="flex items-center gap-2 rounded-xl bg-[#023e8a] px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                 >
-                    <IconDeviceFloppy :size="18" />
+                    <Icon icon="si:archive-line" :width="18" :height="18"  />
                     <span>{{ form.processing ? 'Saving...' : 'Save Invoice' }}</span>
                 </button>
             </div>
@@ -113,27 +170,30 @@ const submit = () => {
                 <!-- Left: Invoice Details -->
                 <div class="lg:col-span-2 space-y-8">
                     <!-- Basic Info -->
-                    <div class="bg-white rounded-[2rem] border border-slate-100 p-8 shadow-xl shadow-slate-200/20">
+                    <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-xl shadow-slate-200/20">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Client</label>
                                 <div class="relative">
-                                    <IconUser :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                                    <select 
-                                         v-model="form.client_id"
-                                         class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
-                                     >
-                                         <option value="" disabled>Select a client</option>
-                                         <option v-for="client in clients" :key="client.id" :value="client.id">
-                                             {{ client.name }} ({{ client.company }})
-                                         </option>
-                                     </select>
-                                 </div>
+                                    <Icon icon="si:user-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none"  />
+                                    <Autocomplete
+                                        v-model="clientSearch"
+                                        :items="clients"
+                                        item-label="name"
+                                        placeholder="Select a client..."
+                                        @update:modelValue="form.client_id = ''"
+                                        @select="(client) => { form.client_id = client.id; clientSearch = client.name; }"
+                                        :show-add-option="true"
+                                        add-option-label="Add Client"
+                                        @add="openAddClient"
+                                        input-class="pl-12 pr-4 py-4 rounded-xl text-sm font-semibold"
+                                    />
+                                </div>
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Invoice Number</label>
                                 <div class="relative">
-                                    <IconHash :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <Icon icon="si:text-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                     <input 
                                         type="text" 
                                         v-model="form.invoice_number"
@@ -144,7 +204,7 @@ const submit = () => {
                             <div class="space-y-2">
                                 <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Invoice Date</label>
                                 <div class="relative">
-                                    <IconCalendar :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                     <input 
                                         type="date" 
                                         v-model="form.invoice_date"
@@ -155,7 +215,7 @@ const submit = () => {
                             <div class="space-y-2">
                                 <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Due Date</label>
                                 <div class="relative">
-                                    <IconCalendar :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                     <input 
                                         type="date" 
                                         v-model="form.due_date"
@@ -167,11 +227,18 @@ const submit = () => {
                     </div>
 
                     <!-- Items Section -->
-                    <div class="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/20 overflow-hidden">
-                        <div class="bg-slate-50/50 px-8 py-5 border-b border-slate-50">
-                            <h3 class="text-sm font-semibold text-slate-900 uppercase tracking-widest">Line Items</h3>
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/20 overflow-hidden">
+                        <div class="bg-slate-50/50 px-8 py-5 border-b border-slate-50 flex items-center justify-between">
+                            <div></div>
+                            <button
+                                type="button"
+                                @click="showAddProduct = true"
+                                class="text-[10px] font-semibold uppercase tracking-widest text-[#023e8a] hover:underline"
+                            >
+                                Add Product
+                            </button>
                         </div>
-                        <div class="p-8 space-y-6">
+                        <div class="p-6 space-y-6">
                             <div v-for="(item, index) in form.items" :key="index" class="grid grid-cols-12 gap-4 items-end pb-6 border-b border-slate-50 last:border-0 last:pb-0">
                                 <div class="col-span-5 space-y-2">
                                     <label class="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Product / Description</label>
@@ -182,6 +249,9 @@ const submit = () => {
                                         placeholder="Search product or type description..."
                                         @update:modelValue="item.product_id = null"
                                         @select="(product) => updateItem(index, product)"
+                                        :show-add-option="true"
+                                        add-option-label="Add Product"
+                                        @add="openAddProduct"
                                     />
                                 </div>
                                 <div class="col-span-2 space-y-2">
@@ -208,7 +278,7 @@ const submit = () => {
                                         @click="removeItem(index)"
                                         class="p-2 text-rose-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                                     >
-                                        <IconTrash :size="18" />
+                                        <Icon icon="si:bin-line" :width="18" :height="18"  />
                                     </button>
                                 </div>
                             </div>
@@ -217,7 +287,7 @@ const submit = () => {
                                 @click="addItem"
                                 class="w-full py-4 border-2 border-dashed border-slate-100 rounded-[1.5rem] text-xs font-semibold text-slate-400 uppercase tracking-widest hover:bg-slate-50 hover:border-slate-200 transition-all flex items-center justify-center gap-2"
                             >
-                                <IconPlus :size="14" :stroke-width="4" />
+                                <Icon icon="si:add-line" :width="14" :height="14"  />
                                 Add Item
                             </button>
                         </div>
@@ -227,8 +297,8 @@ const submit = () => {
                 <!-- Right: Summary & Notes -->
                 <div class="space-y-8">
                     <!-- Totals -->
-                    <div class="bg-[#023e8a] rounded-[2.5rem] p-8 text-white shadow-2xl shadow-[#023e8a]/30">
-                        <h3 class="text-xs font-semibold uppercase tracking-widest text-white/50 mb-6">Order Summary</h3>
+                    <div class="bg-[#023e8a] rounded-2xl p-6 text-white shadow-2xl shadow-[#023e8a]/30">
+                        <h3 class="text-xs font-semibold uppercase tracking-widest text-white/50 mb-6">Invoice Summary</h3>
                         <div class="space-y-4">
                             <div class="flex justify-between text-sm font-semibold">
                                 <span class="text-white/70">Subtotal</span>
@@ -241,7 +311,7 @@ const submit = () => {
                                 class="w-full flex justify-between items-center text-sm font-semibold py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
                             >
                                 <div class="flex items-center gap-2">
-                                    <IconReceipt :size="16" />
+                                    <Icon icon="si:checklist-line" :width="16" :height="16"  />
                                     <span class="text-white/70">Tax</span>
                                     <span v-if="selectedTaxes.length > 0" class="px-2 py-0.5 bg-white/20 rounded-md text-xs">
                                         {{ selectedTaxes.length }}
@@ -271,11 +341,30 @@ const submit = () => {
                         </div>
                     </div>
 
+                    <!-- Bank Selection -->
+                    <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-xl shadow-slate-200/20">
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Bank Account</label>
+                            <div class="relative">
+                                <Icon icon="si:building-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <select
+                                    v-model="form.bank_account_id"
+                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                >
+                                    <option value="" disabled>Select a bank account</option>
+                                    <option v-for="bank in bankAccounts" :key="bank.id" :value="bank.id">
+                                        {{ bank.bank_name }} — {{ bank.account_number }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Notes -->
-                    <div class="bg-white rounded-[2rem] border border-slate-100 p-8 shadow-xl shadow-slate-200/20">
+                    <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-xl shadow-slate-200/20">
                         <div class="space-y-4">
                             <label class="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
-                                <IconNote :size="14" />
+                                <Icon icon="si:ai-note-line" :width="14" :height="14"  />
                                 Notes / Terms
                             </label>
                             <textarea 
@@ -300,5 +389,192 @@ const submit = () => {
             v-model="selectedTaxIds"
             @close="showTaxSelector = false"
         />
+
+        <!-- Add Client Modal -->
+        <Transition name="modal">
+            <div v-if="showAddClient" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-6">
+            <div class="w-full max-w-lg rounded-xl bg-white p-8 shadow-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-slate-900">Add Client</h3>
+                    <button
+                        type="button"
+                        @click="showAddClient = false"
+                        class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                    >
+                        <Icon icon="si:close-line" :width="18" :height="18" />
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Name</label>
+                        <input
+                            v-model="clientForm.name"
+                            type="text"
+                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                        />
+                        <p v-if="clientForm.errors.name" class="text-[10px] text-rose-500 ml-1 mt-1">{{ clientForm.errors.name }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Email</label>
+                            <input
+                                v-model="clientForm.email"
+                                type="email"
+                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Phone</label>
+                            <input
+                                v-model="clientForm.phone"
+                                type="text"
+                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Tax Number</label>
+                        <input
+                            v-model="clientForm.company"
+                            type="text"
+                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                            placeholder="Tax number"
+                        />
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Industry Sector</label>
+                        <select
+                            v-model="clientForm.industry_sector"
+                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                        >
+                            <option value="" disabled>Select industry</option>
+                            <option v-for="option in industryOptions" :key="option" :value="option">{{ option }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Address</label>
+                        <textarea
+                            v-model="clientForm.address"
+                            rows="3"
+                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none resize-none"
+                        ></textarea>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button
+                            type="button"
+                            @click="showAddClient = false"
+                            class="px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            @click="submitClient"
+                            :disabled="clientForm.processing"
+                            class="px-5 py-2 rounded-xl bg-[#023e8a] text-sm font-semibold text-white shadow-lg shadow-[#023e8a]/20 hover:bg-[#002d66] disabled:opacity-50"
+                        >
+                            {{ clientForm.processing ? 'Saving...' : 'Save Client' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </Transition>
+
+        <!-- Add Product Modal -->
+        <Transition name="modal">
+            <div v-if="showAddProduct" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-6">
+            <div class="w-full max-w-lg rounded-xl bg-white p-8 shadow-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-slate-900">Add Product</h3>
+                    <button
+                        type="button"
+                        @click="showAddProduct = false"
+                        class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                    >
+                        <Icon icon="si:close-line" :width="18" :height="18" />
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Name</label>
+                        <input
+                            v-model="productForm.name"
+                            type="text"
+                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                        />
+                        <p v-if="productForm.errors.name" class="text-[10px] text-rose-500 ml-1 mt-1">{{ productForm.errors.name }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">SKU</label>
+                            <input
+                                v-model="productForm.sku"
+                                type="text"
+                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Price</label>
+                            <input
+                                v-model="productForm.price"
+                                type="number"
+                                min="0"
+                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Description</label>
+                        <textarea
+                            v-model="productForm.description"
+                            rows="3"
+                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none resize-none"
+                        ></textarea>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button
+                            type="button"
+                            @click="showAddProduct = false"
+                            class="px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            @click="submitProduct"
+                            :disabled="productForm.processing"
+                            class="px-5 py-2 rounded-xl bg-[#023e8a] text-sm font-semibold text-white shadow-lg shadow-[#023e8a]/20 hover:bg-[#002d66] disabled:opacity-50"
+                        >
+                            {{ productForm.processing ? 'Saving...' : 'Save Product' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </Transition>
     </AppLayout>
 </template>
+
+<style scoped>
+.modal-enter-active,
+.modal-leave-active {
+    transition: opacity 180ms ease-out;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+    opacity: 0;
+}
+
+.modal-enter-active .rounded-2xl,
+.modal-leave-active .rounded-2xl {
+    transition: transform 180ms ease-out, opacity 180ms ease-out;
+}
+
+.modal-enter-from .rounded-2xl,
+.modal-leave-to .rounded-2xl {
+    transform: translateY(8px) scale(0.98);
+    opacity: 0;
+}
+</style>
