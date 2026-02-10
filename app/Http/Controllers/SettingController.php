@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Setting;
+use App\Models\Tax;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class SettingController extends Controller
+{
+    public function index(): Response
+    {
+        return Inertia::render('Settings/Index', [
+            'invoice_prefix' => Setting::where('key', 'invoice_prefix')->value('value') ?? 'INV',
+            'quotation_prefix' => Setting::where('key', 'quotation_prefix')->value('value') ?? 'QUO',
+            'company_name' => Setting::where('key', 'company_name')->value('value') ?? '',
+            'company_address' => Setting::where('key', 'company_address')->value('value') ?? '',
+            'company_phone' => Setting::where('key', 'company_phone')->value('value') ?? '',
+            'company_email' => Setting::where('key', 'company_email')->value('value') ?? '',
+            'company_website' => Setting::where('key', 'company_website')->value('value') ?? '',
+            'company_tax_id' => Setting::where('key', 'company_tax_id')->value('value') ?? '',
+            'taxes' => Tax::all(),
+        ]);
+    }
+
+    public function update(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'invoice_prefix' => 'nullable|string|max:10|alpha_dash',
+            'quotation_prefix' => 'nullable|string|max:10|alpha_dash',
+            'company_name' => 'nullable|string|max:255',
+            'company_address' => 'nullable|string|max:500',
+            'company_phone' => 'nullable|string|max:50',
+            'company_email' => 'nullable|email|max:255',
+            'company_website' => 'nullable|url|max:255',
+            'company_tax_id' => 'nullable|string|max:100',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            if ($value !== null) {
+                Setting::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => in_array($key, ['invoice_prefix', 'quotation_prefix']) ? strtoupper($value) : $value]
+                );
+            }
+        }
+
+        return redirect()->back()->with('status', 'Settings updated successfully.');
+    }
+}
