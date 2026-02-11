@@ -24,8 +24,6 @@ const secondaryAction = computed(() => {
 
 const spotlightModules = computed(() => props.modules.slice(0, 6));
 const operationModules = computed(() => props.modules.slice(6));
-
-const paidInvoices = computed(() => Number(props.stats?.invoice_paid ?? 0).toLocaleString('id-ID'));
 const currentYear = new Date().getFullYear();
 </script>
 
@@ -75,7 +73,7 @@ const currentYear = new Date().getFullYear();
                     <h1 class="text-4xl font-bold leading-tight text-[#07304a] md:text-5xl">
                         Run quotation-to-invoice workflows in one focused workspace.
                     </h1>
-                    <p class="mt-5 max-w-2xl text-sm leading-relaxed text-slate-600">
+                    <p class="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-slate-600">
                         Paperwork combines client records, product catalog, tax presets, invoice generation,
                         quotation conversion, and billing history. The interface is built for teams that need
                         speed without losing financial visibility.
@@ -94,15 +92,6 @@ const currentYear = new Date().getFullYear();
                         >
                             Product Walkthrough
                         </Link>
-                    </div>
-
-                    <div class="relative mt-10 flex items-center justify-center">
-                        <div class="absolute h-28 w-28 rounded-full bg-[#00b4d8]/20 blur-2xl"></div>
-                        <div class="relative flex h-28 w-28 flex-col items-center justify-center rounded-full border border-[#0077b6]/30 bg-white/80 shadow-xl backdrop-blur-md">
-                            <p class="text-[9px] font-semibold uppercase tracking-widest text-[#07304a]/70">Billing</p>
-                            <p class="mt-1 text-lg font-bold text-[#07304a]">{{ paidInvoices }}</p>
-                            <p class="text-[9px] font-semibold uppercase tracking-widest text-slate-500">Paid</p>
-                        </div>
                     </div>
             </section>
 
