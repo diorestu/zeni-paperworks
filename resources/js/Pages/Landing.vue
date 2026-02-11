@@ -26,6 +26,7 @@ const spotlightModules = computed(() => props.modules.slice(0, 6));
 const operationModules = computed(() => props.modules.slice(6));
 
 const paidInvoices = computed(() => Number(props.stats?.invoice_paid ?? 0).toLocaleString('id-ID'));
+const currentYear = new Date().getFullYear();
 </script>
 
 <template>
@@ -187,5 +188,53 @@ const paidInvoices = computed(() => Number(props.stats?.invoice_paid ?? 0).toLoc
                 </div>
             </section>
         </main>
+
+        <footer class="mt-8 border-t border-slate-200 bg-white/90">
+            <div class="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 py-10 md:grid-cols-3">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <img src="/img/logo/favicon_blue.png" alt="Paperwork" class="h-8 w-8">
+                        <p class="text-sm font-bold tracking-wide text-[#07304a]">PAPERWORK</p>
+                    </div>
+                    <p class="mt-3 max-w-xs text-xs leading-relaxed text-slate-600">
+                        Manage quotations, invoices, clients, and billing operations in one workspace.
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Navigation</p>
+                    <div class="mt-3 flex flex-col gap-2">
+                        <Link :href="route('landing')" class="text-xs font-semibold text-slate-600 hover:text-[#07304a]">Home</Link>
+                        <Link :href="isAuthenticated ? route('dashboard') : route('login')" class="text-xs font-semibold text-slate-600 hover:text-[#07304a]">Dashboard</Link>
+                        <Link :href="isAuthenticated ? route('profile.billing') : route('login')" class="text-xs font-semibold text-slate-600 hover:text-[#07304a]">Billing</Link>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Contact</p>
+                    <div class="mt-3 space-y-2 text-xs text-slate-600">
+                        <p>support@paperwork.local</p>
+                        <p>Denpasar, Indonesia</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-100 px-6 py-4">
+                <p class="mx-auto max-w-7xl text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    © {{ currentYear }} Paperwork. All rights reserved.
+                </p>
+            </div>
+        </footer>
+
+        <a
+            href="https://wa.me/6285183440300"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl shadow-[#25D366]/30 transition hover:scale-105 hover:bg-[#1fb95a]"
+            aria-label="Chat on WhatsApp"
+            title="Chat on WhatsApp"
+        >
+            <Icon icon="ri:whatsapp-fill" :width="28" :height="28" />
+        </a>
     </div>
 </template>
