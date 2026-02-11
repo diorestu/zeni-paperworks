@@ -23,6 +23,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'role',
         'wizard_completed',
+        'plan_name',
+        'plan_renews_at',
     ];
 
     /**
@@ -45,6 +47,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'plan_renews_at' => 'date',
         ];
     }
 
@@ -66,5 +69,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function bankAccounts()
     {
         return $this->hasMany(BankAccount::class);
+    }
+
+    public function subscriptionInvoices()
+    {
+        return $this->hasMany(SubscriptionInvoice::class);
     }
 }

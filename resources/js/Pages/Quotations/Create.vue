@@ -90,7 +90,7 @@ const submit = () => {
                 <button 
                     @click="submit"
                     :disabled="form.processing"
-                    class="flex items-center gap-2 rounded-xl bg-[#023e8a] px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
+                    class="flex items-center gap-2 rounded-xl bg-[#07304a] px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                 >
                     <Icon icon="si:archive-line" :width="18" :height="18"  />
                     <span>{{ form.processing ? 'Saving...' : 'Save Quotation' }}</span>
@@ -109,7 +109,7 @@ const submit = () => {
                                     <Icon icon="si:user-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                     <select 
                                          v-model="form.client_id"
-                                         class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                         class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                      >
                                          <option value="" disabled>Select a client</option>
                                          <option v-for="client in clients" :key="client.id" :value="client.id">
@@ -125,7 +125,7 @@ const submit = () => {
                                     <input 
                                         type="text" 
                                         v-model="form.quotation_number"
-                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                     >
                                 </div>
                             </div>
@@ -136,7 +136,7 @@ const submit = () => {
                                     <input 
                                         type="date" 
                                         v-model="form.quotation_date"
-                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                     >
                                 </div>
                             </div>
@@ -147,7 +147,7 @@ const submit = () => {
                                     <input 
                                         type="date" 
                                         v-model="form.valid_until"
-                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                     >
                                 </div>
                             </div>
@@ -177,7 +177,7 @@ const submit = () => {
                                     <input 
                                         type="number" 
                                         v-model="item.quantity"
-                                        class="w-full bg-slate-50 border-none rounded-lg px-3 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none shadow-sm"
+                                        class="w-full bg-slate-50 border-none rounded-lg px-3 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none shadow-sm"
                                     >
                                 </div>
                                 <div class="col-span-3 space-y-2">
@@ -185,7 +185,7 @@ const submit = () => {
                                     <input 
                                         type="number" 
                                         v-model="item.unit_price"
-                                        class="w-full bg-slate-50 border-none rounded-lg px-3 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none shadow-sm"
+                                        class="w-full bg-slate-50 border-none rounded-lg px-3 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none shadow-sm"
                                     >
                                 </div>
                                 <div class="col-span-1 flex flex-col justify-end text-right pb-3">
@@ -215,7 +215,7 @@ const submit = () => {
                 <!-- Right: Summary & Notes -->
                 <div class="space-y-8">
                     <!-- Totals -->
-                    <div class="bg-[#023e8a] rounded-[2.5rem] p-8 text-white shadow-2xl shadow-[#023e8a]/30">
+                    <div class="bg-[#07304a] rounded-[2.5rem] p-8 text-white shadow-2xl shadow-[#07304a]/30">
                         <h3 class="text-xs font-semibold uppercase tracking-widest text-white/50 mb-6">Order Summary</h3>
                         <div class="space-y-4">
                             <div class="flex justify-between text-sm font-semibold">
@@ -270,7 +270,7 @@ const submit = () => {
                                 v-model="form.notes"
                                 rows="4"
                                 placeholder="Thank you for your business..."
-                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none resize-none"
+                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none resize-none"
                             ></textarea>
                             <p class="text-[10px] font-normal text-slate-400 leading-relaxed px-1">
                                 These notes will appear at the bottom of the quotation.

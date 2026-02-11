@@ -44,7 +44,7 @@ const submit = () => {
                         v-model="form.email"
                         type="email"
                         placeholder="you@company.com"
-                        class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-5 py-4 text-sm font-semibold text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-[#023e8a] focus:ring-4 focus:ring-[#023e8a]/5"
+                        class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-5 py-4 text-sm font-semibold text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-[#07304a] focus:ring-4 focus:ring-[#07304a]/5"
                         :class="{'border-rose-500': form.errors.email}"
                         tabindex="1"
                         required
@@ -54,14 +54,14 @@ const submit = () => {
                 <div class="space-y-2">
                     <div class="flex items-center justify-between px-1">
                         <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Password</label>
-                        <a class="text-[10px] font-semibold uppercase tracking-widest text-[#023e8a] hover:underline" href="#" tabindex="4">Forgot?</a>
+                        <a class="text-[10px] font-semibold uppercase tracking-widest text-[#07304a] hover:underline" href="#" tabindex="4">Forgot?</a>
                     </div>
                     <div class="relative">
                         <input
                             v-model="form.password"
                             :type="showPassword ? 'text' : 'password'"
                             placeholder="••••••••"
-                            class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-5 py-4 pr-12 text-sm font-semibold text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-[#023e8a] focus:ring-4 focus:ring-[#023e8a]/5"
+                            class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-5 py-4 pr-12 text-sm font-semibold text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition focus:border-[#07304a] focus:ring-4 focus:ring-[#07304a]/5"
                             :class="{'border-rose-500': form.errors.password}"
                             tabindex="2"
                             required
@@ -90,7 +90,7 @@ const submit = () => {
                         v-model="form.remember"
                         type="checkbox"
                         id="remember"
-                        class="h-4 w-4 rounded-lg border-slate-200 text-[#023e8a] focus:ring-[#023e8a] cursor-pointer"
+                        class="h-4 w-4 rounded-lg border-slate-200 text-[#07304a] focus:ring-[#07304a] cursor-pointer"
                     />
                     <label for="remember" class="text-xs font-semibold text-slate-500 cursor-pointer">Remember me for 30 days</label>
                 </div>
@@ -98,7 +98,7 @@ const submit = () => {
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="w-full rounded-2xl bg-[#023e8a] px-6 py-4.5 text-sm font-semibold text-white shadow-xl shadow-[#023e8a]/20 transition-all hover:bg-[#012b60] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
+                    class="w-full rounded-2xl bg-[#07304a] px-6 py-4.5 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#012b60] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
                     tabindex="3"
                 >
                     {{ form.processing ? 'Signing in...' : 'Sign in to Account' }}
@@ -111,8 +111,8 @@ const submit = () => {
         <div class="mt-10 max-w-[480px] text-center space-y-4">
             <p class="text-[11px] font-normal text-slate-400 px-10 leading-relaxed">
                 By signing in, you agree to create an account and accept Paperwork's 
-                <span class="text-[#023e8a] font-semibold cursor-pointer hover:underline">Terms of Use</span> and 
-                <span class="text-[#023e8a] font-semibold cursor-pointer hover:underline">Privacy Policy</span>.
+                <span class="text-[#07304a] font-semibold cursor-pointer hover:underline">Terms of Use</span> and 
+                <span class="text-[#07304a] font-semibold cursor-pointer hover:underline">Privacy Policy</span>.
             </p>
         </div>
     </div>

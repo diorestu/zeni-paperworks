@@ -50,7 +50,23 @@ class ProfileController extends Controller
 
     public function billing(): Response
     {
-        return Inertia::render('Profile/Billing');
+        $user = request()->user();
+
+        return Inertia::render('Profile/Billing', [
+            'currentPlan' => $user->plan_name ?? 'Free',
+            'paymentHistory' => $user->subscriptionInvoices()
+                ->latest('invoice_date')
+                ->get()
+                ->map(fn ($invoice) => [
+                    'id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'plan_name' => $invoice->plan_name,
+                    'amount' => (float) $invoice->amount,
+                    'invoice_date' => optional($invoice->invoice_date)->toDateString(),
+                    'due_date' => optional($invoice->due_date)->toDateString(),
+                    'status' => $invoice->status,
+                ]),
+        ]);
     }
 
     public function security(): Response

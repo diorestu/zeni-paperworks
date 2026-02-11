@@ -4,64 +4,97 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
+const props = defineProps({
+    currentPlan: {
+        type: String,
+        default: 'Free',
+    },
+    paymentHistory: {
+        type: Array,
+        default: () => [],
+    },
+});
+
 const isYearly = ref(false);
 
-const plans = [
+const basePlans = [
     { 
-        badge: 'Try for free',
+        badge: 'Starter',
         name: 'Free', 
         monthly: '0', 
         yearly: '0',
-        info: 'No credit card needed',
-        color: 'bg-slate-900 text-white',
-        docs: ['10 Invoices', '10 Clients'],
-        features: ['Community Support', 'Basic Exports', 'Web Dashboard'],
-        current: true,
+        info: 'No credit card required',
+        color: 'bg-[#07304a] text-white',
+        docs: ['10 Invoices / month', '10 Quotations / month', '10 Clients'],
+        features: ['1 User', 'Basic Template', 'Basic Reminders', 'Community Support'],
         button: 'Current Plan'
     },
     { 
-        badge: 'Basic',
+        badge: 'Growth',
         name: 'Basic', 
-        monthly: '49.000', 
-        yearly: '37.500',
+        monthly: '39.000', 
+        yearly: '30.000',
         info: 'Save 23%',
-        color: 'bg-[#023e8a] text-white',
-        docs: ['50 Invoices', '50 Clients'],
-        features: ['Email Support', 'Advanced Exports', 'Team Invites'],
-        current: false,
+        color: 'bg-[#07304a] text-white',
+        docs: ['100 Invoices / month', '10 Quotations / month', '100 Clients'],
+        features: ['1 User', 'Remove Watermark', 'Recurring Invoices', 'CSV/PDF Export', 'Email Support'],
         button: 'Upgrade Basic'
     },
     { 
-        badge: 'Pro',
+        badge: 'Scale',
         name: 'Pro', 
-        monthly: '139.000', 
-        yearly: '105.000',
-        info: 'Save 25%',
-        color: 'bg-[#023e8a] text-white',
-        docs: ['500 Invoices', '150 Clients'],
-        features: ['Priority Support', 'Custom Branding', 'API Access'],
-        current: false,
+        monthly: '99.000', 
+        yearly: '75.000',
+        info: 'Save 24%',
+        color: 'bg-[#07304a] text-white',
+        docs: ['500 Invoices / month', 'Unlimited Quotations', '500 Clients'],
+        features: ['Up to 5 Users', 'Approval Workflow', 'Custom Branding', 'API & Webhooks', 'Priority Support'],
         button: 'Upgrade Pro'
     },
     { 
         badge: 'Enterprise',
-        name: 'Professional', 
-        monthly: '199.000', 
-        yearly: '149.000',
-        info: 'Maximum value',
-        color: 'bg-[#023e8a] text-white',
-        docs: ['Unlimited Invoices', 'Unlimited Clients'],
-        features: ['Dedicated Manager', 'SSO Login', 'Audit Logs'],
-        current: false,
-        button: 'Get started'
+        name: 'Enterprise', 
+        monthly: '249.000', 
+        yearly: '189.000',
+        info: 'Save 24%',
+        color: 'bg-[#07304a] text-white',
+        docs: ['Unlimited Invoices', 'Unlimited Quotations', 'Unlimited Clients'],
+        features: ['Unlimited Users', 'SSO Login', 'Audit Logs', 'Advanced Permissions', 'Dedicated Manager'],
+        button: 'Contact Sales'
     },
 ];
+
+const plans = computed(() => basePlans.map((plan) => ({
+    ...plan,
+    current: plan.name === props.currentPlan,
+})));
 
 const getPrice = (plan) => isYearly.value ? plan.yearly : plan.monthly;
 const getDayPrice = (plan) => {
     if (plan.name === 'Free') return '0';
-    const priceNum = parseInt(getPrice(plan).replace('.', ''));
+    const priceNum = parseInt(getPrice(plan).replaceAll('.', ''), 10);
     return Math.floor(priceNum / 30).toLocaleString('id-ID');
+};
+
+const formatCurrency = (amount) => `Rp${Number(amount).toLocaleString('id-ID')}`;
+
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+    });
+};
+
+const statusClass = (status) => {
+    return {
+        paid: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+        sent: 'bg-amber-50 text-amber-600 border-amber-100',
+        overdue: 'bg-rose-50 text-rose-600 border-rose-100',
+        draft: 'bg-slate-50 text-slate-600 border-slate-100',
+        cancelled: 'bg-slate-100 text-slate-500 border-slate-200',
+    }[status] ?? 'bg-slate-50 text-slate-600 border-slate-100';
 };
 </script>
 
@@ -100,9 +133,9 @@ const getDayPrice = (plan) => {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
                 <div v-for="plan in plans" :key="plan.name" 
                     :class="['relative p-8 rounded-[2.5rem] border transition-all duration-300 flex flex-col', 
-                        plan.current ? 'border-[#023e8a] bg-white shadow-2xl shadow-[#023e8a]/5 ring-1 ring-[#023e8a]/5' : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-xl hover:shadow-slate-200/40']"
+                        plan.current ? 'border-[#07304a] bg-white shadow-2xl shadow-[#07304a]/5 ring-1 ring-[#07304a]/5' : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-xl hover:shadow-slate-200/40']"
                 >
-                    <div v-if="plan.current" class="absolute -top-3 left-10 bg-[#023e8a] text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-[#023e8a]/20">
+                    <div v-if="plan.current" class="absolute -top-3 left-10 bg-[#07304a] text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-[#07304a]/20">
                         Current
                     </div>
                     
@@ -172,27 +205,35 @@ const getDayPrice = (plan) => {
                         </div>
                         <h2 class="text-lg font-semibold text-slate-900">Payment History</h2>
                     </div>
-                    <button class="text-xs font-semibold text-[#023e8a] uppercase tracking-widest hover:underline px-4 py-2 bg-slate-50 rounded-xl transition-all hover:bg-slate-100 border border-slate-100">Download All</button>
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-widest px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
+                        {{ paymentHistory.length }} Records
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead class="bg-slate-50/50">
                             <tr>
                                 <th class="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Date</th>
+                                <th class="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Plan</th>
                                 <th class="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Amount</th>
                                 <th class="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Status</th>
-                                <th class="px-10 py-5"></th>
+                                <th class="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Invoice</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50">
-                            <tr class="hover:bg-slate-50/30 transition-colors">
-                                <td class="px-10 py-6 text-sm font-semibold text-slate-900 text-nowrap">Feb 01, 2026</td>
-                                <td class="px-10 py-6 text-sm font-normal text-slate-600">Rp12.000</td>
+                            <tr v-for="payment in paymentHistory" :key="payment.id" class="hover:bg-slate-50/30 transition-colors">
+                                <td class="px-10 py-6 text-sm font-semibold text-slate-900 text-nowrap">{{ formatDate(payment.invoice_date) }}</td>
+                                <td class="px-10 py-6 text-sm font-normal text-slate-600">{{ payment.plan_name }}</td>
+                                <td class="px-10 py-6 text-sm font-normal text-slate-600">{{ formatCurrency(payment.amount) }}</td>
                                 <td class="px-10 py-6">
-                                    <span class="bg-emerald-50 text-emerald-600 text-[10px] font-semibold uppercase tracking-widest px-3 py-1 rounded-md border border-emerald-100">Paid</span>
+                                    <span :class="['text-[10px] font-semibold uppercase tracking-widest px-3 py-1 rounded-md border', statusClass(payment.status)]">{{ payment.status }}</span>
                                 </td>
-                                <td class="px-10 py-6 text-right">
-                                    <button class="text-[10px] font-semibold text-[#023e8a] uppercase tracking-widest bg-slate-50 hover:bg-white border border-slate-100 px-4 py-2 rounded-xl transition-all shadow-sm">Receipt</button>
+                                <td class="px-10 py-6 text-sm font-semibold text-slate-700 text-nowrap">{{ payment.invoice_number }}</td>
+                            </tr>
+                            <tr v-if="paymentHistory.length === 0">
+                                <td colspan="5" class="px-10 py-10 text-center">
+                                    <p class="text-sm font-semibold text-slate-900">No payment history yet</p>
+                                    <p class="text-xs text-slate-500 mt-1">Auto-generated subscription invoices will appear here.</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -202,6 +243,3 @@ const getDayPrice = (plan) => {
         </div>
     </AppLayout>
 </template>
-
-<style scoped>
-</style>

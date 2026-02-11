@@ -106,7 +106,7 @@ const updateStatus = () => {
                     <div class="flex items-center gap-2">
                         <select
                             v-model="statusForm.status"
-                            class="rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm font-semibold text-slate-700 shadow-sm outline-none transition-all focus:ring-2 focus:ring-[#023e8a] appearance-none"
+                            class="rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm font-semibold text-slate-700 shadow-sm outline-none transition-all focus:ring-2 focus:ring-[#07304a] appearance-none"
                             style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2394a3b8%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;"
                         >
                             <option v-for="option in statusOptions" :key="option.value" :value="option.value">
@@ -126,7 +126,7 @@ const updateStatus = () => {
                         <Icon icon="si:file-download-line" :width="18" :height="18"  />
                         <span>Print</span>
                     </button>
-                    <button class="flex items-center gap-2 rounded-xl bg-[#023e8a] px-6 py-3 text-sm font-semibold text-white shadow-xl shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95">
+                    <button class="flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95">
                         <Icon icon="si:mail-line" :width="18" :height="18"  />
                         <span>Send</span>
                     </button>
@@ -161,7 +161,7 @@ const updateStatus = () => {
                          <div class="flex flex-col items-end">
                              <img src="/img/logo/logo_text_blue.png" alt="Company Logo" class="h-16 w-auto object-contain">
                              <!-- Optional logo subtitle like in image -->
-                             <p class="text-[8px] font-bold text-[#023e8a] uppercase tracking-[0.2em] mt-2">Accounting | Business | Tax Consulting</p>
+                             <p class="text-[8px] font-bold text-[#07304a] uppercase tracking-[0.2em] mt-2">Accounting | Business | Tax Consulting</p>
                          </div>
                     </div>
 

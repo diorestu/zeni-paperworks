@@ -34,7 +34,7 @@ const applySelection = () => {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="$emit('close')">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden" @click.stop>
             <!-- Header -->
-            <div class="bg-[#023e8a] px-6 py-5 flex items-center justify-between">
+            <div class="bg-[#07304a] px-6 py-5 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <Icon icon="si:checklist-line" :width="24" :height="24" class="text-white"  />
                     <h3 class="text-lg font-semibold text-white">Select Taxes</h3>
@@ -59,7 +59,7 @@ const applySelection = () => {
                         :class="[
                             'w-full p-4 rounded-xl border-2 transition-all text-left',
                             isTaxSelected(tax.id)
-                                ? 'border-[#023e8a] bg-[#023e8a]/5'
+                                ? 'border-[#07304a] bg-[#07304a]/5'
                                 : 'border-slate-100 hover:border-slate-200'
                         ]"
                     >
@@ -82,7 +82,7 @@ const applySelection = () => {
                                 :class="[
                                     'flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all',
                                     isTaxSelected(tax.id)
-                                        ? 'border-[#023e8a] bg-[#023e8a]'
+                                        ? 'border-[#07304a] bg-[#07304a]'
                                         : 'border-slate-300'
                                 ]"
                             >
@@ -103,7 +103,7 @@ const applySelection = () => {
                 </button>
                 <button 
                     @click="applySelection"
-                    class="flex-1 px-4 py-3 text-sm font-semibold text-white bg-[#023e8a] hover:bg-[#002d66] rounded-xl transition-all shadow-lg shadow-[#023e8a]/20"
+                    class="flex-1 px-4 py-3 text-sm font-semibold text-white bg-[#07304a] hover:bg-[#002d66] rounded-xl transition-all shadow-lg shadow-[#07304a]/20"
                 >
                     Apply
                 </button>

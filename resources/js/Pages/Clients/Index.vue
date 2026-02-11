@@ -151,11 +151,11 @@ const deleteClient = () => {
         <!-- Header Section -->
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between mb-8">
             <div>
-                <p class="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#023e8a]/60">Member directory</p>
+                <p class="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#07304a]/60">Member directory</p>
                 <h1 class="mt-1 text-2xl font-semibold text-slate-900 tracking-tight">Client Hub</h1>
             </div>
             <button
-                class="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-[#023e8a] px-8 py-4 text-sm font-semibold text-white shadow-2xl shadow-[#023e8a]/30 transition-all hover:-translate-y-1 hover:bg-[#002d66] active:scale-95"
+                class="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-[#07304a] px-8 py-4 text-sm font-semibold text-white shadow-2xl shadow-[#07304a]/30 transition-all hover:-translate-y-1 hover:bg-[#002d66] active:scale-95"
                 @click="startCreate"
             >
                 <span class="relative z-10 flex items-center gap-2">
@@ -177,9 +177,9 @@ const deleteClient = () => {
                     v-model="searchQuery"
                     type="text"
                     placeholder="Search by name, email or tax number..."
-                    class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-normal text-slate-700 shadow-sm ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] focus:bg-white transition-all outline-none"
+                    class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-normal text-slate-700 shadow-sm ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] focus:bg-white transition-all outline-none"
                 />
-                <Icon icon="si:search-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a] transition-colors"  />
+                <Icon icon="si:search-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#07304a] transition-colors"  />
                 <button 
                     v-if="searchQuery" 
                     @click="searchQuery = ''"
@@ -191,7 +191,7 @@ const deleteClient = () => {
 
             <div class="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-lg border border-slate-100">
                 <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Total</span>
-                <span class="text-sm font-semibold text-[#023e8a]">{{ filteredClients.length }}</span>
+                <span class="text-sm font-semibold text-[#07304a]">{{ filteredClients.length }}</span>
             </div>
         </div>
 
@@ -201,20 +201,20 @@ const deleteClient = () => {
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-100/30">
-                            <th @click="toggleSort('name')" class="group cursor-pointer px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 select-none hover:text-[#023e8a] transition-colors">
+                            <th @click="toggleSort('name')" class="group cursor-pointer px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 select-none hover:text-[#07304a] transition-colors">
                                 <div class="flex items-center gap-2">
                                     Name
-                                    <span class="transition-all" :class="sortConfig.key === 'name' ? 'opacity-100 text-[#023e8a]' : 'opacity-0 group-hover:opacity-100'">
+                                    <span class="transition-all" :class="sortConfig.key === 'name' ? 'opacity-100 text-[#07304a]' : 'opacity-0 group-hover:opacity-100'">
                                         <Icon icon="si:arrow-upward-line" v-if="sortConfig.key === 'name' && sortConfig.direction === 'asc'" :width="14" :height="14"  />
                                         <Icon icon="si:arrow-downward-line" v-else-if="sortConfig.key === 'name' && sortConfig.direction === 'desc'" :width="14" :height="14"  />
                                         <Icon icon="si:sort-line" v-else :width="14" :height="14"  />
                                     </span>
                                 </div>
                             </th>
-                            <th @click="toggleSort('email')" class="group cursor-pointer px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 select-none hover:text-[#023e8a] transition-colors">
+                            <th @click="toggleSort('email')" class="group cursor-pointer px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 select-none hover:text-[#07304a] transition-colors">
                                 <div class="flex items-center gap-2">
                                     Email Address
-                                    <span class="transition-all" :class="sortConfig.key === 'email' ? 'opacity-100 text-[#023e8a]' : 'opacity-0 group-hover:opacity-100'">
+                                    <span class="transition-all" :class="sortConfig.key === 'email' ? 'opacity-100 text-[#07304a]' : 'opacity-0 group-hover:opacity-100'">
                                         <Icon icon="si:arrow-upward-line" v-if="sortConfig.key === 'email' && sortConfig.direction === 'asc'" :width="14" :height="14"  />
                                         <Icon icon="si:arrow-downward-line" v-else-if="sortConfig.key === 'email' && sortConfig.direction === 'desc'" :width="14" :height="14"  />
                                         <Icon icon="si:sort-line" v-else :width="14" :height="14"  />
@@ -222,10 +222,10 @@ const deleteClient = () => {
                                 </div>
                             </th>
                             <th class="px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Phone</th>
-                            <th @click="toggleSort('company')" class="group cursor-pointer px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 select-none hover:text-[#023e8a] transition-colors">
+                            <th @click="toggleSort('company')" class="group cursor-pointer px-8 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 select-none hover:text-[#07304a] transition-colors">
                                 <div class="flex items-center gap-2">
                                     Tax Number
-                                    <span class="transition-all" :class="sortConfig.key === 'company' ? 'opacity-100 text-[#023e8a]' : 'opacity-0 group-hover:opacity-100'">
+                                    <span class="transition-all" :class="sortConfig.key === 'company' ? 'opacity-100 text-[#07304a]' : 'opacity-0 group-hover:opacity-100'">
                                         <Icon icon="si:arrow-upward-line" v-if="sortConfig.key === 'company' && sortConfig.direction === 'asc'" :width="14" :height="14"  />
                                         <Icon icon="si:arrow-downward-line" v-else-if="sortConfig.key === 'company' && sortConfig.direction === 'desc'" :width="14" :height="14"  />
                                         <Icon icon="si:sort-line" v-else :width="14" :height="14"  />
@@ -243,10 +243,10 @@ const deleteClient = () => {
                         >
                             <td class="px-8 py-6">
                                 <div class="flex items-center gap-4">
-                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-50 font-semibold text-[#023e8a] group-hover:bg-[#023e8a] group-hover:text-white transition-all duration-300">
+                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-50 font-semibold text-[#07304a] group-hover:bg-[#07304a] group-hover:text-white transition-all duration-300">
                                         {{ client.name.charAt(0) }}
                                     </div>
-                                    <span class="font-semibold text-slate-900 group-hover:text-[#023e8a] transition-colors">{{ client.name }}</span>
+                                    <span class="font-semibold text-slate-900 group-hover:text-[#07304a] transition-colors">{{ client.name }}</span>
                                 </div>
                             </td>
                             <td class="px-8 py-6 text-sm text-slate-500 font-normal">{{ client.email || '—' }}</td>
@@ -283,12 +283,12 @@ const deleteClient = () => {
             >
                 <div class="pointer-events-auto w-full max-w-2xl rounded-[2rem] bg-white p-10 shadow-2xl relative border border-slate-100 flex flex-col gap-8">
                     <div v-if="processing" class="absolute inset-0 rounded-[2rem] bg-white/70 backdrop-blur-sm flex items-center justify-center z-10 animate-fade-in">
-                        <div class="h-12 w-12 animate-spin rounded-full border-4 border-[#023e8a] border-t-transparent"></div>
+                        <div class="h-12 w-12 animate-spin rounded-full border-4 border-[#07304a] border-t-transparent"></div>
                     </div>
                     
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#023e8a]/60">
+                            <p class="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#07304a]/60">
                                 {{ showCreate ? 'Creation flow' : 'Update records' }}
                             </p>
                             <h3 class="mt-1 text-2xl font-semibold text-slate-900 tracking-tight">
@@ -307,19 +307,19 @@ const deleteClient = () => {
                     >
                         <div class="col-span-2">
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Full Legal Name</label>
-                            <input v-model="form.name" required class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="e.g. Christopher Nolan" />
+                            <input v-model="form.name" required class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#07304a] transition-all outline-none" placeholder="e.g. Christopher Nolan" />
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Email Address</label>
-                            <input v-model="form.email" type="email" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="name@domain.com" />
+                            <input v-model="form.email" type="email" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#07304a] transition-all outline-none" placeholder="name@domain.com" />
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Phone Number</label>
-                            <input v-model="form.phone" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="+1 (555) 000-0000" />
+                            <input v-model="form.phone" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#07304a] transition-all outline-none" placeholder="+1 (555) 000-0000" />
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Tax Number</label>
-                            <input v-model="form.company" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="Tax number" />
+                            <input v-model="form.company" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#07304a] transition-all outline-none" placeholder="Tax number" />
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Industry Sector</label>
@@ -333,10 +333,10 @@ const deleteClient = () => {
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Physical Address</label>
-                            <textarea v-model="form.address" rows="3" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none resize-none" placeholder="123 Street Ave."></textarea>
+                            <textarea v-model="form.address" rows="3" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#07304a] transition-all outline-none resize-none" placeholder="123 Street Ave."></textarea>
                         </div>
                         <div class="col-span-2 flex justify-end pt-4">
-                            <button type="submit" class="flex items-center gap-3 rounded-xl bg-[#023e8a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#023e8a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95">
+                            <button type="submit" class="flex items-center gap-3 rounded-xl bg-[#07304a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#07304a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95">
                                 <Icon icon="si:archive-line" :width="18" :height="18"  />
                                 <span>Save Profile</span>
                             </button>
@@ -350,19 +350,19 @@ const deleteClient = () => {
                     >
                         <div class="col-span-2">
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Full Legal Name</label>
-                            <input v-model="editForm.name" required class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="e.g. Christopher Nolan" />
+                            <input v-model="editForm.name" required class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#07304a] transition-all outline-none" placeholder="e.g. Christopher Nolan" />
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Email Address</label>
-                            <input v-model="editForm.email" type="email" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="name@domain.com" />
+                            <input v-model="editForm.email" type="email" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#07304a] transition-all outline-none" placeholder="name@domain.com" />
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Phone Number</label>
-                            <input v-model="editForm.phone" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="+1 (555) 000-0000" />
+                            <input v-model="editForm.phone" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#07304a] transition-all outline-none" placeholder="+1 (555) 000-0000" />
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Tax Number</label>
-                            <input v-model="editForm.company" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none" placeholder="Tax number" />
+                            <input v-model="editForm.company" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#07304a] transition-all outline-none" placeholder="Tax number" />
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Industry Sector</label>
@@ -376,7 +376,7 @@ const deleteClient = () => {
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Physical Address</label>
-                            <textarea v-model="editForm.address" rows="3" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none resize-none" placeholder="123 Street Ave."></textarea>
+                            <textarea v-model="editForm.address" rows="3" class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 focus:ring-2 focus:ring-[#07304a] transition-all outline-none resize-none" placeholder="123 Street Ave."></textarea>
                         </div>
                         <div class="col-span-2 flex justify-between pt-4">
                             <button
@@ -387,7 +387,7 @@ const deleteClient = () => {
                                 <Icon icon="si:bin-line" :width="18" :height="18"  />
                                 <span>Delete Record</span>
                             </button>
-                            <button type="submit" class="flex items-center gap-3 rounded-xl bg-[#023e8a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#023e8a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95">
+                            <button type="submit" class="flex items-center gap-3 rounded-xl bg-[#07304a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#07304a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95">
                                 <Icon icon="si:archive-line" :width="18" :height="18"  />
                                 <span>Save Changes</span>
                             </button>
@@ -439,6 +439,6 @@ const deleteClient = () => {
     border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: #023e8a;
+    background: #07304a;
 }
 </style>

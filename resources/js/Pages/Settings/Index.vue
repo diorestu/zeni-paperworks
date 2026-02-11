@@ -116,7 +116,7 @@ const deleteTax = (tax) => {
                         :class="[
                             'pb-4 text-sm font-semibold transition-all border-b-2',
                             activeTab === 'general'
-                                ? 'text-[#023e8a] border-[#023e8a]'
+                                ? 'text-[#07304a] border-[#07304a]'
                                 : 'text-slate-500 border-transparent hover:text-slate-700'
                         ]"
                     >
@@ -127,7 +127,7 @@ const deleteTax = (tax) => {
                         :class="[
                             'pb-4 text-sm font-semibold transition-all border-b-2',
                             activeTab === 'company'
-                                ? 'text-[#023e8a] border-[#023e8a]'
+                                ? 'text-[#07304a] border-[#07304a]'
                                 : 'text-slate-500 border-transparent hover:text-slate-700'
                         ]"
                     >
@@ -138,7 +138,7 @@ const deleteTax = (tax) => {
                         :class="[
                             'pb-4 text-sm font-semibold transition-all border-b-2',
                             activeTab === 'taxes'
-                                ? 'text-[#023e8a] border-[#023e8a]'
+                                ? 'text-[#07304a] border-[#07304a]'
                                 : 'text-slate-500 border-transparent hover:text-slate-700'
                         ]"
                     >
@@ -161,7 +161,7 @@ const deleteTax = (tax) => {
                             </div>
                             <div class="flex-1">
                                 <p class="text-sm font-semibold text-slate-900">{{ $page.props.auth.user.name }}</p>
-                                <button class="text-sm text-[#023e8a] font-semibold hover:underline">Change</button>
+                                <button class="text-sm text-[#07304a] font-semibold hover:underline">Change</button>
                             </div>
                         </div>
                         <div class="pt-6 border-t border-slate-100">
@@ -183,7 +183,7 @@ const deleteTax = (tax) => {
                                     type="text" 
                                     v-model="profileForm.invoice_prefix"
                                     placeholder="e.g. INV"
-                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 >
                             </div>
                             <p class="text-xs text-slate-400">Format: <span class="font-semibold">{{ profileForm.invoice_prefix }}/YYMMDD/001</span></p>
@@ -197,7 +197,7 @@ const deleteTax = (tax) => {
                                     type="text" 
                                     v-model="profileForm.quotation_prefix"
                                     placeholder="e.g. QUO"
-                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 >
                             </div>
                             <p class="text-xs text-slate-400">Format: <span class="font-semibold">{{ profileForm.quotation_prefix }}/YYMMDD/001</span></p>
@@ -207,7 +207,7 @@ const deleteTax = (tax) => {
                             <button 
                                 type="submit" 
                                 :disabled="profileForm.processing"
-                                class="flex items-center gap-2 rounded-xl bg-[#023e8a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
+                                class="flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                             >
                                 <Icon icon="si:archive-line" :width="18" :height="18"  />
                                 <span>{{ profileForm.processing ? 'Saving...' : 'Save Changes' }}</span>
@@ -233,7 +233,7 @@ const deleteTax = (tax) => {
                                     type="text" 
                                     v-model="companyForm.company_name"
                                     placeholder="e.g. PT Solusi Usaha Adijaya"
-                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 >
                             </div>
                         </div>
@@ -247,7 +247,7 @@ const deleteTax = (tax) => {
                                     v-model="companyForm.company_address"
                                     rows="3"
                                     placeholder="Full company address"
-                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none resize-none"
+                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none resize-none"
                                 ></textarea>
                             </div>
                         </div>
@@ -261,7 +261,7 @@ const deleteTax = (tax) => {
                                     type="text" 
                                     v-model="companyForm.company_phone"
                                     placeholder="e.g. (+62) 851 8344 0300"
-                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 >
                             </div>
                         </div>
@@ -275,7 +275,7 @@ const deleteTax = (tax) => {
                                     type="email" 
                                     v-model="companyForm.company_email"
                                     placeholder="e.g. info@konsulin.id"
-                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 >
                             </div>
                         </div>
@@ -289,7 +289,7 @@ const deleteTax = (tax) => {
                                     type="url" 
                                     v-model="companyForm.company_website"
                                     placeholder="e.g. https://konsulin.id"
-                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 >
                             </div>
                         </div>
@@ -303,7 +303,7 @@ const deleteTax = (tax) => {
                                     type="text" 
                                     v-model="companyForm.company_tax_id"
                                     placeholder="e.g. NPWP"
-                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 >
                             </div>
                         </div>
@@ -313,7 +313,7 @@ const deleteTax = (tax) => {
                         <button 
                             type="submit" 
                             :disabled="companyForm.processing"
-                            class="flex items-center gap-2 rounded-xl bg-[#023e8a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
+                            class="flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                         >
                             <Icon icon="si:archive-line" :width="18" :height="18"  />
                             <span>{{ companyForm.processing ? 'Saving...' : 'Save Company Info' }}</span>
@@ -337,7 +337,7 @@ const deleteTax = (tax) => {
                                     type="text" 
                                     v-model="taxForm.name"
                                     placeholder="e.g. VAT, PPN, WHT"
-                                    class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                     required
                                 >
                             </div>
@@ -346,7 +346,7 @@ const deleteTax = (tax) => {
                                 <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</label>
                                 <select 
                                     v-model="taxForm.type"
-                                    class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 >
                                     <option value="add">Add (Penambah)</option>
                                     <option value="subtract">Subtract (Pengurang)</option>
@@ -362,7 +362,7 @@ const deleteTax = (tax) => {
                                     step="0.01"
                                     min="0"
                                     max="100"
-                                    class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                     required
                                 >
                             </div>
@@ -371,7 +371,7 @@ const deleteTax = (tax) => {
                                 <button 
                                     type="submit" 
                                     :disabled="taxForm.processing"
-                                    class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#023e8a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
+                                    class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                                 >
                                     <Icon icon="si:archive-line" :width="18" :height="18"  />
                                     <span>{{ editingTax ? 'Update' : 'Add Tax' }}</span>
@@ -416,12 +416,12 @@ const deleteTax = (tax) => {
                                                 {{ tax.type === 'add' ? 'Penambah' : 'Pengurang' }}
                                             </span>
                                         </div>
-                                        <p class="text-2xl font-bold text-[#023e8a]">{{ tax.rate }}%</p>
+                                        <p class="text-2xl font-bold text-[#07304a]">{{ tax.rate }}%</p>
                                     </div>
                                     <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button 
                                             @click="editTax(tax)"
-                                            class="px-4 py-2 text-xs font-semibold text-[#023e8a] hover:bg-[#023e8a]/10 rounded-lg transition-all"
+                                            class="px-4 py-2 text-xs font-semibold text-[#07304a] hover:bg-[#07304a]/10 rounded-lg transition-all"
                                         >
                                             Edit
                                         </button>

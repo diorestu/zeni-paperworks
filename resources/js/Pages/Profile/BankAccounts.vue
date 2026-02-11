@@ -76,7 +76,7 @@ const deleteAccount = (id) => {
                                     v-model="form.bank_name"
                                     type="text" 
                                     placeholder="e.g. BCA, Mandiri"
-                                    class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                     required
                                 />
                             </div>
@@ -87,7 +87,7 @@ const deleteAccount = (id) => {
                                     v-model="form.account_name"
                                     type="text" 
                                     placeholder="Full name"
-                                    class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                     required
                                 />
                             </div>
@@ -98,7 +98,7 @@ const deleteAccount = (id) => {
                                     v-model="form.account_number"
                                     type="text" 
                                     placeholder="0000 0000 0000"
-                                    class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full rounded-xl border-none bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                     required
                                 />
                             </div>
@@ -108,7 +108,7 @@ const deleteAccount = (id) => {
                                     v-model="form.is_default"
                                     type="checkbox" 
                                     id="is_default"
-                                    class="h-4 w-4 rounded border-slate-200 text-[#023e8a] focus:ring-[#023e8a]"
+                                    class="h-4 w-4 rounded border-slate-200 text-[#07304a] focus:ring-[#07304a]"
                                 />
                                 <label for="is_default" class="text-xs font-semibold text-slate-500">Set as default</label>
                             </div>
@@ -117,7 +117,7 @@ const deleteAccount = (id) => {
                                 <button 
                                     type="submit"
                                     :disabled="form.processing"
-                                    class="w-full rounded-xl bg-[#023e8a] px-5 py-3.5 text-xs font-bold text-white shadow-lg shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
+                                    class="w-full rounded-xl bg-[#07304a] px-5 py-3.5 text-xs font-bold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                                 >
                                     {{ isEditing ? 'Update Account' : 'Add Bank Account' }}
                                 </button>
@@ -151,11 +151,11 @@ const deleteAccount = (id) => {
                     <div 
                         v-for="account in bankAccounts" 
                         :key="account.id"
-                        class="group relative bg-white rounded-[2rem] border border-slate-100 p-8 shadow-xl shadow-slate-200/5 transition-all hover:border-[#023e8a]/20"
+                        class="group relative bg-white rounded-[2rem] border border-slate-100 p-8 shadow-xl shadow-slate-200/5 transition-all hover:border-[#07304a]/20"
                     >
                         <div class="flex items-start justify-between">
                             <div class="flex items-center gap-5">
-                                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-[#023e8a] transition-all group-hover:bg-[#023e8a] group-hover:text-white">
+                                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-[#07304a] transition-all group-hover:bg-[#07304a] group-hover:text-white">
                                     <Icon icon="si:building-line" :width="24" :height="24"  />
                                 </div>
                                 <div>

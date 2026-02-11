@@ -119,7 +119,7 @@ onUnmounted(() => {
                 @focus="isOpen = true"
                 @keydown="onKeydown"
                 :placeholder="placeholder"
-                :class="['w-full bg-slate-50 border-none text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none shadow-sm', inputClass]"
+                :class="['w-full bg-slate-50 border-none text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none shadow-sm', inputClass]"
             >
              <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                 <Icon icon="si:expand-more-line" :width="16" :height="16"  />
@@ -135,7 +135,7 @@ onUnmounted(() => {
                 <li
                     v-if="showAddOption"
                     @click="emit('add')"
-                    class="px-4 py-3 cursor-pointer transition-colors text-xs font-semibold uppercase tracking-widest text-[#023e8a] hover:bg-slate-50 border-b border-slate-100"
+                    class="px-4 py-3 cursor-pointer transition-colors text-xs font-semibold uppercase tracking-widest text-[#07304a] hover:bg-slate-50 border-b border-slate-100"
                 >
                     {{ addOptionLabel }}
                 </li>
@@ -144,7 +144,7 @@ onUnmounted(() => {
                     :key="index"
                     @click="selectItem(item)"
                     class="px-4 py-3 cursor-pointer transition-colors text-sm font-semibold text-slate-700"
-                    :class="{ 'bg-slate-50 text-[#023e8a]': index === activeIndex, 'hover:bg-slate-50': index !== activeIndex }"
+                    :class="{ 'bg-slate-50 text-[#07304a]': index === activeIndex, 'hover:bg-slate-50': index !== activeIndex }"
                 >
                     {{ item[itemLabel] }}
                     <span v-if="item.price" class="float-right text-xs text-slate-400 font-normal">Rp{{ item.price.toLocaleString('id-ID') }}</span>

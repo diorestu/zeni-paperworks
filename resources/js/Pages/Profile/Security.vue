@@ -49,9 +49,9 @@ const submit = () => {
                                     v-model="form.current_password" 
                                     type="password" 
                                     required
-                                    class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 />
-                                <Icon icon="si:lock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a]"  />
+                                <Icon icon="si:lock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#07304a]"  />
                             </div>
                         </div>
 
@@ -62,9 +62,9 @@ const submit = () => {
                                     v-model="form.password" 
                                     type="password" 
                                     required
-                                    class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 />
-                                <Icon icon="si:lock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a]"  />
+                                <Icon icon="si:lock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#07304a]"  />
                             </div>
                         </div>
 
@@ -75,9 +75,9 @@ const submit = () => {
                                     v-model="form.password_confirmation" 
                                     type="password" 
                                     required
-                                    class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 />
-                                <Icon icon="si:lock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a]"  />
+                                <Icon icon="si:lock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#07304a]"  />
                             </div>
                         </div>
                     </div>
@@ -86,7 +86,7 @@ const submit = () => {
                         <button 
                             type="submit" 
                             :disabled="form.processing"
-                            class="flex items-center gap-3 rounded-xl bg-[#023e8a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#023e8a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95 disabled:opacity-50"
+                            class="flex items-center gap-3 rounded-xl bg-[#07304a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#07304a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95 disabled:opacity-50"
                         >
                             <Icon icon="si:archive-line" :width="18" :height="18"  />
                             <span>Update Password</span>

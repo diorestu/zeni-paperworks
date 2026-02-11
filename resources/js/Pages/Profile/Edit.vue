@@ -30,12 +30,12 @@ const submit = () => {
             <div class="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/20 overflow-hidden">
                 <div class="p-8 border-b border-slate-50 bg-slate-50/30">
                     <div class="flex items-center gap-4">
-                        <div class="h-16 w-16 rounded-full bg-[#023e8a] flex items-center justify-center text-white text-2xl font-bold">
+                        <div class="h-16 w-16 rounded-full bg-[#07304a] flex items-center justify-center text-white text-2xl font-bold">
                             {{ form.name.charAt(0) }}
                         </div>
                         <div>
                             <h2 class="text-lg font-semibold text-slate-900">Profile Information</h2>
-                            <p class="text-xs font-semibold text-[#023e8a] uppercase tracking-widest">Public profile details</p>
+                            <p class="text-xs font-semibold text-[#07304a] uppercase tracking-widest">Public profile details</p>
                         </div>
                     </div>
                 </div>
@@ -49,9 +49,9 @@ const submit = () => {
                                     v-model="form.name" 
                                     type="text" 
                                     required
-                                    class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 />
-                                <Icon icon="si:user-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a]"  />
+                                <Icon icon="si:user-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#07304a]"  />
                             </div>
                         </div>
 
@@ -62,9 +62,9 @@ const submit = () => {
                                     v-model="form.email" 
                                     type="email" 
                                     required
-                                    class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 />
-                                <Icon icon="si:mail-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#023e8a]"  />
+                                <Icon icon="si:mail-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#07304a]"  />
                             </div>
                         </div>
                     </div>
@@ -73,7 +73,7 @@ const submit = () => {
                         <button 
                             type="submit" 
                             :disabled="form.processing"
-                            class="flex items-center gap-3 rounded-xl bg-[#023e8a] px-10 py-5 text-sm font-bold text-white shadow-2xl shadow-[#023e8a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95 disabled:opacity-50"
+                            class="flex items-center gap-3 rounded-xl bg-[#07304a] px-10 py-5 text-sm font-bold text-white shadow-2xl shadow-[#07304a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95 disabled:opacity-50"
                         >
                             <Icon icon="si:archive-line" :width="18" :height="18"  />
                             <span>Save Profile</span>

@@ -12,7 +12,18 @@
     --font-heading: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-sans: 'Google Sans Flex', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
-    --color-primary: #023e8a;
+    --color-lochmara-50: #f0f9ff;
+    --color-lochmara-100: #dff2ff;
+    --color-lochmara-200: #b9e7fe;
+    --color-lochmara-300: #7bd5fe;
+    --color-lochmara-400: #34c0fc;
+    --color-lochmara-500: #0aa9ed;
+    --color-lochmara-600: #0087cb;
+    --color-lochmara-700: #0077b6;
+    --color-lochmara-800: #055b87;
+    --color-lochmara-900: #0a4b70;
+    --color-lochmara-950: #07304a;
+    --color-primary: #07304a;
 }
 
 @layer base {
@@ -31,5 +42,20 @@
 
     p {
         font-weight: 400;
+    }
+}
+
+@layer utilities {
+    [class*='rounded']:not(input):not(textarea):not(select) {
+        border-radius: 20px !important;
+    }
+
+    input,
+    textarea,
+    select,
+    input[class*='rounded'],
+    textarea[class*='rounded'],
+    select[class*='rounded'] {
+        border-radius: 8px !important;
     }
 }

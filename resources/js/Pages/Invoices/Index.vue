@@ -54,7 +54,7 @@ const statusCounts = computed(() => {
             </div>
             <Link 
                 :href="route('invoices.create')"
-                class="flex items-center gap-2 rounded-xl bg-[#023e8a] px-6 py-4 text-sm font-semibold text-white shadow-xl shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95"
+                class="flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-4 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95"
             >
                 <Icon icon="si:add-line" :width="18" :height="18"  />
                 <span>Create Invoice</span>
@@ -74,7 +74,7 @@ const statusCounts = computed(() => {
                     :class="[
                         'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap',
                         statusFilter === 'all'
-                            ? 'bg-[#023e8a] text-white shadow-lg shadow-[#023e8a]/20'
+                            ? 'bg-[#07304a] text-white shadow-lg shadow-[#07304a]/20'
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                     ]"
                 >
@@ -148,7 +148,7 @@ const statusCounts = computed(() => {
                     v-model="searchQuery"
                     type="text" 
                     placeholder="Search invoice number or client..."
-                    class="w-full rounded-xl border-none bg-slate-50 pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                    class="w-full rounded-xl border-none bg-slate-50 pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                 >
             </div>
         </div>
@@ -170,7 +170,7 @@ const statusCounts = computed(() => {
                     <tr v-for="invoice in filteredInvoices" :key="invoice.id" class="group hover:bg-slate-50/30 transition-all cursor-pointer" @click="$inertia.visit(route('invoices.show', invoice))">
                         <td class="px-8 py-6">
                             <div class="flex items-center gap-3">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-[#023e8a] group-hover:bg-white group-hover:shadow-sm transition-all">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-[#07304a] group-hover:bg-white group-hover:shadow-sm transition-all">
                                     <Icon icon="si:quote-line" :width="18" :height="18"  />
                                 </div>
                                 <span class="text-sm font-semibold text-slate-900">{{ invoice.invoice_number }}</span>
@@ -205,7 +205,7 @@ const statusCounts = computed(() => {
                             </span>
                         </td>
                         <td class="px-8 py-6 text-right">
-                            <Icon icon="si:chevron-right-line" :width="18" :height="18" class="text-slate-300 group-hover:text-[#023e8a] transition-colors inline-block"  />
+                            <Icon icon="si:chevron-right-line" :width="18" :height="18" class="text-slate-300 group-hover:text-[#07304a] transition-colors inline-block"  />
                         </td>
                     </tr>
                     <tr v-if="filteredInvoices.length === 0">

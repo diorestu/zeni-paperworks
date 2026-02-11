@@ -28,7 +28,7 @@ const form = useForm({
     due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     notes: '',
     items: [
-        { product_id: null, description: '', quantity: 1, unit_price: 0 }
+        { product_id: null, description: '', quantity: 1, unit_price: 0, unit_price_input: '0' }
     ],
 });
 
@@ -67,7 +67,7 @@ const industryOptions = [
 ];
 
 const addItem = () => {
-    form.items.push({ product_id: null, description: '', quantity: 1, unit_price: 0 });
+    form.items.push({ product_id: null, description: '', quantity: 1, unit_price: 0, unit_price_input: '0' });
 };
 
 const removeItem = (index) => {
@@ -79,7 +79,31 @@ const removeItem = (index) => {
 const updateItem = (index, product) => {
     form.items[index].product_id = product.id;
     form.items[index].description = product.name;
-    form.items[index].unit_price = product.price;
+    const parsedPrice = parseRupiah(product.price);
+    form.items[index].unit_price = parsedPrice;
+    form.items[index].unit_price_input = formatRupiah(parsedPrice);
+};
+
+const parseRupiah = (value) => {
+    const digitsOnly = String(value ?? '').replace(/[^\d]/g, '');
+    return digitsOnly ? Number(digitsOnly) : 0;
+};
+
+const formatRupiah = (value) => {
+    const numberValue = Number(value ?? 0);
+    return numberValue.toLocaleString('id-ID');
+};
+
+const onUnitPriceInput = (index, value) => {
+    if (String(value).trim() === '') {
+        form.items[index].unit_price = 0;
+        form.items[index].unit_price_input = '';
+        return;
+    }
+
+    const parsed = parseRupiah(value);
+    form.items[index].unit_price = parsed;
+    form.items[index].unit_price_input = formatRupiah(parsed);
 };
 
 const subtotal = computed(() => {
@@ -106,7 +130,12 @@ const taxAmount = computed(() => {
 const total = computed(() => subtotal.value + taxAmount.value);
 
 const submit = () => {
-    form.post(route('invoices.store'));
+    form
+        .transform((data) => ({
+            ...data,
+            items: data.items.map(({ unit_price_input, ...item }) => item),
+        }))
+        .post(route('invoices.store'));
 };
 
 const submitClient = () => {
@@ -159,7 +188,7 @@ const openAddClient = () => {
                 <button 
                     @click="submit"
                     :disabled="form.processing"
-                    class="flex items-center gap-2 rounded-xl bg-[#023e8a] px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-[#023e8a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
+                    class="flex items-center gap-2 rounded-xl bg-[#07304a] px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                 >
                     <Icon icon="si:archive-line" :width="18" :height="18"  />
                     <span>{{ form.processing ? 'Saving...' : 'Save Invoice' }}</span>
@@ -190,37 +219,28 @@ const openAddClient = () => {
                                     />
                                 </div>
                             </div>
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Invoice Number</label>
-                                <div class="relative">
-                                    <Icon icon="si:text-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
-                                    <input 
-                                        type="text" 
-                                        v-model="form.invoice_number"
-                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
-                                    >
+                            <div class="space-y-6">
+                                <div class="space-y-2">
+                                    <label class="block w-3/5 ml-auto text-[10px] font-semibold uppercase tracking-widest text-slate-400">Invoice Date</label>
+                                    <div class="relative w-3/5 ml-auto">
+                                        <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"  />
+                                        <input 
+                                            type="date" 
+                                            v-model="form.invoice_date"
+                                            class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
+                                        >
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Invoice Date</label>
-                                <div class="relative">
-                                    <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
-                                    <input 
-                                        type="date" 
-                                        v-model="form.invoice_date"
-                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
-                                    >
-                                </div>
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Due Date</label>
-                                <div class="relative">
-                                    <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
-                                    <input 
-                                        type="date" 
-                                        v-model="form.due_date"
-                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
-                                    >
+                                <div class="space-y-2">
+                                    <label class="block w-3/5 ml-auto text-[10px] font-semibold uppercase tracking-widest text-slate-400">Due Date</label>
+                                    <div class="relative w-3/5 ml-auto">
+                                        <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"  />
+                                        <input 
+                                            type="date" 
+                                            v-model="form.due_date"
+                                            class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
+                                        >
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -233,14 +253,14 @@ const openAddClient = () => {
                             <button
                                 type="button"
                                 @click="showAddProduct = true"
-                                class="text-[10px] font-semibold uppercase tracking-widest text-[#023e8a] hover:underline"
+                                class="text-[10px] font-semibold uppercase tracking-widest text-[#07304a] hover:underline"
                             >
                                 Add Product
                             </button>
                         </div>
                         <div class="p-6 space-y-6">
                             <div v-for="(item, index) in form.items" :key="index" class="grid grid-cols-12 gap-4 items-end pb-6 border-b border-slate-50 last:border-0 last:pb-0">
-                                <div class="col-span-5 space-y-2">
+                                <div class="col-span-6 space-y-2">
                                     <label class="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Product / Description</label>
                                     <Autocomplete 
                                         v-model="item.description"
@@ -254,20 +274,22 @@ const openAddClient = () => {
                                         @add="openAddProduct"
                                     />
                                 </div>
-                                <div class="col-span-2 space-y-2">
+                                <div class="col-span-1 space-y-2">
                                     <label class="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Qty</label>
                                     <input 
                                         type="number" 
                                         v-model="item.quantity"
-                                        class="w-full bg-slate-50 border-none rounded-lg px-3 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none shadow-sm"
+                                        class="w-full bg-slate-50 border-none rounded-lg px-3 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none shadow-sm"
                                     >
                                 </div>
                                 <div class="col-span-3 space-y-2">
                                     <label class="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Unit Price</label>
                                     <input 
-                                        type="number" 
-                                        v-model="item.unit_price"
-                                        class="w-full bg-slate-50 border-none rounded-lg px-3 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none shadow-sm"
+                                        type="text"
+                                        inputmode="numeric"
+                                        :value="item.unit_price_input"
+                                        @input="onUnitPriceInput(index, $event.target.value)"
+                                        class="w-full bg-slate-50 border-none rounded-lg px-3 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none shadow-sm"
                                     >
                                 </div>
                                 <div class="col-span-1 flex flex-col justify-end text-right pb-3">
@@ -297,7 +319,11 @@ const openAddClient = () => {
                 <!-- Right: Summary & Notes -->
                 <div class="space-y-8">
                     <!-- Totals -->
-                    <div class="bg-[#023e8a] rounded-2xl p-6 text-white shadow-2xl shadow-[#023e8a]/30">
+                    <div class="bg-[#07304a] rounded-2xl p-6 text-white shadow-2xl shadow-[#07304a]/30">
+                        <div class="mb-5 rounded-xl bg-white/10 px-4 py-3">
+                            <div class="text-[9px] font-semibold uppercase tracking-widest text-white/60">Invoice Number</div>
+                            <div class="mt-1 text-sm font-semibold tracking-wide">{{ form.invoice_number }}</div>
+                        </div>
                         <h3 class="text-xs font-semibold uppercase tracking-widest text-white/50 mb-6">Invoice Summary</h3>
                         <div class="space-y-4">
                             <div class="flex justify-between text-sm font-semibold">
@@ -349,7 +375,7 @@ const openAddClient = () => {
                                 <Icon icon="si:building-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                 <select
                                     v-model="form.bank_account_id"
-                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none"
+                                    class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                 >
                                     <option value="" disabled>Select a bank account</option>
                                     <option v-for="bank in bankAccounts" :key="bank.id" :value="bank.id">
@@ -371,7 +397,7 @@ const openAddClient = () => {
                                 v-model="form.notes"
                                 rows="4"
                                 placeholder="Thank you for your business..."
-                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] transition-all outline-none resize-none"
+                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none resize-none"
                             ></textarea>
                             <p class="text-[10px] font-normal text-slate-400 leading-relaxed px-1">
                                 These notes will appear at the bottom of the invoice.
@@ -410,7 +436,7 @@ const openAddClient = () => {
                         <input
                             v-model="clientForm.name"
                             type="text"
-                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] outline-none"
                         />
                         <p v-if="clientForm.errors.name" class="text-[10px] text-rose-500 ml-1 mt-1">{{ clientForm.errors.name }}</p>
                     </div>
@@ -420,7 +446,7 @@ const openAddClient = () => {
                             <input
                                 v-model="clientForm.email"
                                 type="email"
-                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] outline-none"
                             />
                         </div>
                         <div>
@@ -428,7 +454,7 @@ const openAddClient = () => {
                             <input
                                 v-model="clientForm.phone"
                                 type="text"
-                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] outline-none"
                             />
                         </div>
                     </div>
@@ -437,7 +463,7 @@ const openAddClient = () => {
                         <input
                             v-model="clientForm.company"
                             type="text"
-                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] outline-none"
                             placeholder="Tax number"
                         />
                     </div>
@@ -445,7 +471,7 @@ const openAddClient = () => {
                         <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Industry Sector</label>
                         <select
                             v-model="clientForm.industry_sector"
-                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] outline-none"
                         >
                             <option value="" disabled>Select industry</option>
                             <option v-for="option in industryOptions" :key="option" :value="option">{{ option }}</option>
@@ -456,7 +482,7 @@ const openAddClient = () => {
                         <textarea
                             v-model="clientForm.address"
                             rows="3"
-                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none resize-none"
+                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] outline-none resize-none"
                         ></textarea>
                     </div>
                     <div class="flex justify-end gap-3 pt-2">
@@ -471,7 +497,7 @@ const openAddClient = () => {
                             type="button"
                             @click="submitClient"
                             :disabled="clientForm.processing"
-                            class="px-5 py-2 rounded-xl bg-[#023e8a] text-sm font-semibold text-white shadow-lg shadow-[#023e8a]/20 hover:bg-[#002d66] disabled:opacity-50"
+                            class="px-5 py-2 rounded-xl bg-[#07304a] text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 hover:bg-[#002d66] disabled:opacity-50"
                         >
                             {{ clientForm.processing ? 'Saving...' : 'Save Client' }}
                         </button>
@@ -501,7 +527,7 @@ const openAddClient = () => {
                         <input
                             v-model="productForm.name"
                             type="text"
-                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] outline-none"
                         />
                         <p v-if="productForm.errors.name" class="text-[10px] text-rose-500 ml-1 mt-1">{{ productForm.errors.name }}</p>
                     </div>
@@ -511,7 +537,7 @@ const openAddClient = () => {
                             <input
                                 v-model="productForm.sku"
                                 type="text"
-                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] outline-none"
                             />
                         </div>
                         <div>
@@ -520,7 +546,7 @@ const openAddClient = () => {
                                 v-model="productForm.price"
                                 type="number"
                                 min="0"
-                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none"
+                                class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] outline-none"
                             />
                         </div>
                     </div>
@@ -529,7 +555,7 @@ const openAddClient = () => {
                         <textarea
                             v-model="productForm.description"
                             rows="3"
-                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#023e8a] outline-none resize-none"
+                            class="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] outline-none resize-none"
                         ></textarea>
                     </div>
                     <div class="flex justify-end gap-3 pt-2">
@@ -544,7 +570,7 @@ const openAddClient = () => {
                             type="button"
                             @click="submitProduct"
                             :disabled="productForm.processing"
-                            class="px-5 py-2 rounded-xl bg-[#023e8a] text-sm font-semibold text-white shadow-lg shadow-[#023e8a]/20 hover:bg-[#002d66] disabled:opacity-50"
+                            class="px-5 py-2 rounded-xl bg-[#07304a] text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 hover:bg-[#002d66] disabled:opacity-50"
                         >
                             {{ productForm.processing ? 'Saving...' : 'Save Product' }}
                         </button>
