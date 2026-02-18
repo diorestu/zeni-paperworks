@@ -37,10 +37,16 @@ class InvoiceController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $companyId = $request->user()->company_id;
+
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'bank_account_id' => 'nullable|exists:bank_accounts,id',
-            'invoice_number' => 'required|string|unique:invoices,invoice_number',
+            'invoice_number' => [
+                'required',
+                'string',
+                Rule::unique('invoices', 'invoice_number')->where(fn ($query) => $query->where('company_id', $companyId)),
+            ],
             'invoice_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:invoice_date',
             'notes' => 'nullable|string',

@@ -22,9 +22,16 @@ class ProductController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $companyId = $request->user()->company_id;
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'sku' => ['required', 'string', 'max:255', 'unique:products,sku'],
+            'sku' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('products', 'sku')->where(fn ($query) => $query->where('company_id', $companyId)),
+            ],
             'price' => ['required', 'numeric', 'min:0'],
             'description' => ['nullable', 'string'],
         ]);
@@ -36,13 +43,17 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product): RedirectResponse
     {
+        $companyId = $request->user()->company_id;
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'sku' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('products', 'sku')->ignore($product->id),
+                Rule::unique('products', 'sku')
+                    ->where(fn ($query) => $query->where('company_id', $companyId))
+                    ->ignore($product->id),
             ],
             'price' => ['required', 'numeric', 'min:0'],
             'description' => ['nullable', 'string'],

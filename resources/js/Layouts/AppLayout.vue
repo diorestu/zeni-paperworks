@@ -9,9 +9,26 @@ const currentPackage = computed(() => page.props.auth?.user?.plan_name || 'Free'
 const showDropdown = ref(false);
 const showNotifications = ref(false);
 const isSidebarCollapsed = ref(false);
+const showFeedbackModal = ref(false);
+const feedbackSubmitted = ref(false);
+const feedbackForm = ref({
+    name: '',
+    company: '',
+    role: '',
+    rating: 5,
+    message: '',
+});
 
 const navItems = computed(() => {
     const role = page.props.auth?.user?.role;
+    const isVerified = !!page.props.auth?.user?.email_verified_at;
+
+    if (!isVerified) {
+        return [
+            { name: 'Dashboard', href: '/dashboard', icon: 'si:bar-chart-line' },
+        ];
+    }
+
     const items = [
         { name: 'Dashboard', href: '/dashboard', icon: 'si:bar-chart-line' },
         { name: 'Invoices', href: '/invoices', icon: 'si:ballot-line' },
@@ -33,6 +50,7 @@ const avatarUrl = computed(
     () =>
         `https://ui-avatars.com/api/?name=${encodeURIComponent(userName.value)}&background=07304a&color=fff&size=96&bold=true`
 );
+const isVerifiedUser = computed(() => !!page.props.auth?.user?.email_verified_at);
 
 const isActive = (href) => page.url.startsWith(href);
 
@@ -74,6 +92,26 @@ const closeDropdownHandler = (e) => {
 const toggleSidebar = () => {
     isSidebarCollapsed.value = !isSidebarCollapsed.value;
     localStorage.setItem('sidebar-collapsed', String(isSidebarCollapsed.value));
+};
+
+const openFeedbackModal = () => {
+    showFeedbackModal.value = true;
+    feedbackSubmitted.value = false;
+};
+
+const closeFeedbackModal = () => {
+    showFeedbackModal.value = false;
+};
+
+const submitFeedback = () => {
+    feedbackSubmitted.value = true;
+    feedbackForm.value = {
+        name: '',
+        company: '',
+        role: '',
+        rating: 5,
+        message: '',
+    };
 };
 </script>
 
@@ -153,6 +191,25 @@ const toggleSidebar = () => {
                                 <Icon icon="si:award-line" :width="20" :height="20" />
                             </div>
                         </div>
+
+                        <button
+                            v-if="!isSidebarCollapsed"
+                            type="button"
+                            @click="openFeedbackModal"
+                            class="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-[#07304a] transition hover:bg-slate-50"
+                        >
+                            Feedback
+                        </button>
+                        <button
+                            v-else
+                            type="button"
+                            @click="openFeedbackModal"
+                            class="mt-3 mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#07304a] transition hover:bg-slate-50"
+                            title="Feedback"
+                            aria-label="Feedback"
+                        >
+                            <Icon icon="si:chat-line" :width="18" :height="18" />
+                        </button>
                     </div>
                 </div>
             </aside>
@@ -221,23 +278,28 @@ const toggleSidebar = () => {
                                     <div class="px-3 py-2 border-b border-slate-50 mb-1">
                                         <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Account Control</p>
                                     </div>
-                                    <Link :href="route('profile.edit')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
-                                        <Icon icon="si:user-line" :width="18" :height="18"  />
-                                        My Profile
-                                    </Link>
-                                    <Link :href="route('profile.billing')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
-                                        <Icon icon="si:credit-card-line" :width="18" :height="18"  />
-                                        Billing
-                                    </Link>
-                                    <Link :href="route('profile.bank-accounts.index')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
-                                        <Icon icon="si:building-line" :width="18" :height="18"  />
-                                        Bank Accounts
-                                    </Link>
-                                    <Link :href="route('profile.security')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
-                                        <Icon icon="si:shield-line" :width="18" :height="18"  />
-                                        Security
-                                    </Link>
-                                    <div class="my-1 border-t border-slate-50"></div>
+                                    <template v-if="isVerifiedUser">
+                                        <Link :href="route('profile.edit')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
+                                            <Icon icon="si:user-line" :width="18" :height="18"  />
+                                            My Profile
+                                        </Link>
+                                        <Link :href="route('profile.billing')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
+                                            <Icon icon="si:credit-card-line" :width="18" :height="18"  />
+                                            Billing
+                                        </Link>
+                                        <Link :href="route('profile.bank-accounts.index')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
+                                            <Icon icon="si:building-line" :width="18" :height="18"  />
+                                            Bank Accounts
+                                        </Link>
+                                        <Link :href="route('profile.security')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
+                                            <Icon icon="si:shield-line" :width="18" :height="18"  />
+                                            Security
+                                        </Link>
+                                        <div class="my-1 border-t border-slate-50"></div>
+                                    </template>
+                                    <p v-else class="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-amber-600">
+                                        Verify email to unlock menus
+                                    </p>
                                     <Link :href="route('logout')" method="post" as="button" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-500 transition hover:bg-rose-50">
                                         <Icon icon="si:arrow-left-line" :width="18" :height="18"  />
                                         Log out
@@ -254,6 +316,70 @@ const toggleSidebar = () => {
                 </main>
             </div>
         </div>
+
+        <transition name="fade">
+            <div v-if="showFeedbackModal" class="fixed inset-0 z-[70] bg-slate-900/45 p-4 sm:p-6" @click.self="closeFeedbackModal">
+                <div class="mx-auto mt-12 w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+                    <div class="mb-5 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-900">Share Feedback</h3>
+                            <p class="text-xs text-slate-500">Tell us about your experience using Paperwork.</p>
+                        </div>
+                        <button type="button" @click="closeFeedbackModal" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                            <Icon icon="si:close-line" :width="18" :height="18" />
+                        </button>
+                    </div>
+
+                    <div v-if="feedbackSubmitted" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                        Thanks for your feedback. Your testimonial has been recorded.
+                    </div>
+
+                    <form v-else @submit.prevent="submitFeedback" class="space-y-4">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Name</label>
+                                <input v-model="feedbackForm.name" type="text" required class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-[#07304a]" />
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Company</label>
+                                <input v-model="feedbackForm.company" type="text" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-[#07304a]" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Role</label>
+                                <input v-model="feedbackForm.role" type="text" placeholder="Finance Manager" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-[#07304a]" />
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Rating</label>
+                                <select v-model="feedbackForm.rating" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-[#07304a]">
+                                    <option :value="5">5 - Excellent</option>
+                                    <option :value="4">4 - Good</option>
+                                    <option :value="3">3 - Fair</option>
+                                    <option :value="2">2 - Poor</option>
+                                    <option :value="1">1 - Bad</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Testimonial</label>
+                            <textarea v-model="feedbackForm.message" rows="4" required placeholder="Share your experience..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-[#07304a]"></textarea>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2 pt-1">
+                            <button type="button" @click="closeFeedbackModal" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600 hover:bg-slate-50">
+                                Cancel
+                            </button>
+                            <button type="submit" class="rounded-xl bg-[#07304a] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-[#0a3f61]">
+                                Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
 

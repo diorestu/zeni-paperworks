@@ -22,41 +22,44 @@ const secondaryAction = computed(() => {
         : { label: 'Sign In', href: route('login') };
 });
 
-const spotlightModules = computed(() => props.modules.slice(0, 6));
-const operationModules = computed(() => props.modules.slice(6));
+const heroFeatures = [
+    'Invoicing',
+    'Quotation',
+    'Payment Tracking',
+];
+
+const partnerNames = [
+    'VISA', 'Mastercard', 'JCB', 'AMEX', 'BCA', 'Mandiri',
+    'BRI', 'BNI', 'UOB', 'DigiPay', 'Kredivo', 'QRIS',
+];
+
 const currentYear = new Date().getFullYear();
 </script>
 
 <template>
     <Head title="Paperwork" />
 
-    <div class="min-h-screen bg-[#f7fbff] text-slate-900">
-        <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-            <div class="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-[#90e0ef]/40 blur-3xl"></div>
-            <div class="absolute top-52 -left-20 h-80 w-80 rounded-full bg-[#caf0f8]/80 blur-3xl"></div>
-            <div class="absolute bottom-0 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[#0077b6]/10 blur-3xl"></div>
-        </div>
-
-        <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/80 backdrop-blur-lg">
-            <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+    <div class="min-h-screen bg-[#f3f6fb] text-slate-900">
+        <header class="fixed inset-x-0 top-0 z-40 px-4 pt-4">
+            <div class="mx-auto flex max-w-7xl items-center justify-between rounded-[60px] border border-white/30 bg-[#0b1e4d]/70 px-6 py-4 shadow-2xl shadow-[#09163b]/50 backdrop-blur-xl" style="border-radius: 60px !important;">
                 <div class="flex items-center gap-3">
                     <img src="/img/logo/favicon_blue.png" alt="Paperwork" class="h-10 w-10">
                     <div>
-                        <p class="text-sm font-bold tracking-wide text-[#07304a]">PAPERWORK</p>
-                        <p class="text-[10px] uppercase tracking-widest text-slate-400">Invoice & Quotation Ops</p>
+                        <p class="text-sm font-bold tracking-wide text-white">PAPERWORK</p>
+                        <p class="text-[10px] uppercase tracking-widest text-white/60">Invoice & Quotation Ops</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-3">
                     <Link
                         :href="secondaryAction.href"
-                        class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600 transition hover:bg-slate-100"
+                        class="rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-semibold uppercase tracking-widest text-white transition hover:bg-white/20"
                     >
                         {{ secondaryAction.label }}
                     </Link>
                     <Link
                         :href="primaryAction.href"
-                        class="rounded-xl bg-[#07304a] px-5 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-[#0a3f61]"
+                        class="rounded-xl bg-white px-6 py-2.5 text-sm font-semibold uppercase tracking-widest text-[#0b1e4d] transition hover:bg-[#e5efff]"
                     >
                         {{ primaryAction.label }}
                     </Link>
@@ -64,152 +67,195 @@ const currentYear = new Date().getFullYear();
             </div>
         </header>
 
-        <main class="mx-auto max-w-7xl px-6 py-12">
-            <section class="mx-auto max-w-4xl text-center">
-                    <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-[#0077b6]/20 bg-white px-4 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#07304a]">
+        <main>
+            <section class="relative overflow-hidden bg-gradient-to-b from-[#08173f] via-[#173987] to-[#3f7add] pb-24 pt-36 text-white">
+                <div class="pointer-events-none absolute inset-0">
+                    <div class="absolute -top-12 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-[#89d9ff]/20 blur-3xl"></div>
+                    <div class="absolute bottom-10 left-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
+                    <div class="absolute bottom-16 right-10 h-44 w-44 rounded-full bg-[#7be0ff]/20 blur-2xl"></div>
+                </div>
+
+                <div class="relative mx-auto max-w-6xl px-6 text-center">
+                    <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-[10px] font-semibold uppercase tracking-widest text-white">
                         <Icon icon="si:flash-line" :width="12" :height="12" />
-                        Live Data From Your Project
+                        Platform Lengkap untuk Bisnis
                     </p>
-                    <h1 class="text-4xl font-bold leading-tight text-[#07304a] md:text-5xl">
-                        Run quotation-to-invoice workflows in one focused workspace.
+                    <h1 class="mx-auto max-w-4xl text-4xl font-bold leading-tight md:text-6xl">
+                        Invoicing & Transaksi Bisnis dalam Satu Alur Kerja
                     </h1>
-                    <p class="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-slate-600">
-                        Paperwork combines client records, product catalog, tax presets, invoice generation,
-                        quotation conversion, and billing history. The interface is built for teams that need
-                        speed without losing financial visibility.
+                    <p class="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-white/80">
+                        Praktis, resmi, dan aman untuk tim Anda: dari quotation hingga invoice, serta pelacakan pembayaran.
                     </p>
 
                     <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
                         <Link
                             :href="primaryAction.href"
-                            class="rounded-xl bg-[#07304a] px-6 py-3 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-[#0a3f61]"
+                            class="rounded-xl bg-white px-6 py-3 text-xs font-semibold uppercase tracking-widest text-[#0b1e4d] transition hover:bg-[#e9f2ff]"
                         >
                             {{ primaryAction.label }}
                         </Link>
                         <Link
                             :href="route('login')"
-                            class="rounded-xl border border-slate-200 bg-white px-6 py-3 text-xs font-semibold uppercase tracking-widest text-slate-700 transition hover:bg-slate-100"
+                            class="rounded-xl border border-white/30 bg-white/10 px-6 py-3 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-white/20"
                         >
                             Product Walkthrough
                         </Link>
                     </div>
-            </section>
 
-            <section class="mt-14 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    <div class="rounded-xl bg-[#07304a] p-5 text-white">
-                        <p class="text-[10px] font-semibold uppercase tracking-widest text-white/70">Step 1</p>
-                        <h3 class="mt-2 text-lg font-bold">Create Quotation</h3>
-                        <p class="mt-2 text-xs leading-relaxed text-white/80">Generate client-ready quotation documents from your product and tax setup.</p>
-                    </div>
-                    <div class="rounded-xl bg-[#0077b6] p-5 text-white">
-                        <p class="text-[10px] font-semibold uppercase tracking-widest text-white/70">Step 2</p>
-                        <h3 class="mt-2 text-lg font-bold">Convert To Invoice</h3>
-                        <p class="mt-2 text-xs leading-relaxed text-white/80">Turn accepted quotations into invoices with one action and keep consistency.</p>
-                    </div>
-                    <div class="rounded-xl bg-[#00b4d8] p-5 text-[#07304a]">
-                        <p class="text-[10px] font-semibold uppercase tracking-widest text-[#07304a]/70">Step 3</p>
-                        <h3 class="mt-2 text-lg font-bold">Track Payment & Billing</h3>
-                        <p class="mt-2 text-xs leading-relaxed text-[#07304a]/80">Monitor payment history and package billing records from one place.</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="mt-16">
-                <div class="mb-6 flex items-end justify-between">
-                    <div>
-                        <h2 class="text-3xl font-bold text-[#07304a]">Core Modules</h2>
-                        <p class="mt-1 text-sm text-slate-600">Built from what currently exists in your application.</p>
-                    </div>
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{{ modules.length }} Total Modules</p>
-                </div>
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    <article v-for="module in spotlightModules" :key="module.title" class="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
-                        <div class="mb-3 inline-flex rounded-lg bg-[#caf0f8] px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#07304a]">
-                            Module
+                    <div class="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div v-for="item in heroFeatures" :key="item" class="rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-white/90">
+                            {{ item }}
                         </div>
-                        <h3 class="text-base font-bold text-slate-900">{{ module.title }}</h3>
-                        <p class="mt-2 text-xs leading-relaxed text-slate-600">{{ module.description }}</p>
-                    </article>
-                </div>
-                <div v-if="operationModules.length > 0" class="mt-4 rounded-xl border border-slate-200 bg-white p-4">
-                    <p class="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Additional Modules</p>
-                    <div class="flex flex-wrap gap-2">
-                        <span v-for="module in operationModules" :key="module.title" class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
-                            {{ module.title }}
-                        </span>
                     </div>
                 </div>
             </section>
 
-            <section class="mt-16 rounded-[30px] border border-slate-200 bg-gradient-to-br from-white via-[#f5fbff] to-[#eef8ff] p-6 shadow-sm">
-                <div class="mb-6 flex items-center justify-between">
-                    <div>
-                        <h2 class="text-3xl font-bold text-[#07304a]">Plans & Capacity</h2>
-                        <p class="mt-1 text-sm text-slate-600">Current package matrix from your billing configuration.</p>
+            <section class="bg-white py-8">
+                <div class="mx-auto max-w-6xl px-6">
+                    <p class="mb-5 text-center text-[10px] font-semibold uppercase tracking-widest text-slate-400">Dipercaya Tim dari Berbagai Industri</p>
+                    <div class="grid grid-cols-2 gap-4 text-center text-xs font-semibold text-slate-500 sm:grid-cols-4 lg:grid-cols-8">
+                        <div v-for="name in partnerNames.slice(0, 8)" :key="name" class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">{{ name }}</div>
                     </div>
-                    <Link
-                        :href="isAuthenticated ? route('profile.billing') : route('login')"
-                        class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-[#07304a] transition hover:bg-slate-100"
-                    >
-                        Open Billing
-                    </Link>
                 </div>
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <article
-                        v-for="(plan, idx) in plans"
-                        :key="plan.name"
-                        class="rounded-xl border bg-white p-5 shadow-sm"
-                        :class="idx === 2 ? 'border-[#07304a] ring-1 ring-[#07304a]/20' : 'border-slate-200'"
-                    >
-                        <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{{ plan.name }}</p>
-                        <div class="mt-2 flex items-end gap-1">
-                            <span class="text-2xl font-bold text-slate-900">{{ plan.price }}</span>
-                            <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{{ plan.period }}</span>
+            </section>
+
+            <section class="mx-auto mt-14 max-w-6xl space-y-10 px-6">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-[#07304a]">Sederhanakan Transaksi, Maksimalkan Bisnis</h2>
+                    <p class="mx-auto mt-3 max-w-2xl text-sm text-slate-600">Semua fitur inti untuk mengelola transaksi keluar dan pembayaran masuk ada di satu platform.</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-2 md:items-center">
+                    <div>
+                        <p class="text-[10px] font-semibold uppercase tracking-widest text-[#0077b6]">Praktis, Resmi, Aman</p>
+                        <h3 class="mt-2 text-2xl font-bold text-[#07304a]">Buat Invoice Profesional dalam Menit</h3>
+                        <p class="mt-3 text-sm leading-relaxed text-slate-600">Gunakan data client, produk, pajak, dan akun bank Anda untuk membuat invoice akurat tanpa input berulang.</p>
+                        <Link :href="primaryAction.href" class="mt-5 inline-flex rounded-xl bg-[#07304a] px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-white hover:bg-[#0a3f61]">Use Invoicing</Link>
+                    </div>
+                    <div class="rounded-[24px] bg-gradient-to-br from-[#d9f3ff] to-[#eef9ff] p-6">
+                        <div class="rounded-xl bg-white p-4 shadow-sm">
+                            <p class="text-xs font-semibold text-slate-500">Invoice Draft</p>
+                            <div class="mt-3 space-y-2">
+                                <div class="h-3 rounded bg-slate-100"></div>
+                                <div class="h-3 rounded bg-slate-100"></div>
+                                <div class="h-3 w-2/3 rounded bg-slate-100"></div>
+                            </div>
                         </div>
-                        <ul class="mt-4 space-y-2">
-                            <li v-for="item in plan.highlights" :key="item" class="flex items-center gap-2 text-xs text-slate-700">
-                                <Icon icon="si:check-circle-line" :width="14" :height="14" class="text-[#07304a]" />
-                                {{ item }}
-                            </li>
-                        </ul>
-                    </article>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-2 md:items-center">
+                    <div class="order-2 md:order-1 rounded-[24px] bg-gradient-to-br from-[#d9f3ff] to-[#eef9ff] p-6">
+                        <div class="rounded-xl bg-white p-4 shadow-sm">
+                            <p class="text-xs font-semibold text-slate-500">Quotation To Invoice</p>
+                            <div class="mt-3 space-y-2">
+                                <div class="h-3 rounded bg-slate-100"></div>
+                                <div class="h-3 rounded bg-slate-100"></div>
+                                <div class="h-3 w-3/4 rounded bg-slate-100"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-1 md:order-2">
+                        <p class="text-[10px] font-semibold uppercase tracking-widest text-[#0077b6]">Mudah & Cepat</p>
+                        <h3 class="mt-2 text-2xl font-bold text-[#07304a]">Konversi Quotation ke Invoice Sekali Klik</h3>
+                        <p class="mt-3 text-sm leading-relaxed text-slate-600">Kurangi pekerjaan manual dengan alur yang langsung membawa dokumen penawaran ke invoice final.</p>
+                        <Link :href="isAuthenticated ? route('quotations.index') : route('login')" class="mt-5 inline-flex rounded-xl bg-[#07304a] px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-white hover:bg-[#0a3f61]">Try Workflow</Link>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mx-auto mt-16 max-w-6xl px-6">
+                <div class="rounded-[28px] bg-gradient-to-b from-[#0b1e4d] to-[#3b79da] p-7 text-white shadow-2xl shadow-[#194090]/30">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-white/70">Paper Horizon Card</p>
+                    <h3 class="mt-2 text-2xl font-bold">Beragam Kartu Kredit Bisnis untuk Segala Kebutuhan</h3>
+                    <p class="mt-3 max-w-2xl text-sm text-white/80">Integrasi pembayaran, pencatatan transaksi, dan laporan operasional dalam antarmuka yang rapi.</p>
+                    <Link :href="primaryAction.href" class="mt-6 inline-flex rounded-xl bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-[#0b1e4d] hover:bg-[#eaf3ff]">Get Started</Link>
+                </div>
+            </section>
+
+            <section class="mt-16 bg-[#eaf6ff] py-14">
+                <div class="mx-auto max-w-6xl px-6">
+                    <p class="text-center text-[10px] font-semibold uppercase tracking-widest text-slate-400">Powering Your Financial Operation</p>
+                    <div class="mt-6 grid grid-cols-1 gap-6 text-center md:grid-cols-3">
+                        <div class="border-r border-[#9bc7ea] px-4 md:last:border-r-0">
+                            <p class="text-4xl font-bold text-[#07304a]">{{ Number(stats.invoices || 0).toLocaleString('id-ID') }}</p>
+                            <p class="mt-2 text-xs font-semibold uppercase tracking-widest text-slate-500">Invoices Created</p>
+                        </div>
+                        <div class="border-r border-[#9bc7ea] px-4 md:last:border-r-0">
+                            <p class="text-4xl font-bold text-[#07304a]">{{ Number(stats.invoice_paid || 0).toLocaleString('id-ID') }}</p>
+                            <p class="mt-2 text-xs font-semibold uppercase tracking-widest text-slate-500">Paid Invoices</p>
+                        </div>
+                        <div class="px-4">
+                            <p class="text-4xl font-bold text-[#07304a]">{{ Number(stats.quotation_accepted || 0).toLocaleString('id-ID') }}</p>
+                            <p class="mt-2 text-xs font-semibold uppercase tracking-widest text-slate-500">Accepted Quotations</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mx-auto mt-14 max-w-6xl px-6">
+                <div class="rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Enterprise Solution</p>
+                    <h3 class="mt-2 text-3xl font-bold text-[#07304a]">Sederhanakan Transaksi Bisnis Rumit dengan Automation</h3>
+                    <p class="mt-3 max-w-3xl text-sm text-slate-600">Kelola skala operasional lebih besar dengan workflow approvals, log audit, dan manajemen billing terpusat.</p>
+                    <Link :href="isAuthenticated ? route('profile.billing') : route('login')" class="mt-6 inline-flex rounded-xl bg-[#07304a] px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-white hover:bg-[#0a3f61]">Talk To Sales</Link>
+                </div>
+            </section>
+
+            <section class="mx-auto mt-14 max-w-6xl px-6 text-center">
+                <h2 class="text-3xl font-bold text-[#07304a]">Partner Kami</h2>
+                <p class="mx-auto mt-2 max-w-xl text-sm text-slate-600">Kolaborasi dengan berbagai jaringan pembayaran dan institusi finansial.</p>
+                <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                    <div v-for="name in partnerNames" :key="name" class="rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-semibold text-slate-600 shadow-sm">
+                        {{ name }}
+                    </div>
+                </div>
+            </section>
+
+            <section class="mx-auto mt-16 max-w-4xl px-6 pb-10 text-center">
+                <h2 class="text-2xl font-bold text-[#07304a]">Kata Mereka Tentang Kami</h2>
+                <div class="mt-6 rounded-[24px] bg-gradient-to-br from-[#103171] to-[#3a78db] p-7 text-left text-white shadow-2xl shadow-[#1f4f9e]/30">
+                    <p class="text-sm leading-relaxed text-white/90">
+                        “Paperwork membantu tim kami mempercepat proses dari penawaran hingga pembayaran.
+                        Tidak lagi pindah-pindah spreadsheet untuk memantau status transaksi.”
+                    </p>
+                    <div class="mt-4 text-xs font-semibold uppercase tracking-widest text-white/70">Finance Manager • Enterprise Client</div>
                 </div>
             </section>
         </main>
 
-        <footer class="mt-8 border-t border-slate-200 bg-white/90">
+        <footer class="mt-8 border-t border-[#0a3f61] bg-[#07304a] text-white">
             <div class="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 py-10 md:grid-cols-3">
                 <div>
                     <div class="flex items-center gap-3">
                         <img src="/img/logo/favicon_blue.png" alt="Paperwork" class="h-8 w-8">
-                        <p class="text-sm font-bold tracking-wide text-[#07304a]">PAPERWORK</p>
+                        <p class="text-sm font-bold tracking-wide text-white">PAPERWORK</p>
                     </div>
-                    <p class="mt-3 max-w-xs text-xs leading-relaxed text-slate-600">
+                    <p class="mt-3 max-w-xs text-xs leading-relaxed text-white/80">
                         Manage quotations, invoices, clients, and billing operations in one workspace.
                     </p>
                 </div>
 
                 <div>
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Navigation</p>
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-white/60">Navigation</p>
                     <div class="mt-3 flex flex-col gap-2">
-                        <Link :href="route('landing')" class="text-xs font-semibold text-slate-600 hover:text-[#07304a]">Home</Link>
-                        <Link :href="isAuthenticated ? route('dashboard') : route('login')" class="text-xs font-semibold text-slate-600 hover:text-[#07304a]">Dashboard</Link>
-                        <Link :href="isAuthenticated ? route('profile.billing') : route('login')" class="text-xs font-semibold text-slate-600 hover:text-[#07304a]">Billing</Link>
+                        <Link :href="route('landing')" class="text-xs font-semibold text-white/85 hover:text-white">Home</Link>
+                        <Link :href="isAuthenticated ? route('dashboard') : route('login')" class="text-xs font-semibold text-white/85 hover:text-white">Dashboard</Link>
+                        <Link :href="isAuthenticated ? route('profile.billing') : route('login')" class="text-xs font-semibold text-white/85 hover:text-white">Billing</Link>
                     </div>
                 </div>
 
                 <div>
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Contact</p>
-                    <div class="mt-3 space-y-2 text-xs text-slate-600">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-white/60">Contact</p>
+                    <div class="mt-3 space-y-2 text-xs text-white/85">
                         <p>support@paperwork.local</p>
                         <p>Denpasar, Indonesia</p>
                     </div>
                 </div>
             </div>
 
-            <div class="border-t border-slate-100 px-6 py-4">
-                <p class="mx-auto max-w-7xl text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <div class="border-t border-white/15 px-6 py-4">
+                <p class="mx-auto max-w-7xl text-[10px] font-semibold uppercase tracking-widest text-white/60">
                     © {{ currentYear }} Paperwork. All rights reserved.
                 </p>
             </div>

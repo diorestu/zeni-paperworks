@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -36,9 +37,15 @@ class QuotationController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $companyId = $request->user()->company_id;
+
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
-            'quotation_number' => 'required|string|unique:quotations,quotation_number',
+            'quotation_number' => [
+                'required',
+                'string',
+                Rule::unique('quotations', 'quotation_number')->where(fn ($query) => $query->where('company_id', $companyId)),
+            ],
             'quotation_date' => 'required|date',
             'valid_until' => 'required|date|after_or_equal:quotation_date',
             'notes' => 'nullable|string',

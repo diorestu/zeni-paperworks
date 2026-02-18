@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Quotation extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToCompany;
 
     public function getRouteKeyName(): string
     {
@@ -17,6 +18,7 @@ class Quotation extends Model
     }
 
     protected $fillable = [
+        'company_id',
         'client_id',
         'quotation_number',
         'quotation_date',

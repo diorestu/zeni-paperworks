@@ -1,6 +1,7 @@
 <script setup>
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { Link } from '@inertiajs/vue3';
 
 const form = useForm({
     email: '',
@@ -109,6 +110,10 @@ const submit = () => {
 
         <!-- Footer Info -->
         <div class="mt-10 max-w-[480px] text-center space-y-4">
+            <p class="text-xs font-semibold text-slate-500">
+                New to Paperwork?
+                <Link :href="route('register')" class="text-[#07304a] hover:underline">Create account</Link>
+            </p>
             <p class="text-[11px] font-normal text-slate-400 px-10 leading-relaxed">
                 By signing in, you agree to create an account and accept Paperwork's 
                 <span class="text-[#07304a] font-semibold cursor-pointer hover:underline">Terms of Use</span> and 
