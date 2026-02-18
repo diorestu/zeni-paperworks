@@ -140,13 +140,18 @@ const submitFeedback = () => {
 
                 <div class="flex h-full flex-col px-6 py-8">
                     <!-- Brand -->
-                    <div class="flex items-center gap-3" :class="isSidebarCollapsed ? 'justify-center' : ''">
+                    <Link
+                        :href="route('landing')"
+                        class="flex items-center gap-3 focus:outline-none"
+                        :class="isSidebarCollapsed ? 'justify-center' : ''"
+                        aria-label="Go to landing page"
+                    >
                         <img
                             :src="isSidebarCollapsed ? '/img/logo/favicon_blue.png' : '/img/logo/logo_text_blue.png'"
                             alt="Paperwork Logo"
                             :class="isSidebarCollapsed ? 'h-10 w-10 object-contain shrink-0' : 'h-12 w-auto max-w-[180px] object-contain shrink-0'"
                         >
-                    </div>
+                    </Link>
 
                     <!-- Navigation -->
                     <nav class="mt-12 space-y-1.5">
@@ -162,8 +167,8 @@ const submitFeedback = () => {
                                     : 'text-slate-500 hover:bg-white hover:text-slate-900 hover:shadow-sm'
                             ]"
                         >
-                            <div class="flex items-center" :class="isSidebarCollapsed ? 'justify-center' : 'gap-3'">
-                                <Icon :icon="item.icon" :width="21" :height="21" />
+                            <div class="flex items-center" :class="isSidebarCollapsed ? 'justify-center' : 'gap-[0.9rem]'">
+                                <Icon :icon="item.icon" :width="19" :height="19" />
                                 <span v-if="!isSidebarCollapsed">{{ item.name }}</span>
                             </div>
                             <span v-if="isActive(item.href) && !isSidebarCollapsed" class="h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"></span>

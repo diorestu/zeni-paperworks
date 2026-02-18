@@ -6,6 +6,7 @@ use App\Models\Setting;
 use App\Models\Tax;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,6 +17,7 @@ class SettingController extends Controller
         return Inertia::render('Settings/Index', [
             'invoice_prefix' => Setting::where('key', 'invoice_prefix')->value('value') ?? 'INV',
             'quotation_prefix' => Setting::where('key', 'quotation_prefix')->value('value') ?? 'QUO',
+            'currency' => Setting::where('key', 'currency')->value('value') ?? 'IDR',
             'company_name' => Setting::where('key', 'company_name')->value('value') ?? '',
             'company_address' => Setting::where('key', 'company_address')->value('value') ?? '',
             'company_phone' => Setting::where('key', 'company_phone')->value('value') ?? '',
@@ -31,6 +33,7 @@ class SettingController extends Controller
         $validated = $request->validate([
             'invoice_prefix' => 'nullable|string|max:10|alpha_dash',
             'quotation_prefix' => 'nullable|string|max:10|alpha_dash',
+            'currency' => ['nullable', 'string', Rule::in(['IDR', 'USD', 'EUR', 'SGD'])],
             'company_name' => 'nullable|string|max:255',
             'company_address' => 'nullable|string|max:500',
             'company_phone' => 'nullable|string|max:50',
@@ -43,7 +46,7 @@ class SettingController extends Controller
             if ($value !== null) {
                 Setting::updateOrCreate(
                     ['key' => $key],
-                    ['value' => in_array($key, ['invoice_prefix', 'quotation_prefix']) ? strtoupper($value) : $value]
+                    ['value' => in_array($key, ['invoice_prefix', 'quotation_prefix', 'currency']) ? strtoupper($value) : $value]
                 );
             }
         }

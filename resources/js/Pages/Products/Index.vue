@@ -9,6 +9,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    currency: {
+        type: String,
+        default: 'IDR',
+    },
 });
 
 const form = useForm({
@@ -32,6 +36,17 @@ const searchQuery = ref('');
 const sortConfig = ref({ key: 'name', direction: 'asc' });
 
 const processing = computed(() => form.processing || editForm.processing);
+const currencyCode = computed(() => (props.currency || 'IDR').toUpperCase());
+const currencyLocale = computed(() => {
+    const localeByCurrency = {
+        IDR: 'id-ID',
+        USD: 'en-US',
+        EUR: 'de-DE',
+        SGD: 'en-SG',
+    };
+
+    return localeByCurrency[currencyCode.value] || 'id-ID';
+});
 
 const filteredProducts = computed(() => {
     let result = [...(props.products || [])];
@@ -129,7 +144,7 @@ const deleteProduct = () => {
 };
 
 const formatPrice = (value) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value || 0));
+    new Intl.NumberFormat(currencyLocale.value, { style: 'currency', currency: currencyCode.value }).format(Number(value || 0));
 </script>
 
 <template>
@@ -298,7 +313,7 @@ const formatPrice = (value) =>
                             <input v-model="form.sku" required class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none" placeholder="SKU-001" />
                         </div>
                         <div>
-                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Selling Price (USD)</label>
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Selling Price ({{ currencyCode }})</label>
                             <input v-model="form.price" type="number" step="0.01" min="0" required class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none" placeholder="0.00" />
                         </div>
                         <div class="col-span-2">
@@ -327,7 +342,7 @@ const formatPrice = (value) =>
                             <input v-model="editForm.sku" required class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none" placeholder="SKU-001" />
                         </div>
                         <div>
-                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Selling Price (USD)</label>
+                            <label class="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2 px-1">Selling Price ({{ currencyCode }})</label>
                             <input v-model="editForm.price" type="number" step="0.01" min="0" required class="w-full rounded-xl border-none bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none" placeholder="0.00" />
                         </div>
                         <div class="col-span-2">

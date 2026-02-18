@@ -7,6 +7,7 @@ import { Icon } from '@iconify/vue';
 const props = defineProps({
     invoice_prefix: String,
     quotation_prefix: String,
+    currency: String,
     company_name: String,
     company_address: String,
     company_phone: String,
@@ -21,6 +22,7 @@ const activeTab = ref('general');
 const profileForm = useForm({
     invoice_prefix: props.invoice_prefix,
     quotation_prefix: props.quotation_prefix,
+    currency: props.currency || 'IDR',
 });
 
 const companyForm = useForm({
@@ -201,6 +203,23 @@ const deleteTax = (tax) => {
                                 >
                             </div>
                             <p class="text-xs text-slate-400">Format: <span class="font-semibold">{{ profileForm.quotation_prefix }}/YYMMDD/001</span></p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Currency</label>
+                            <div class="relative">
+                                <Icon icon="si:money-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
+                                <select
+                                    v-model="profileForm.currency"
+                                    class="w-full appearance-none bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
+                                >
+                                    <option value="IDR">IDR</option>
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="SGD">SGD</option>
+                                </select>
+                            </div>
+                            <p class="text-xs text-slate-400">Dipakai untuk format harga produk.</p>
                         </div>
 
                         <div class="pt-4">

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
@@ -34,6 +34,28 @@ const partnerNames = [
 ];
 
 const currentYear = new Date().getFullYear();
+const showMobileMenu = ref(false);
+
+const mobileMenuItems = computed(() => {
+    const items = [
+        { label: 'Home', href: route('landing') },
+        { label: primaryAction.value.label, href: primaryAction.value.href },
+    ];
+
+    if (secondaryAction.value.href !== primaryAction.value.href) {
+        items.push({ label: secondaryAction.value.label, href: secondaryAction.value.href });
+    }
+
+    return items;
+});
+
+const openMobileMenu = () => {
+    showMobileMenu.value = true;
+};
+
+const closeMobileMenu = () => {
+    showMobileMenu.value = false;
+};
 </script>
 
 <template>
@@ -46,11 +68,19 @@ const currentYear = new Date().getFullYear();
                     <img src="/img/logo/favicon_blue.png" alt="Paperwork" class="h-10 w-10">
                     <div>
                         <p class="text-sm font-bold tracking-wide text-white">PAPERWORK</p>
-                        <p class="text-[10px] uppercase tracking-widest text-white/60">Invoice & Quotation Ops</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <button
+                    type="button"
+                    class="sm:hidden flex h-10 w-10 items-center justify-center rounded-xl border border-white/25 bg-white/10 text-white transition hover:bg-white/20"
+                    @click="openMobileMenu"
+                    aria-label="Open menu"
+                >
+                    <Icon icon="si:menu-hamburger-line" :width="18" :height="18" />
+                </button>
+
+                <div class="hidden sm:flex items-center gap-3">
                     <Link
                         :href="secondaryAction.href"
                         class="rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-semibold uppercase tracking-widest text-white transition hover:bg-white/20"
@@ -66,6 +96,49 @@ const currentYear = new Date().getFullYear();
                 </div>
             </div>
         </header>
+
+        <transition name="fade">
+            <div
+                v-if="showMobileMenu"
+                class="fixed inset-0 z-50 bg-[#050d24]/65 sm:hidden"
+                @click="closeMobileMenu"
+            ></div>
+        </transition>
+
+        <transition name="slide-panel">
+            <aside
+                v-if="showMobileMenu"
+                class="fixed right-0 top-0 z-[60] h-screen w-[84vw] max-w-xs border-l border-slate-200 bg-white px-5 py-6 shadow-2xl sm:hidden"
+            >
+                <div class="mb-8 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <img src="/img/logo/favicon_blue.png" alt="Paperwork" class="h-8 w-8">
+                        <p class="text-sm font-bold tracking-wide text-[#0b1e4d]">PAPERWORK</p>
+                    </div>
+                    <button
+                        type="button"
+                        class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600"
+                        @click="closeMobileMenu"
+                        aria-label="Close menu"
+                    >
+                        <Icon icon="si:close-line" :width="16" :height="16" />
+                    </button>
+                </div>
+
+                <nav class="space-y-2">
+                    <Link
+                        v-for="item in mobileMenuItems"
+                        :key="item.label"
+                        :href="item.href"
+                        class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[#0b1e4d] transition hover:bg-slate-50"
+                        @click="closeMobileMenu"
+                    >
+                        <span>{{ item.label }}</span>
+                        <Icon icon="si:arrow-right-line" :width="14" :height="14" />
+                    </Link>
+                </nav>
+            </aside>
+        </transition>
 
         <main>
             <section class="relative overflow-hidden bg-gradient-to-b from-[#08173f] via-[#173987] to-[#3f7add] pb-24 pt-36 text-white">
@@ -273,3 +346,26 @@ const currentYear = new Date().getFullYear();
         </a>
     </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 220ms ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+.slide-panel-enter-active,
+.slide-panel-leave-active {
+    transition: transform 220ms ease, opacity 220ms ease;
+}
+
+.slide-panel-enter-from,
+.slide-panel-leave-to {
+    opacity: 0;
+    transform: translateX(20px);
+}
+</style>
