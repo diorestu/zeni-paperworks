@@ -289,9 +289,9 @@ class BillingPaymentController extends Controller
     private function callbacks(): array
     {
         return [
-            'finish' => route('profile.billing', ['payment' => 'finish']),
-            'unfinish' => route('profile.billing', ['payment' => 'unfinish']),
-            'error' => route('profile.billing', ['payment' => 'error']),
+            'finish' => route('settings.billing', ['payment' => 'finish']),
+            'unfinish' => route('settings.billing', ['payment' => 'unfinish']),
+            'error' => route('settings.billing', ['payment' => 'error']),
         ];
     }
 

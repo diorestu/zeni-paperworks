@@ -12,6 +12,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -25,14 +26,37 @@ class InvoiceController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
+        $sourceInvoice = null;
+
+        if ($request->filled('source_invoice')) {
+            $sourceInvoice = Invoice::query()
+                ->with(['items', 'client'])
+                ->where('company_id', $request->user()->company_id)
+                ->where('invoice_number', (string) $request->input('source_invoice'))
+                ->first();
+        }
+
         return Inertia::render('Invoices/Create', [
-            'clients' => Client::all(),
+            'clients' => Client::latest()->get(),
             'products' => Product::all(),
             'bankAccounts' => auth()->user()->bankAccounts()->latest()->get(),
             'taxes' => Tax::where('is_active', true)->get(),
             'nextInvoiceNumber' => $this->generateInvoiceNumber(),
+            'sourceInvoice' => $sourceInvoice ? [
+                'id' => $sourceInvoice->id,
+                'invoice_number' => $sourceInvoice->invoice_number,
+                'client_id' => $sourceInvoice->client_id,
+                'bank_account_id' => $sourceInvoice->bank_account_id,
+                'notes' => $sourceInvoice->notes,
+                'items' => $sourceInvoice->items->map(fn ($item) => [
+                    'product_id' => $item->product_id,
+                    'description' => $item->description,
+                    'quantity' => $item->quantity,
+                    'unit_price' => (float) $item->unit_price,
+                ]),
+            ] : null,
         ]);
     }
 
@@ -59,6 +83,11 @@ class InvoiceController extends Controller
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'bank_account_id' => 'nullable|exists:bank_accounts,id',
+            'is_down_payment' => 'nullable|boolean',
+            'parent_invoice_id' => [
+                'nullable',
+                Rule::exists('invoices', 'id')->where(fn ($query) => $query->where('company_id', $companyId)),
+            ],
             'invoice_number' => [
                 'required',
                 'string',
@@ -82,6 +111,8 @@ class InvoiceController extends Controller
             $invoice = Invoice::create([
                 'client_id' => $validated['client_id'],
                 'bank_account_id' => $validated['bank_account_id'] ?? null,
+                'is_down_payment' => (bool) ($validated['is_down_payment'] ?? false),
+                'parent_invoice_id' => $validated['parent_invoice_id'] ?? null,
                 'invoice_number' => $validated['invoice_number'], // Frontend sends this, but we could enforce generation here if needed
                 'invoice_date' => $validated['invoice_date'],
                 'due_date' => $validated['due_date'],
@@ -109,7 +140,8 @@ class InvoiceController extends Controller
     public function show(Invoice $invoice): Response
     {
         return Inertia::render('Invoices/Show', [
-            'invoice' => $invoice->load(['client', 'items.product']),
+            'invoice' => $invoice->load(['client', 'bankAccount', 'items.product', 'parentInvoice']),
+            'companyLogoUrl' => $this->resolveCompanyLogoUrl(),
         ]);
     }
 
@@ -167,5 +199,16 @@ class InvoiceController extends Controller
         }
 
         return "{$prefix}/{$dateCode}/{$nextSequence}";
+    }
+
+    private function resolveCompanyLogoUrl(): ?string
+    {
+        $logoPath = Setting::where('key', 'company_logo')->value('value');
+
+        if (empty($logoPath)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($logoPath);
     }
 }

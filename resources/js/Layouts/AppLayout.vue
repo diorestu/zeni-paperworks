@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { Link, useForm, usePage, router } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
@@ -11,6 +11,7 @@ const showNotifications = ref(false);
 const isSidebarCollapsed = ref(false);
 const showFeedbackModal = ref(false);
 const feedbackSubmitted = ref(false);
+const showFeedbackCta = ref(false);
 const feedbackForm = useForm({
     name: page.props.auth?.user?.name || '',
     company: '',
@@ -61,25 +62,106 @@ const isVerifiedUser = computed(() => !!page.props.auth?.user?.email_verified_at
 const isActive = (href) => page.url.startsWith(href);
 
 const isNavigating = ref(false);
+const isTransitioning = ref(false);
+const sidebarWidth = computed(() => (isSidebarCollapsed.value ? 80 : 256));
+const sidebarStyle = computed(() => ({ width: `${sidebarWidth.value}px` }));
+const contentWrapperStyle = computed(() => ({ marginLeft: `${sidebarWidth.value}px` }));
 
-const start = () => (isNavigating.value = true);
-const finish = () => (isNavigating.value = false);
+const start = () => {
+    isNavigating.value = true;
+    isTransitioning.value = true;
+};
+
+let transitionTimeout = null;
+const finish = () => {
+    isNavigating.value = false;
+    if (transitionTimeout) {
+        clearTimeout(transitionTimeout);
+    }
+    transitionTimeout = setTimeout(() => {
+        isTransitioning.value = false;
+    }, 180);
+};
 
 let unregisterStart;
 let unregisterFinish;
+let feedbackTimer = null;
+let feedbackActiveStartedAt = null;
+let feedbackRemainingMs = 60000;
+
+const feedbackStorageKey = computed(() => {
+    const userId = page.props.auth?.user?.id || 'guest';
+    return `feedback_submitted_${userId}`;
+});
+
+const hasSubmittedFeedback = () => localStorage.getItem(feedbackStorageKey.value) === '1';
+
+const clearFeedbackTimer = () => {
+    if (feedbackTimer) {
+        clearTimeout(feedbackTimer);
+        feedbackTimer = null;
+    }
+    feedbackActiveStartedAt = null;
+};
+
+const startFeedbackCountdown = () => {
+    if (showFeedbackCta.value || hasSubmittedFeedback()) return;
+    if (feedbackTimer || document.hidden || !document.hasFocus()) return;
+
+    feedbackActiveStartedAt = Date.now();
+    feedbackTimer = setTimeout(() => {
+        showFeedbackCta.value = true;
+        clearFeedbackTimer();
+    }, feedbackRemainingMs);
+};
+
+const pauseFeedbackCountdown = () => {
+    if (!feedbackTimer || feedbackActiveStartedAt === null) return;
+
+    const elapsed = Date.now() - feedbackActiveStartedAt;
+    feedbackRemainingMs = Math.max(0, feedbackRemainingMs - elapsed);
+    clearFeedbackTimer();
+};
+
+const handleVisibilityOrFocusChange = () => {
+    if (hasSubmittedFeedback()) {
+        showFeedbackCta.value = false;
+        clearFeedbackTimer();
+        return;
+    }
+
+    if (!document.hidden && document.hasFocus()) {
+        startFeedbackCountdown();
+    } else {
+        pauseFeedbackCountdown();
+    }
+};
 
 onMounted(() => {
     const savedState = localStorage.getItem('sidebar-collapsed');
     isSidebarCollapsed.value = savedState === 'true';
+    showFeedbackCta.value = false;
+    feedbackRemainingMs = 60000;
     unregisterStart = router.on('start', start);
     unregisterFinish = router.on('finish', finish);
     document.addEventListener('click', closeDropdownHandler);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocusChange);
+    window.addEventListener('focus', handleVisibilityOrFocusChange);
+    window.addEventListener('blur', handleVisibilityOrFocusChange);
+    if (!hasSubmittedFeedback()) {
+        startFeedbackCountdown();
+    }
 });
 
 onUnmounted(() => {
     if (unregisterStart) unregisterStart();
     if (unregisterFinish) unregisterFinish();
+    if (transitionTimeout) clearTimeout(transitionTimeout);
+    clearFeedbackTimer();
     document.removeEventListener('click', closeDropdownHandler);
+    document.removeEventListener('visibilitychange', handleVisibilityOrFocusChange);
+    window.removeEventListener('focus', handleVisibilityOrFocusChange);
+    window.removeEventListener('blur', handleVisibilityOrFocusChange);
 });
 
 const closeDropdownHandler = (e) => {
@@ -114,27 +196,30 @@ const submitFeedback = () => {
     feedbackForm.post(route('feedback.store'), {
         preserveScroll: true,
         onSuccess: () => {
+            localStorage.setItem(feedbackStorageKey.value, '1');
+            showFeedbackCta.value = false;
             feedbackSubmitted.value = true;
             feedbackForm.reset();
             feedbackForm.name = page.props.auth?.user?.name || '';
             feedbackForm.rating = 5;
+            clearFeedbackTimer();
         },
     });
 };
 </script>
 
 <template>
-    <div class="min-h-screen bg-white text-slate-900 font-sans">
+    <div class="admin-ui min-h-screen bg-slate-50 text-slate-900 font-sans">
         <transition name="fade">
             <div v-if="isNavigating" class="fixed inset-x-0 top-0 z-50 h-1 bg-[#07304a] animate-pulse"></div>
         </transition>
 
         <div class="flex">
-            <!-- Sidebar (Now Slate 50) -->
+            <!-- Sidebar -->
             <aside
+                :style="sidebarStyle"
                 :class="[
-                    'fixed inset-y-0 bg-slate-50 border-r border-slate-100 z-40 transition-all duration-300',
-                    isSidebarCollapsed ? 'w-20' : 'w-64'
+                    'fixed inset-y-0 bg-white border-r border-slate-100 z-40 transition-all duration-300'
                 ]"
             >
                 <button
@@ -155,14 +240,14 @@ const submitFeedback = () => {
                         aria-label="Go to landing page"
                     >
                         <img
-                            :src="isSidebarCollapsed ? '/img/logo/favicon_blue.png' : '/img/logo/logo_text_blue.png'"
+                            :src="isSidebarCollapsed ? '/img/logo/favicon.png' : '/img/logo/logo.svg'"
                             alt="Paperwork Logo"
-                            :class="isSidebarCollapsed ? 'h-10 w-10 object-contain shrink-0' : 'h-12 w-auto max-w-[180px] object-contain shrink-0'"
+                            :class="isSidebarCollapsed ? 'h-[3.125rem] w-[3.125rem] object-contain shrink-0' : 'h-[3.75rem] w-auto max-w-[225px] object-contain shrink-0'"
                         >
                     </Link>
 
                     <!-- Navigation -->
-                    <nav class="mt-12 space-y-1.5">
+                    <nav class="mt-8 space-y-1.5">
                         <Link
                             v-for="item in navItems"
                             :key="item.href"
@@ -171,15 +256,14 @@ const submitFeedback = () => {
                             :class="[
                                 isSidebarCollapsed ? 'justify-center' : 'justify-between',
                                 isActive(item.href)
-                                    ? 'bg-[#07304a] text-white shadow-lg shadow-[#07304a]/20'
-                                    : 'text-slate-500 hover:bg-white hover:text-slate-900 hover:shadow-sm'
+                                    ? 'bg-[#eef4ff] text-[#2f5ea8] border border-[#c8d9f7] shadow-none'
+                                    : 'text-slate-500 hover:bg-white/70 hover:text-slate-700'
                             ]"
                         >
                             <div class="flex items-center" :class="isSidebarCollapsed ? 'justify-center' : 'gap-[0.9rem]'">
                                 <Icon :icon="item.icon" :width="19" :height="19" />
                                 <span v-if="!isSidebarCollapsed">{{ item.name }}</span>
                             </div>
-                            <span v-if="isActive(item.href) && !isSidebarCollapsed" class="h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"></span>
                         </Link>
                     </nav>
 
@@ -193,7 +277,7 @@ const submitFeedback = () => {
                                 Current: <span class="text-[#07304a]">{{ currentPackage }}</span>
                             </p>
                             <Link
-                                :href="route('profile.billing')"
+                                :href="route('settings.billing')"
                                 class="mt-4 block w-full rounded-xl bg-[#07304a] px-4 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:bg-[#0a3f61]"
                             >
                                 Upgrade
@@ -206,7 +290,7 @@ const submitFeedback = () => {
                         </div>
 
                         <button
-                            v-if="!isSidebarCollapsed"
+                            v-if="showFeedbackCta && !isSidebarCollapsed"
                             type="button"
                             @click="openFeedbackModal"
                             class="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-[#07304a] transition hover:bg-slate-50"
@@ -214,7 +298,7 @@ const submitFeedback = () => {
                             Feedback
                         </button>
                         <button
-                            v-else
+                            v-else-if="showFeedbackCta"
                             type="button"
                             @click="openFeedbackModal"
                             class="mt-3 mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#07304a] transition hover:bg-slate-50"
@@ -227,10 +311,10 @@ const submitFeedback = () => {
                 </div>
             </aside>
 
-            <!-- Main Content Area (Now White) -->
-            <div :class="['flex-1 min-h-screen transition-all duration-300', isSidebarCollapsed ? 'ml-20' : 'ml-64']">
+            <!-- Main Content Area -->
+            <div :style="contentWrapperStyle" class="flex-1 min-h-screen bg-slate-50 transition-all duration-300">
                     <!-- Top Header -->
-                <header class="sticky top-0 z-30 flex h-20 w-full items-center justify-between bg-white/80 px-10 backdrop-blur-md border-b border-slate-100">
+                <header class="sticky top-0 z-30 flex h-20 w-full items-center justify-between bg-slate-50/85 px-10 backdrop-blur-md border-b border-slate-100">
                     <div></div>
 
                     <div class="flex items-center gap-6">
@@ -296,7 +380,7 @@ const submitFeedback = () => {
                                             <Icon icon="si:user-line" :width="18" :height="18"  />
                                             My Profile
                                         </Link>
-                                        <Link :href="route('profile.billing')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
+                                        <Link :href="route('settings.billing')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
                                             <Icon icon="si:credit-card-line" :width="18" :height="18"  />
                                             Billing
                                         </Link>
@@ -304,7 +388,7 @@ const submitFeedback = () => {
                                             <Icon icon="si:building-line" :width="18" :height="18"  />
                                             Bank Accounts
                                         </Link>
-                                        <Link :href="route('profile.security')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
+                                        <Link :href="route('settings.reset-password')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
                                             <Icon icon="si:shield-line" :width="18" :height="18"  />
                                             Security
                                         </Link>
@@ -325,7 +409,14 @@ const submitFeedback = () => {
 
                 <!-- Page Page -->
                 <main class="p-10">
-                    <slot />
+                    <div
+                        :class="[
+                            'will-change-transform transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+                            isTransitioning ? 'translate-y-1 scale-[0.995] opacity-80' : 'translate-y-0 scale-100 opacity-100',
+                        ]"
+                    >
+                        <slot />
+                    </div>
                 </main>
             </div>
         </div>

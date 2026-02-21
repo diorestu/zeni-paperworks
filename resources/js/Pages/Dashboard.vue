@@ -130,13 +130,14 @@ onUnmounted(() => {
         <!-- Header -->
         <div class="mb-8 flex items-end justify-between">
             <div>
-                <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Overview</h1>
+                <h1 class="text-3xl font-semibold text-slate-900 tracking-tight">Overview</h1>
+                <p class="text-slate-500 font-normal">Monitor your invoice performance and cashflow overview.</p>
             </div>
             <div class="flex items-center gap-4">
                 <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">
                     {{ range?.start }} - {{ range?.end }}
                 </p>
-                <button class="flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-all">
+                <button class="flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-all">
                     <Icon icon="si:clock-line" :width="16" :height="16" class="text-slate-400"  />
                     <span>Last 12 months</span>
                     <Icon icon="si:expand-more-line" :width="14" :height="14" class="text-slate-400 ml-1"  />

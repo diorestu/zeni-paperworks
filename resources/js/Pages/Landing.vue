@@ -4,33 +4,40 @@ import { Head, Link } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
-    stats: Object,
-    modules: Array,
-    plans: Array,
-    isAuthenticated: Boolean,
+    stats: {
+        type: Object,
+        default: () => ({}),
+    },
+    modules: {
+        type: Array,
+        default: () => [],
+    },
+    plans: {
+        type: Array,
+        default: () => [],
+    },
+    isAuthenticated: {
+        type: Boolean,
+        default: false,
+    },
 });
 
-const primaryAction = computed(() => {
-    return props.isAuthenticated
-        ? { label: 'Open Dashboard', href: route('dashboard') }
-        : { label: 'Start Free', href: route('login') };
-});
+const primaryAction = computed(() =>
+    props.isAuthenticated
+        ? { label: 'Buka Dashboard', href: route('dashboard') }
+        : { label: 'Coba Gratis', href: route('login') }
+);
 
-const secondaryAction = computed(() => {
-    return props.isAuthenticated
-        ? { label: 'Billing', href: route('profile.billing') }
-        : { label: 'Sign In', href: route('login') };
-});
+const secondaryAction = computed(() =>
+    props.isAuthenticated
+        ? { label: 'Billing', href: route('settings.billing') }
+        : { label: 'Lihat Demo', href: route('login') }
+);
 
-const heroFeatures = [
-    'Invoicing',
-    'Quotation',
-    'Payment Tracking',
-];
-
-const partnerNames = [
-    'VISA', 'Mastercard', 'JCB', 'AMEX', 'BCA', 'Mandiri',
-    'BRI', 'BNI', 'UOB', 'DigiPay', 'Kredivo', 'QRIS',
+const navLinks = [
+    { label: 'Fitur', href: '#fitur' },
+    { label: 'Harga', href: '#harga' },
+    { label: 'Testimoni', href: '#testimoni' },
 ];
 
 const partnerIndustries = [
@@ -40,35 +47,26 @@ const partnerIndustries = [
     'Healthcare',
     'Education',
     'Technology',
-    'Manufacturing',
-    'Logistics',
     'F&B',
-    'Real Estate',
-    'Professional Services',
-    'Construction',
+    'Manufacturing',
 ];
 
+const heroChecks = ['Invoice & Quotation', 'Pelacakan Pembayaran', 'Data Client Terpusat'];
 const currentYear = new Date().getFullYear();
 const showMobileMenu = ref(false);
 
-const mobileMenuItems = computed(() => {
-    const items = [
-        { label: 'Home', href: route('landing') },
-        { label: primaryAction.value.label, href: primaryAction.value.href },
-    ];
+const topStats = computed(() => [
+    { label: 'Invoices Diproses', value: Number(props.stats?.invoices || 0).toLocaleString('id-ID') },
+    { label: 'Quotation Terkirim', value: Number(props.stats?.quotations || 0).toLocaleString('id-ID') },
+    { label: 'Client Aktif', value: Number(props.stats?.clients || 0).toLocaleString('id-ID') },
+]);
 
-    if (secondaryAction.value.href !== primaryAction.value.href) {
-        items.push({ label: secondaryAction.value.label, href: secondaryAction.value.href });
-    }
-
-    return items;
+const spotlightFeatures = computed(() => {
+    if (!props.modules?.length) return [];
+    return props.modules.slice(0, 6);
 });
 
-const openMobileMenu = () => {
-    showMobileMenu.value = true;
-};
-
-const closeMobileMenu = () => {
+const closeMenu = () => {
     showMobileMenu.value = false;
 };
 </script>
@@ -76,287 +74,296 @@ const closeMobileMenu = () => {
 <template>
     <Head title="Paperwork" />
 
-    <div class="min-h-screen bg-[#f3f6fb] text-slate-900">
-        <header class="fixed inset-x-0 top-0 z-40 px-4 pt-4">
-            <div class="mx-auto flex max-w-7xl items-center justify-between rounded-[60px] border border-white/30 bg-[#0b1e4d]/70 px-6 py-4 shadow-2xl shadow-[#09163b]/50 backdrop-blur-xl" style="border-radius: 60px !important;">
-                <div class="flex items-center gap-3">
-                    <img src="/img/logo/favicon_blue.png" alt="Paperwork" class="h-10 w-10">
+    <div class="min-h-screen bg-[#f4f8ff] text-slate-900">
+        <header class="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
+            <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+                <Link :href="route('landing')" class="flex items-center gap-3">
+                    <img src="/img/logo/favicon.png" alt="Paperwork" class="h-9 w-9">
                     <div>
-                        <p class="text-sm font-bold tracking-wide text-white">PAPERWORK</p>
+                        <p class="text-sm font-extrabold tracking-wide text-[#0b2d6b]">PAPERWORK</p>
+                        <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Business Operating System</p>
                     </div>
-                </div>
+                </Link>
 
-                <button
-                    type="button"
-                    class="sm:hidden flex h-10 w-10 items-center justify-center rounded-xl border border-white/25 bg-white/10 text-white transition hover:bg-white/20"
-                    @click="openMobileMenu"
-                    aria-label="Open menu"
-                >
-                    <Icon icon="si:menu-hamburger-line" :width="18" :height="18" />
-                </button>
+                <nav class="hidden items-center gap-6 md:flex">
+                    <a
+                        v-for="item in navLinks"
+                        :key="item.href"
+                        :href="item.href"
+                        class="text-xs font-semibold uppercase tracking-widest text-slate-500 transition hover:text-[#0b2d6b]"
+                    >
+                        {{ item.label }}
+                    </a>
+                </nav>
 
-                <div class="hidden sm:flex items-center gap-3">
+                <div class="hidden items-center gap-3 md:flex">
                     <Link
                         :href="secondaryAction.href"
-                        class="rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-semibold uppercase tracking-widest text-white transition hover:bg-white/20"
+                        class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-widest text-slate-600 transition hover:bg-slate-50"
                     >
                         {{ secondaryAction.label }}
                     </Link>
                     <Link
                         :href="primaryAction.href"
-                        class="rounded-xl bg-white px-6 py-2.5 text-sm font-semibold uppercase tracking-widest text-[#0b1e4d] transition hover:bg-[#e5efff]"
+                        class="rounded-xl bg-[#0b2d6b] px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-[#0a2558]"
                     >
                         {{ primaryAction.label }}
                     </Link>
                 </div>
+
+                <button
+                    type="button"
+                    class="md:hidden flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600"
+                    @click="showMobileMenu = true"
+                    aria-label="Open menu"
+                >
+                    <Icon icon="si:menu-hamburger-line" :width="18" :height="18" />
+                </button>
             </div>
         </header>
 
         <transition name="fade">
             <div
                 v-if="showMobileMenu"
-                class="fixed inset-0 z-50 bg-[#050d24]/65 sm:hidden"
-                @click="closeMobileMenu"
+                class="fixed inset-0 z-50 bg-[#071634]/45 md:hidden"
+                @click="closeMenu"
             ></div>
         </transition>
 
         <transition name="slide-panel">
             <aside
                 v-if="showMobileMenu"
-                class="fixed right-0 top-0 z-[60] h-screen w-[84vw] max-w-xs border-l border-slate-200 bg-white px-5 py-6 shadow-2xl sm:hidden"
+                class="fixed right-0 top-0 z-[60] h-screen w-[82vw] max-w-xs border-l border-slate-100 bg-white px-5 py-6 md:hidden"
             >
                 <div class="mb-8 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <img src="/img/logo/favicon_blue.png" alt="Paperwork" class="h-8 w-8">
-                        <p class="text-sm font-bold tracking-wide text-[#0b1e4d]">PAPERWORK</p>
-                    </div>
-                    <button
-                        type="button"
-                        class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600"
-                        @click="closeMobileMenu"
-                        aria-label="Close menu"
-                    >
+                    <p class="text-sm font-bold tracking-wide text-[#0b2d6b]">MENU</p>
+                    <button type="button" class="rounded-lg bg-slate-100 p-2 text-slate-600" @click="closeMenu">
                         <Icon icon="si:close-line" :width="16" :height="16" />
                     </button>
                 </div>
 
-                <nav class="space-y-2">
-                    <Link
-                        v-for="item in mobileMenuItems"
-                        :key="item.label"
+                <div class="space-y-2">
+                    <a
+                        v-for="item in navLinks"
+                        :key="item.href"
                         :href="item.href"
-                        class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[#0b1e4d] transition hover:bg-slate-50"
-                        @click="closeMobileMenu"
+                        class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-slate-700"
+                        @click="closeMenu"
                     >
                         <span>{{ item.label }}</span>
                         <Icon icon="si:arrow-right-line" :width="14" :height="14" />
+                    </a>
+                </div>
+
+                <div class="mt-6 space-y-2">
+                    <Link
+                        :href="secondaryAction.href"
+                        class="block rounded-xl border border-slate-200 px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-700"
+                        @click="closeMenu"
+                    >
+                        {{ secondaryAction.label }}
                     </Link>
-                </nav>
+                    <Link
+                        :href="primaryAction.href"
+                        class="block rounded-xl bg-[#0b2d6b] px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-white"
+                        @click="closeMenu"
+                    >
+                        {{ primaryAction.label }}
+                    </Link>
+                </div>
             </aside>
         </transition>
 
         <main>
-            <section class="relative overflow-hidden bg-gradient-to-b from-[#08173f] via-[#173987] to-[#3f7add] pb-24 pt-36 text-white">
-                <div class="pointer-events-none absolute inset-0">
-                    <div class="absolute -top-12 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-[#89d9ff]/20 blur-3xl"></div>
-                    <div class="absolute bottom-10 left-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
-                    <div class="absolute bottom-16 right-10 h-44 w-44 rounded-full bg-[#7be0ff]/20 blur-2xl"></div>
+            <section class="relative overflow-hidden bg-gradient-to-br from-[#0b2d6b] via-[#124394] to-[#2e7adf] pb-20 pt-20 text-white">
+                <div class="absolute inset-0 pointer-events-none">
+                    <div class="absolute -top-20 left-1/3 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
+                    <div class="absolute bottom-6 right-8 h-52 w-52 rounded-full bg-[#6fd2ff]/30 blur-3xl"></div>
                 </div>
 
-                <div class="relative mx-auto max-w-6xl px-6 text-center">
-                    <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-[10px] font-semibold uppercase tracking-widest text-white">
-                        <Icon icon="si:flash-line" :width="12" :height="12" />
-                        Platform Lengkap untuk Bisnis
-                    </p>
-                    <h1 class="mx-auto max-w-4xl text-4xl font-bold leading-tight md:text-6xl">
-                        Invoicing & Transaksi Bisnis dalam Satu Alur Kerja
-                    </h1>
-                    <p class="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-white/80">
-                        Praktis, resmi, dan aman untuk tim Anda: dari quotation hingga invoice, serta pelacakan pembayaran.
-                    </p>
+                <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 lg:grid-cols-2">
+                    <div>
+                        <p class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-[10px] font-semibold uppercase tracking-widest text-white/90">
+                            <Icon icon="si:flash-line" :width="12" :height="12" />
+                            Solusi Seperti Jurnal, Fokus Untuk Tim Growing
+                        </p>
+                        <h1 class="mt-5 text-4xl font-extrabold leading-tight md:text-5xl">
+                            Kelola Invoice, Quotation, dan Pembayaran dalam Satu Platform
+                        </h1>
+                        <p class="mt-4 max-w-xl text-sm leading-relaxed text-white/85">
+                            Paperwork membantu tim finance dan owner bisnis memproses dokumen lebih cepat, lebih rapi, dan lebih minim input berulang.
+                        </p>
 
-                    <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-                        <Link
-                            :href="primaryAction.href"
-                            class="rounded-xl bg-white px-6 py-3 text-xs font-semibold uppercase tracking-widest text-[#0b1e4d] transition hover:bg-[#e9f2ff]"
-                        >
-                            {{ primaryAction.label }}
-                        </Link>
-                        <Link
-                            :href="route('login')"
-                            class="rounded-xl border border-white/30 bg-white/10 px-6 py-3 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-white/20"
-                        >
-                            Product Walkthrough
-                        </Link>
+                        <div class="mt-7 flex flex-wrap items-center gap-3">
+                            <Link
+                                :href="primaryAction.href"
+                                class="rounded-xl bg-[#ff8a00] px-6 py-3 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-[#ec7d00]"
+                            >
+                                {{ primaryAction.label }}
+                            </Link>
+                            <Link
+                                :href="secondaryAction.href"
+                                class="rounded-xl border border-white/30 bg-white/10 px-6 py-3 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-white/20"
+                            >
+                                {{ secondaryAction.label }}
+                            </Link>
+                        </div>
+
+                        <div class="mt-8 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                            <div v-for="check in heroChecks" :key="check" class="flex items-center gap-2 text-xs font-semibold text-white/90">
+                                <Icon icon="si:check-line" :width="14" :height="14" class="text-[#8fffd4]" />
+                                <span>{{ check }}</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
-                        <div v-for="item in heroFeatures" :key="item" class="rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-white/90">
-                            {{ item }}
+                    <div class="rounded-[28px] border border-white/20 bg-white/95 p-6 text-slate-900 shadow-2xl shadow-[#0a2558]/40">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-bold text-[#0b2d6b]">Finance Snapshot</p>
+                            <span class="rounded-lg bg-emerald-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-emerald-600">Live</span>
+                        </div>
+                        <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            <div v-for="stat in topStats" :key="stat.label" class="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+                                <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{{ stat.label }}</p>
+                                <p class="mt-2 text-xl font-extrabold text-[#0b2d6b]">{{ stat.value }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-5 rounded-xl border border-slate-100 bg-white p-4">
+                            <div class="mb-3 flex items-center justify-between">
+                                <p class="text-xs font-semibold text-slate-500">Arus Transaksi Mingguan</p>
+                                <p class="text-xs font-semibold text-[#0b2d6b]">+18.4%</p>
+                            </div>
+                            <div class="grid grid-cols-7 items-end gap-2">
+                                <div class="h-10 rounded bg-[#d6e8ff]"></div>
+                                <div class="h-14 rounded bg-[#c6ddff]"></div>
+                                <div class="h-12 rounded bg-[#b5d2ff]"></div>
+                                <div class="h-20 rounded bg-[#8eb7ff]"></div>
+                                <div class="h-16 rounded bg-[#78a6ff]"></div>
+                                <div class="h-24 rounded bg-[#4c84f3]"></div>
+                                <div class="h-28 rounded bg-[#0b2d6b]"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
             <section class="bg-white py-8">
-                <div class="mx-auto max-w-6xl px-6">
-                    <p class="mb-5 text-center text-[10px] font-semibold uppercase tracking-widest text-slate-400">Dipercaya Tim dari Berbagai Industri</p>
-                    <div class="grid grid-cols-2 gap-4 text-center text-xs font-semibold text-slate-500 sm:grid-cols-4 lg:grid-cols-8">
-                        <div v-for="name in partnerNames.slice(0, 8)" :key="name" class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">{{ name }}</div>
+                <div class="mx-auto max-w-7xl px-6">
+                    <p class="text-center text-[10px] font-semibold uppercase tracking-widest text-slate-400">Digunakan Berbagai Industri</p>
+                    <div class="mt-5 grid grid-cols-2 gap-3 text-center sm:grid-cols-4 lg:grid-cols-8">
+                        <div v-for="industry in partnerIndustries" :key="industry" class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600">
+                            {{ industry }}
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <section class="mx-auto mt-14 max-w-6xl space-y-10 px-6">
+            <section id="fitur" class="mx-auto mt-14 max-w-7xl px-6">
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold text-[#07304a]">Sederhanakan Transaksi, Maksimalkan Bisnis</h2>
-                    <p class="mx-auto mt-3 max-w-2xl text-sm text-slate-600">Semua fitur inti untuk mengelola transaksi keluar dan pembayaran masuk ada di satu platform.</p>
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-[#0b2d6b]">Kenapa Paperwork</p>
+                    <h2 class="mt-2 text-3xl font-extrabold text-[#0b2d6b]">Alur Kerja Finance Lebih Cepat dan Terukur</h2>
+                    <p class="mx-auto mt-3 max-w-2xl text-sm text-slate-600">Satu workspace untuk dokumen transaksi, status pembayaran, dan manajemen data client.</p>
                 </div>
 
-                <div class="grid grid-cols-1 gap-6 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-2 md:items-center">
-                    <div>
-                        <p class="text-[10px] font-semibold uppercase tracking-widest text-[#0077b6]">Praktis, Resmi, Aman</p>
-                        <h3 class="mt-2 text-2xl font-bold text-[#07304a]">Buat Invoice Profesional dalam Menit</h3>
-                        <p class="mt-3 text-sm leading-relaxed text-slate-600">Gunakan data client, produk, pajak, dan akun bank Anda untuk membuat invoice akurat tanpa input berulang.</p>
-                        <Link :href="primaryAction.href" class="mt-5 inline-flex rounded-xl bg-[#07304a] px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-white hover:bg-[#0a3f61]">Use Invoicing</Link>
+                <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <article
+                        v-for="module in spotlightFeatures"
+                        :key="module.title"
+                        class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                    >
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e9f1ff] text-[#0b2d6b]">
+                            <Icon icon="si:ballot-line" :width="18" :height="18" />
+                        </div>
+                        <h3 class="mt-4 text-lg font-bold text-slate-900">{{ module.title }}</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ module.description }}</p>
+                    </article>
+                </div>
+            </section>
+
+            <section id="harga" class="mx-auto mt-16 max-w-7xl px-6">
+                <div class="rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm md:p-10">
+                    <div class="mb-8 text-center">
+                        <p class="text-[10px] font-semibold uppercase tracking-widest text-[#0b2d6b]">Pricing</p>
+                        <h2 class="mt-2 text-3xl font-extrabold text-slate-900">Pilih Paket Sesuai Tahap Bisnis</h2>
+                        <p class="mt-3 text-sm text-slate-600">Mulai dari gratis untuk kebutuhan dasar hingga enterprise untuk volume transaksi tinggi.</p>
                     </div>
-                    <div class="rounded-[24px] bg-gradient-to-br from-[#d9f3ff] to-[#eef9ff] p-6">
-                        <div class="rounded-xl bg-white p-4 shadow-sm">
-                            <p class="text-xs font-semibold text-slate-500">Invoice Draft</p>
-                            <div class="mt-3 space-y-2">
-                                <div class="h-3 rounded bg-slate-100"></div>
-                                <div class="h-3 rounded bg-slate-100"></div>
-                                <div class="h-3 w-2/3 rounded bg-slate-100"></div>
+
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                        <article
+                            v-for="plan in plans"
+                            :key="plan.name"
+                            class="rounded-2xl border p-5"
+                            :class="plan.name === 'Pro' ? 'border-[#0b2d6b] bg-[#f3f7ff] shadow-md' : 'border-slate-200 bg-white'"
+                        >
+                            <p class="text-xs font-semibold uppercase tracking-widest" :class="plan.name === 'Pro' ? 'text-[#0b2d6b]' : 'text-slate-500'">{{ plan.name }}</p>
+                            <div class="mt-3 flex items-end gap-1">
+                                <span class="text-2xl font-extrabold text-slate-900">{{ plan.price }}</span>
+                                <span class="text-xs font-semibold text-slate-400">{{ plan.period }}</span>
                             </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="grid grid-cols-1 gap-6 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-2 md:items-center">
-                    <div class="order-2 md:order-1 rounded-[24px] bg-gradient-to-br from-[#d9f3ff] to-[#eef9ff] p-6">
-                        <div class="rounded-xl bg-white p-4 shadow-sm">
-                            <p class="text-xs font-semibold text-slate-500">Quotation To Invoice</p>
-                            <div class="mt-3 space-y-2">
-                                <div class="h-3 rounded bg-slate-100"></div>
-                                <div class="h-3 rounded bg-slate-100"></div>
-                                <div class="h-3 w-3/4 rounded bg-slate-100"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="order-1 md:order-2">
-                        <p class="text-[10px] font-semibold uppercase tracking-widest text-[#0077b6]">Mudah & Cepat</p>
-                        <h3 class="mt-2 text-2xl font-bold text-[#07304a]">Konversi Quotation ke Invoice Sekali Klik</h3>
-                        <p class="mt-3 text-sm leading-relaxed text-slate-600">Kurangi pekerjaan manual dengan alur yang langsung membawa dokumen penawaran ke invoice final.</p>
-                        <Link :href="isAuthenticated ? route('quotations.index') : route('login')" class="mt-5 inline-flex rounded-xl bg-[#07304a] px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-white hover:bg-[#0a3f61]">Try Workflow</Link>
+                            <ul class="mt-4 space-y-2">
+                                <li v-for="item in plan.highlights" :key="item" class="flex items-start gap-2 text-xs font-semibold text-slate-600">
+                                    <Icon icon="si:check-line" :width="14" :height="14" class="mt-0.5 text-emerald-500" />
+                                    <span>{{ item }}</span>
+                                </li>
+                            </ul>
+
+                            <Link
+                                :href="primaryAction.href"
+                                class="mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-xs font-semibold uppercase tracking-widest transition"
+                                :class="plan.name === 'Pro' ? 'bg-[#0b2d6b] text-white hover:bg-[#0a2558]' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'"
+                            >
+                                Pilih Paket
+                            </Link>
+                        </article>
                     </div>
                 </div>
             </section>
 
-            <section class="mt-16 bg-[#eaf6ff] py-14">
-                <div class="mx-auto max-w-6xl px-6">
-                    <p class="text-center text-[10px] font-semibold uppercase tracking-widest text-slate-400">Powering Your Financial Operation</p>
-                    <div class="mt-6 grid grid-cols-1 gap-6 text-center md:grid-cols-3">
-                        <div class="border-r border-[#9bc7ea] px-4 md:last:border-r-0">
-                            <p class="text-4xl font-bold text-[#07304a]">{{ Number(stats.invoices || 0).toLocaleString('id-ID') }}</p>
-                            <p class="mt-2 text-xs font-semibold uppercase tracking-widest text-slate-500">Invoices Created</p>
-                        </div>
-                        <div class="border-r border-[#9bc7ea] px-4 md:last:border-r-0">
-                            <p class="text-4xl font-bold text-[#07304a]">{{ Number(stats.invoice_paid || 0).toLocaleString('id-ID') }}</p>
-                            <p class="mt-2 text-xs font-semibold uppercase tracking-widest text-slate-500">Paid Invoices</p>
-                        </div>
-                        <div class="px-4">
-                            <p class="text-4xl font-bold text-[#07304a]">{{ Number(stats.quotation_accepted || 0).toLocaleString('id-ID') }}</p>
-                            <p class="mt-2 text-xs font-semibold uppercase tracking-widest text-slate-500">Accepted Quotations</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="mx-auto mt-14 max-w-6xl px-6">
-                <div class="rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm">
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Enterprise Solution</p>
-                    <h3 class="mt-2 text-3xl font-bold text-[#07304a]">Sederhanakan Transaksi Bisnis Rumit dengan Automation</h3>
-                    <p class="mt-3 max-w-3xl text-sm text-slate-600">Kelola skala operasional lebih besar dengan workflow approvals, log audit, dan manajemen billing terpusat.</p>
-                    <Link :href="isAuthenticated ? route('profile.billing') : route('login')" class="mt-6 inline-flex rounded-xl bg-[#07304a] px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-white hover:bg-[#0a3f61]">Talk To Sales</Link>
-                </div>
-            </section>
-
-            <section class="mx-auto mt-14 max-w-6xl px-6 text-center">
-                <h2 class="text-3xl font-bold text-[#07304a]">Partner Kami</h2>
-                <p class="mx-auto mt-2 max-w-xl text-sm text-slate-600">Dipakai oleh berbagai bidang industri untuk operasional transaksi bisnis.</p>
-                <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                    <div v-for="industry in partnerIndustries" :key="industry" class="rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-semibold text-slate-600 shadow-sm">
-                        {{ industry }}
-                    </div>
-                </div>
-            </section>
-
-            <section class="mx-auto mt-16 max-w-4xl px-6 pb-10 text-center">
-                <h2 class="text-2xl font-bold text-[#07304a]">Kata Mereka Tentang Kami</h2>
-                <div class="mt-6 rounded-[24px] bg-gradient-to-br from-[#103171] to-[#3a78db] p-7 text-left text-white shadow-2xl shadow-[#1f4f9e]/30">
-                    <p class="text-sm leading-relaxed text-white/90">
-                        “Paperwork membantu tim kami mempercepat proses dari penawaran hingga pembayaran.
-                        Tidak lagi pindah-pindah spreadsheet untuk memantau status transaksi.”
+            <section id="testimoni" class="mx-auto mt-16 max-w-5xl px-6 pb-16">
+                <div class="rounded-[28px] bg-gradient-to-br from-[#0b2d6b] to-[#2c79dd] p-8 text-white shadow-2xl shadow-[#1b4e9f]/30 md:p-10">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-white/70">Customer Story</p>
+                    <p class="mt-4 text-lg font-semibold leading-relaxed md:text-xl">
+                        “Tim kami sekarang tidak lagi bolak-balik spreadsheet. Quotation dan invoice jalan dalam satu flow, serta status pembayaran langsung kebaca.”
                     </p>
-                    <div class="mt-4 text-xs font-semibold uppercase tracking-widest text-white/70">Finance Manager • Enterprise Client</div>
+                    <p class="mt-5 text-xs font-semibold uppercase tracking-widest text-white/70">Finance Lead • SME Services</p>
+
+                    <div class="mt-8 flex flex-wrap items-center gap-3">
+                        <Link
+                            :href="primaryAction.href"
+                            class="rounded-xl bg-[#ff8a00] px-6 py-3 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-[#ec7d00]"
+                        >
+                            Mulai Sekarang
+                        </Link>
+                        <a href="https://wa.me/6285183440300" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-white/30 bg-white/10 px-6 py-3 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-white/20">
+                            Chat Sales
+                        </a>
+                    </div>
                 </div>
             </section>
         </main>
 
-        <footer class="mt-8 border-t border-[#0a3f61] bg-[#07304a] text-white">
-            <div class="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 py-10 md:grid-cols-3">
+        <footer class="border-t border-[#0b2d6b]/10 bg-white">
+            <div class="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-10 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <div class="flex items-center gap-3">
-                        <img src="/img/logo/favicon_blue.png" alt="Paperwork" class="h-8 w-8">
-                        <p class="text-sm font-bold tracking-wide text-white">PAPERWORK</p>
-                    </div>
-                    <p class="mt-3 max-w-xs text-xs leading-relaxed text-white/80">
-                        Manage quotations, invoices, clients, and billing operations in one workspace.
-                    </p>
+                    <p class="text-sm font-bold tracking-wide text-[#0b2d6b]">PAPERWORK</p>
+                    <p class="mt-1 text-xs text-slate-500">Sistem transaksi bisnis untuk tim yang ingin bergerak lebih cepat.</p>
                 </div>
-
-                <div>
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-white/60">Navigation</p>
-                    <div class="mt-3 flex flex-col gap-2">
-                        <Link :href="route('landing')" class="text-xs font-semibold text-white/85 hover:text-white">Home</Link>
-                        <Link :href="isAuthenticated ? route('dashboard') : route('login')" class="text-xs font-semibold text-white/85 hover:text-white">Dashboard</Link>
-                        <Link :href="isAuthenticated ? route('profile.billing') : route('login')" class="text-xs font-semibold text-white/85 hover:text-white">Billing</Link>
-                    </div>
+                <div class="flex flex-wrap gap-4 text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    <a href="#fitur" class="hover:text-[#0b2d6b]">Fitur</a>
+                    <a href="#harga" class="hover:text-[#0b2d6b]">Harga</a>
+                    <a href="#testimoni" class="hover:text-[#0b2d6b]">Testimoni</a>
                 </div>
-
-                <div>
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-white/60">Contact</p>
-                    <div class="mt-3 space-y-2 text-xs text-white/85">
-                        <p>support@paperwork.local</p>
-                        <p>Denpasar, Indonesia</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="border-t border-white/15 px-6 py-4">
-                <p class="mx-auto max-w-7xl text-[10px] font-semibold uppercase tracking-widest text-white/60">
-                    © {{ currentYear }} Paperwork. All rights reserved.
-                </p>
+                <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">© {{ currentYear }} Paperwork</p>
             </div>
         </footer>
-
-        <a
-            href="https://wa.me/6285183440300"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl shadow-[#25D366]/30 transition hover:scale-105 hover:bg-[#1fb95a]"
-            aria-label="Chat on WhatsApp"
-            title="Chat on WhatsApp"
-        >
-            <Icon icon="ri:whatsapp-fill" :width="28" :height="28" />
-        </a>
     </div>
 </template>
 
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 220ms ease;
+    transition: opacity 180ms ease;
 }
 
 .fade-enter-from,
@@ -366,12 +373,11 @@ const closeMobileMenu = () => {
 
 .slide-panel-enter-active,
 .slide-panel-leave-active {
-    transition: transform 220ms ease, opacity 220ms ease;
+    transition: transform 220ms ease;
 }
 
 .slide-panel-enter-from,
 .slide-panel-leave-to {
-    opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(100%);
 }
 </style>

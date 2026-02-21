@@ -151,8 +151,8 @@ const deleteClient = () => {
         <!-- Header Section -->
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between mb-8">
             <div>
-                <p class="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#07304a]/60">Member directory</p>
-                <h1 class="mt-1 text-2xl font-semibold text-slate-900 tracking-tight">Client Hub</h1>
+                <h1 class="text-3xl font-semibold text-slate-900 tracking-tight">Clients</h1>
+                <p class="text-slate-500 font-normal">Manage and track all your registered clients.</p>
             </div>
             <button
                 class="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-[#07304a] px-8 py-4 text-sm font-semibold text-white shadow-2xl shadow-[#07304a]/30 transition-all hover:-translate-y-1 hover:bg-[#002d66] active:scale-95"
@@ -249,7 +249,7 @@ const deleteClient = () => {
                                     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-50 font-semibold text-[#07304a] group-hover:bg-[#07304a] group-hover:text-white transition-all duration-300">
                                         {{ client.name.charAt(0) }}
                                     </div>
-                                    <span class="font-semibold text-slate-900 group-hover:text-[#07304a] transition-colors">{{ client.name }}</span>
+                                    <span class="text-sm font-semibold text-slate-900 group-hover:text-[#07304a] transition-colors">{{ client.name }}</span>
                                 </div>
                             </td>
                             <td class="px-8 py-6 text-sm text-slate-500 font-normal">{{ client.email || '—' }}</td>
@@ -264,30 +264,31 @@ const deleteClient = () => {
                 </table>
                 <div v-if="!filteredClients.length" class="flex flex-col items-center justify-center py-20 px-4 bg-white">
                     <Icon icon="si:archive-line" :width="48" :height="48" class="text-slate-200 mb-4"  />
-                    <p class="text-lg font-semibold text-slate-400">No matching clients found.</p>
-                    <p class="text-sm text-slate-300 mt-1">Try adjusting your search query.</p>
+                    <p class="text-sm font-semibold text-slate-400">No matching clients found.</p>
+                    <p class="text-xs text-slate-300 mt-1">Try adjusting your search query.</p>
                 </div>
             </div>
         </div>
 
         <!-- Modals and Transitions -->
-        <transition name="fade">
-            <div
-                v-if="showCreate || showEdit"
-                class="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm"
-                @click.self="closeModals"
-            ></div>
-        </transition>
+        <Teleport to="body">
+            <transition name="fade">
+                <div
+                    v-if="showCreate || showEdit"
+                    class="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm"
+                    @click.self="closeModals"
+                ></div>
+            </transition>
 
-        <transition name="scale-fade">
-            <div
-                v-if="showCreate || showEdit"
-                class="fixed inset-0 z-[70] flex items-center justify-center px-4 pointer-events-none"
-            >
-                <div class="pointer-events-auto w-full max-w-2xl rounded-[2rem] bg-white p-10 shadow-2xl relative border border-slate-100 flex flex-col gap-8">
-                    <div v-if="processing" class="absolute inset-0 rounded-[2rem] bg-white/70 backdrop-blur-sm flex items-center justify-center z-10 animate-fade-in">
-                        <div class="h-12 w-12 animate-spin rounded-full border-4 border-[#07304a] border-t-transparent"></div>
-                    </div>
+            <transition name="scale-fade">
+                <div
+                    v-if="showCreate || showEdit"
+                    class="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto px-4 py-4 pointer-events-none"
+                >
+                    <div class="pointer-events-auto w-full max-w-xl rounded-xl bg-white p-6 shadow-2xl relative border border-slate-100 flex flex-col gap-6 max-h-[calc(100vh-7rem)] overflow-y-auto">
+                        <div v-if="processing" class="absolute inset-0 rounded-xl bg-white/70 backdrop-blur-sm flex items-center justify-center z-10 animate-fade-in">
+                            <div class="h-12 w-12 animate-spin rounded-full border-4 border-[#07304a] border-t-transparent"></div>
+                        </div>
                     
                     <div class="flex items-center justify-between">
                         <div>
@@ -396,9 +397,10 @@ const deleteClient = () => {
                             </button>
                         </div>
                     </form>
+                    </div>
                 </div>
-            </div>
-        </transition>
+            </transition>
+        </Teleport>
     </AppLayout>
 </template>
 

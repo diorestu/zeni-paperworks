@@ -19,8 +19,13 @@
     },
     "dependencies": {
         "@iconify/vue": "^5.0.0",
+        "@vuepic/vue-datepicker": "^12.1.0",
         "chart.js": "^4.5.1",
+        "jquery": "^4.0.0",
+        "select2": "^4.1.0-rc.0",
+        "tom-select": "^2.5.1",
         "vue-chartjs": "^5.3.3",
+        "vue3-select2-component": "^0.1.7",
         "ziggy-js": "^2.6.0"
     }
 }

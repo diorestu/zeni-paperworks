@@ -194,10 +194,10 @@ const statusCounts = computed(() => {
                         <td class="px-8 py-6">
                             <div class="flex flex-col">
                                 <span class="text-sm font-semibold text-slate-900">{{ quotation.client.name }}</span>
-                                <span class="text-xs font-normal text-slate-400">{{ quotation.client.company }}</span>
+                                <span class="text-xs font-normal text-slate-400">{{ quotation.client.phone || '—' }}</span>
                             </div>
                         </td>
-                        <td class="px-8 py-6 text-sm font-semibold text-slate-900 line-clamp-1">
+                        <td class="px-8 py-6 align-middle text-sm font-semibold text-slate-900 line-clamp-1">
                             Rp{{ parseFloat(quotation.total).toLocaleString('id-ID') }}
                         </td>
                         <td class="px-8 py-6">

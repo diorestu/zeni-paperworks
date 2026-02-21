@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, useForm, router } from '@inertiajs/vue3';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
@@ -14,6 +14,7 @@ const props = defineProps({
     company_email: String,
     company_website: String,
     company_tax_id: String,
+    company_logo_url: String,
     taxes: Array,
 });
 
@@ -32,7 +33,9 @@ const companyForm = useForm({
     company_email: props.company_email,
     company_website: props.company_website,
     company_tax_id: props.company_tax_id,
+    company_logo: null,
 });
+const companyLogoPreview = ref(props.company_logo_url || '');
 
 const taxForm = useForm({
     name: '',
@@ -49,9 +52,29 @@ const submitProfile = () => {
 };
 
 const submitCompany = () => {
-    companyForm.put(route('settings.update'), {
-        preserveScroll: true,
-    });
+    companyForm
+        .transform((data) => ({
+            ...data,
+            _method: 'put',
+        }))
+        .post(route('settings.update'), {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                companyForm.company_logo = null;
+            },
+        });
+};
+
+const onCompanyLogoChange = (event) => {
+    const [file] = event.target.files || [];
+
+    if (!file) {
+        return;
+    }
+
+    companyForm.company_logo = file;
+    companyLogoPreview.value = URL.createObjectURL(file);
 };
 
 const submitTax = () => {
@@ -145,6 +168,17 @@ const deleteTax = (tax) => {
                         ]"
                     >
                         Taxes
+                    </button>
+                    <button
+                        @click="activeTab = 'profile'"
+                        :class="[
+                            'pb-4 text-sm font-semibold transition-all border-b-2',
+                            activeTab === 'profile'
+                                ? 'text-[#07304a] border-[#07304a]'
+                                : 'text-slate-500 border-transparent hover:text-slate-700'
+                        ]"
+                    >
+                        Profile
                     </button>
                 </nav>
             </div>
@@ -242,6 +276,42 @@ const deleteTax = (tax) => {
                 <p class="text-sm text-slate-500 mb-8">This information will appear on your invoices and official documents.</p>
 
                 <form @submit.prevent="submitCompany" class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Company Logo</label>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                                <div class="h-20 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 md:w-72">
+                                    <img
+                                        v-if="companyLogoPreview"
+                                        :src="companyLogoPreview"
+                                        alt="Company logo preview"
+                                        class="h-full w-full object-contain object-left"
+                                    >
+                                    <img
+                                        v-else
+                                        src="/img/logo/logo.svg"
+                                        alt="Default logo preview"
+                                        class="h-full w-full object-contain object-left opacity-70"
+                                    >
+                                </div>
+                                <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-widest text-[#07304a] ring-1 ring-slate-200 transition hover:bg-slate-100">
+                                    <Icon icon="si:image-line" :width="16" :height="16" />
+                                    <span>Change Logo</span>
+                                    <input
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                                        class="hidden"
+                                        @change="onCompanyLogoChange"
+                                    >
+                                </label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400">Accepted format: JPG, PNG, WEBP, SVG. Max size 2MB.</p>
+                        <p v-if="companyForm.errors.company_logo" class="text-xs font-semibold text-rose-500">
+                            {{ companyForm.errors.company_logo }}
+                        </p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Company Name -->
                         <div class="space-y-2 md:col-span-2">
@@ -339,6 +409,49 @@ const deleteTax = (tax) => {
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <!-- Profile Tab Content -->
+            <div v-show="activeTab === 'profile'" class="max-w-4xl">
+                <div class="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
+                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Profile Settings Menu</h3>
+                    <p class="text-sm text-slate-500 mb-8">Quick access to account and subscription related settings.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Link
+                            :href="route('profile.bank-accounts.index')"
+                            class="group rounded-xl border border-slate-100 bg-slate-50 p-5 transition-all hover:border-[#07304a]/20 hover:bg-white hover:shadow-sm"
+                        >
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#07304a] ring-1 ring-slate-100">
+                                <Icon icon="si:building-line" :width="18" :height="18" />
+                            </div>
+                            <p class="mt-4 text-sm font-semibold text-slate-900">Bank Accounts</p>
+                            <p class="mt-1 text-xs text-slate-500">Manage account number and payout destination.</p>
+                        </Link>
+
+                        <Link
+                            :href="route('settings.billing')"
+                            class="group rounded-xl border border-slate-100 bg-slate-50 p-5 transition-all hover:border-[#07304a]/20 hover:bg-white hover:shadow-sm"
+                        >
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#07304a] ring-1 ring-slate-100">
+                                <Icon icon="si:credit-card-line" :width="18" :height="18" />
+                            </div>
+                            <p class="mt-4 text-sm font-semibold text-slate-900">Billing</p>
+                            <p class="mt-1 text-xs text-slate-500">Review plan, payment status, and receipts.</p>
+                        </Link>
+
+                        <Link
+                            :href="route('settings.reset-password')"
+                            class="group rounded-xl border border-slate-100 bg-slate-50 p-5 transition-all hover:border-[#07304a]/20 hover:bg-white hover:shadow-sm"
+                        >
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#07304a] ring-1 ring-slate-100">
+                                <Icon icon="si:shield-line" :width="18" :height="18" />
+                            </div>
+                            <p class="mt-4 text-sm font-semibold text-slate-900">Reset Password</p>
+                            <p class="mt-1 text-xs text-slate-500">Update password and secure account access.</p>
+                        </Link>
+                    </div>
+                </div>
             </div>
 
             <!-- Taxes Tab Content -->

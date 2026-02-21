@@ -31,7 +31,7 @@ const applySelection = () => {
 </script>
 
 <template>
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="$emit('close')">
+    <div class="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="$emit('close')">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden" @click.stop>
             <!-- Header -->
             <div class="bg-[#07304a] px-6 py-5 flex items-center justify-between">

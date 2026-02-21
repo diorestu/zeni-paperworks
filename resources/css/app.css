@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@8..144,100..1000&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -10,8 +9,26 @@
 
 @theme {
     --font-heading: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --font-sans: 'Google Sans Flex', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --text-xs: 12px;
+    --text-xs--line-height: 18px;
+    --text-sm: 13px;
+    --text-sm--line-height: 20px;
+    --text-base: 14px;
+    --text-base--line-height: 22px;
+    --text-md: 16px;
+    --text-md--line-height: 24px;
+    --text-lg: 18px;
+    --text-lg--line-height: 26px;
+    --text-xl: 24px;
+    --text-xl--line-height: 32px;
+    --text-stat: 32px;
+    --text-stat--line-height: 38px;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
     --color-lochmara-50: #f0f9ff;
     --color-lochmara-100: #dff2ff;
     --color-lochmara-200: #b9e7fe;
@@ -23,10 +40,24 @@
     --color-lochmara-800: #055b87;
     --color-lochmara-900: #0a4b70;
     --color-lochmara-950: #07304a;
-    --color-primary: #07304a;
+    --color-primary: #001845;
+    --color-primarySoft: #002855;
+    --color-accent: #0466c8;
+    --color-muted: #7d8597;
+    --color-border: #e5e7eb;
+    --color-textPrimary: #001845;
+    --color-textSecondary: #33415c;
+    --color-textMuted: #7d8597;
+    --color-borderSoft: #e2e8f0;
 }
 
 @layer base {
+    *,
+    *::before,
+    *::after {
+        font-family: var(--font-sans);
+    }
+
     h1, h2, h3, h4, h5, h6 {
         font-family: var(--font-heading);
         font-weight: 600;
@@ -36,26 +67,81 @@
     body {
         font-family: var(--font-sans);
         background-color: #f6f9ff;
-        color: #0b1f44;
+        color: var(--color-textPrimary);
         font-weight: 400;
+        line-height: 1.6;
     }
 
-    p {
+    p,
+    li,
+    td,
+    th,
+    label,
+    input,
+    textarea,
+    select,
+    button {
         font-weight: 400;
+        line-height: 1.6;
+        color: var(--color-textSecondary);
+    }
+
+    h1 {
+        font-size: 24px;
+        line-height: 1.4;
+        font-weight: 600;
+        color: var(--color-textPrimary);
+    }
+
+    h2 {
+        font-size: 18px;
+        line-height: 1.4;
+        font-weight: 600;
+        color: var(--color-textPrimary);
+    }
+
+    h3 {
+        font-size: 16px;
+        line-height: 1.4;
+        font-weight: 600;
+        color: var(--color-textPrimary);
     }
 }
 
 @layer utilities {
-    [class*='rounded']:not(input):not(textarea):not(select) {
-        border-radius: 20px !important;
+    [class*='rounded'],
+    input,
+    textarea,
+    select {
+        border-radius: 8px !important;
     }
 
     input,
     textarea,
     select,
-    input[class*='rounded'],
-    textarea[class*='rounded'],
-    select[class*='rounded'] {
-        border-radius: 8px !important;
+    .ts-wrapper .ts-control,
+    .dp__input {
+        background-color: #ffffff !important;
+    }
+}
+
+@layer components {
+    .admin-ui table {
+        border-color: var(--color-borderSoft) !important;
+    }
+
+    .admin-ui table thead th,
+    .admin-ui table tbody td {
+        padding-top: 0.55rem !important;
+        padding-bottom: 0.55rem !important;
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        vertical-align: middle !important;
+    }
+
+    .text-stat {
+        font-size: 32px !important;
+        line-height: 1.2 !important;
+        font-weight: 700 !important;
     }
 }

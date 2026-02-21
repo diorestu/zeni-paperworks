@@ -10,7 +10,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.put(route('profile.password'), {
+    form.put(route('settings.reset-password.update'), {
         preserveScroll: true,
         onSuccess: () => form.reset(),
     });

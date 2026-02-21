@@ -125,7 +125,7 @@ const payPlan = async (plan) => {
     processingPlan.value = plan.name;
 
     try {
-        const { data } = await window.axios.post(route('profile.billing.checkout'), {
+        const { data } = await window.axios.post(route('settings.billing.checkout'), {
             plan: plan.name,
             billing_cycle: isYearly.value ? 'yearly' : 'monthly',
         });
@@ -158,7 +158,7 @@ const payPlan = async (plan) => {
 
 const confirmPayment = async (orderId) => {
     try {
-        const { data } = await window.axios.post(route('profile.billing.confirm'), {
+        const { data } = await window.axios.post(route('settings.billing.confirm'), {
             order_id: orderId,
         });
 

@@ -67,7 +67,7 @@ class ProfileController extends Controller
                     'due_date' => optional($invoice->due_date)->toDateString(),
                     'status' => $invoice->status,
                     'receipt_url' => $invoice->status === 'paid'
-                        ? route('profile.billing.receipts.download', ['invoice' => $invoice->id])
+                        ? route('settings.billing.receipts.download', ['invoice' => $invoice->id])
                         : null,
                 ]),
         ]);

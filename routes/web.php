@@ -44,12 +44,6 @@ Route::middleware('auth')->group(function () {
         Route::prefix('profile')->name('profile.')->group(function () {
             Route::get('/', [ProfileController::class, 'edit'])->name('edit');
             Route::put('/', [ProfileController::class, 'update'])->name('update');
-            Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password');
-            Route::get('/billing', [ProfileController::class, 'billing'])->name('billing');
-            Route::post('/billing/checkout', [BillingPaymentController::class, 'createTransaction'])->name('billing.checkout');
-            Route::post('/billing/confirm', [BillingPaymentController::class, 'confirmTransaction'])->name('billing.confirm');
-            Route::get('/billing/receipts/{invoice}/download', [BillingPaymentController::class, 'downloadReceipt'])->name('billing.receipts.download');
-            Route::get('/security', [ProfileController::class, 'security'])->name('security');
 
             Route::prefix('bank-accounts')->name('bank-accounts.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\BankAccountController::class, 'index'])->name('index');
@@ -57,6 +51,15 @@ Route::middleware('auth')->group(function () {
                 Route::put('/{bankAccount}', [\App\Http\Controllers\BankAccountController::class, 'update'])->name('update');
                 Route::delete('/{bankAccount}', [\App\Http\Controllers\BankAccountController::class, 'destroy'])->name('destroy');
             });
+        });
+
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('/billing', [ProfileController::class, 'billing'])->name('billing')->middleware('role:admin,user');
+            Route::post('/billing/checkout', [BillingPaymentController::class, 'createTransaction'])->name('billing.checkout')->middleware('role:admin,user');
+            Route::post('/billing/confirm', [BillingPaymentController::class, 'confirmTransaction'])->name('billing.confirm')->middleware('role:admin,user');
+            Route::get('/billing/receipts/{invoice}/download', [BillingPaymentController::class, 'downloadReceipt'])->name('billing.receipts.download')->middleware('role:admin,user');
+            Route::get('/reset-password', [ProfileController::class, 'security'])->name('reset-password')->middleware('role:admin,user');
+            Route::put('/reset-password', [ProfileController::class, 'updatePassword'])->name('reset-password.update')->middleware('role:admin,user');
         });
 
         Route::prefix('settings')->name('settings.')->middleware('role:admin')->group(function () {

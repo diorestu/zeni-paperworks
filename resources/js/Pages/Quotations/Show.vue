@@ -137,7 +137,7 @@ const convertToInvoice = () => {
                                         </div>
                                     </div>
                                     <div class="flex flex-col items-end">
-                                        <img src="/img/logo/logo_text_blue.png" alt="Company Logo" class="h-16 w-auto object-contain">
+                                        <img src="/img/logo/logo.svg" alt="Company Logo" class="h-16 w-auto object-contain">
                                         <p class="text-[8px] font-bold text-[#07304a] uppercase tracking-[0.2em] mt-2">Accounting | Business | Tax Consulting</p>
                                     </div>
                                 </div>

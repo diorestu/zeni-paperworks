@@ -3,7 +3,9 @@ import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Autocomplete from '@/Components/Autocomplete.vue';
 import TaxSelector from '@/Components/TaxSelector.vue';
-import { Head, useForm, Link } from '@inertiajs/vue3';
+import { VueDatePicker } from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
+import { Head, useForm, Link, router } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
@@ -15,6 +17,10 @@ const props = defineProps({
 
 const showTaxSelector = ref(false);
 const selectedTaxIds = ref([]);
+const datePickerTimeConfig = { enableTimePicker: false };
+const showAddClient = ref(false);
+const showAddProduct = ref(false);
+const clientSearch = ref('');
 
 const form = useForm({
     client_id: '',
@@ -26,6 +32,40 @@ const form = useForm({
         { product_id: null, description: '', quantity: 1, unit_price: 0, unit_price_input: '0' },
     ],
 });
+
+const clientForm = useForm({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    industry_sector: '',
+    address: '',
+});
+
+const productForm = useForm({
+    name: '',
+    sku: '',
+    price: 0,
+    description: '',
+});
+
+const industryOptions = [
+    'Farm',
+    'Health',
+    'Finance',
+    'Hospitality',
+    'Retail',
+    'Education',
+    'Technology',
+    'Manufacturing',
+    'Construction',
+    'Transportation',
+    'Real Estate',
+    'Professional Services',
+    'Government',
+    'Non-Profit',
+    'Other',
+];
 
 const addItem = () => {
     form.items.push({ product_id: null, description: '', quantity: 1, unit_price: 0, unit_price_input: '0' });
@@ -98,6 +138,32 @@ const submit = () => {
         }))
         .post(route('quotations.store'));
 };
+
+const submitClient = () => {
+    clientForm.post(route('clients.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showAddClient.value = false;
+            clientForm.reset();
+            router.reload({ only: ['clients'] });
+        },
+    });
+};
+
+const submitProduct = () => {
+    productForm.post(route('products.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showAddProduct.value = false;
+            productForm.reset();
+            router.reload({ only: ['products'] });
+        },
+    });
+};
+
+const openAddProduct = () => {
+    showAddProduct.value = true;
+};
 </script>
 
 <template>
@@ -134,38 +200,57 @@ const submit = () => {
                                 <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Client</label>
                                 <div class="relative">
                                     <Icon icon="si:user-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none"  />
-                                    <select
-                                        v-model="form.client_id"
-                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
-                                    >
-                                        <option value="" disabled>Select a client...</option>
-                                        <option v-for="client in clients" :key="client.id" :value="client.id">
-                                            {{ client.name }}{{ client.company ? ` (${client.company})` : '' }}
-                                        </option>
-                                    </select>
+                                    <Autocomplete
+                                        v-model="clientSearch"
+                                        :items="clients"
+                                        item-label="name"
+                                        placeholder="Search or select a client..."
+                                        :show-default-items="true"
+                                        :merge-with-input="true"
+                                        @update:modelValue="form.client_id = ''"
+                                        @select="(client) => { form.client_id = client.id; clientSearch = client.name; }"
+                                        :show-add-option="true"
+                                        add-option-label="Add New Client"
+                                        @add="showAddClient = true"
+                                        input-class="pl-12 pr-4 py-4 rounded-xl text-sm font-semibold"
+                                    />
                                 </div>
                             </div>
                             <div class="space-y-6">
                                 <div class="space-y-2">
                                     <label class="block w-3/5 ml-auto text-[10px] font-semibold uppercase tracking-widest text-slate-400">Quotation Date</label>
                                     <div class="relative w-3/5 ml-auto">
-                                        <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"  />
-                                        <input
-                                            type="date"
+                                        <Icon icon="si:calendar-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10"  />
+                                        <VueDatePicker
                                             v-model="form.quotation_date"
-                                            class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
-                                        >
+                                            model-type="yyyy-MM-dd"
+                                            format="dd MMM yyyy"
+                                            :enable-time-picker="false"
+                                            :time-picker="false"
+                                            :time-config="datePickerTimeConfig"
+                                            :hide-input-icon="true"
+                                            :clearable="false"
+                                            auto-apply
+                                            input-class-name="quotation-date-input"
+                                        />
                                     </div>
                                 </div>
                                 <div class="space-y-2">
                                     <label class="block w-3/5 ml-auto text-[10px] font-semibold uppercase tracking-widest text-slate-400">Valid Until</label>
                                     <div class="relative w-3/5 ml-auto">
-                                        <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"  />
-                                        <input
-                                            type="date"
+                                        <Icon icon="si:calendar-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10"  />
+                                        <VueDatePicker
                                             v-model="form.valid_until"
-                                            class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
-                                        >
+                                            model-type="yyyy-MM-dd"
+                                            format="dd MMM yyyy"
+                                            :enable-time-picker="false"
+                                            :time-picker="false"
+                                            :time-config="datePickerTimeConfig"
+                                            :hide-input-icon="true"
+                                            :clearable="false"
+                                            auto-apply
+                                            input-class-name="quotation-date-input"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -187,6 +272,9 @@ const submit = () => {
                                         placeholder="Search product or type description..."
                                         @update:modelValue="item.product_id = null"
                                         @select="(product) => updateItem(index, product)"
+                                        :show-add-option="true"
+                                        add-option-label="Add Product"
+                                        @add="openAddProduct"
                                     />
                                 </div>
                                 <div class="col-span-1 space-y-2">
@@ -299,11 +387,156 @@ const submit = () => {
             </div>
         </div>
 
-        <TaxSelector
-            v-if="showTaxSelector"
-            :taxes="taxes"
-            v-model="selectedTaxIds"
-            @close="showTaxSelector = false"
-        />
+        <Teleport to="body">
+            <TaxSelector
+                v-if="showTaxSelector"
+                :taxes="taxes"
+                v-model="selectedTaxIds"
+                @close="showTaxSelector = false"
+            />
+        </Teleport>
+
+        <Teleport to="body">
+            <Transition name="modal">
+                <div v-if="showAddClient" class="fixed inset-0 z-[90] flex items-center justify-center overflow-y-auto bg-slate-900/40 p-4 md:p-6">
+                    <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl max-h-[calc(100vh-7rem)] overflow-y-auto">
+                        <div class="mb-6 flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-slate-900">Add Client</h3>
+                            <button type="button" @click="showAddClient = false" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                                <Icon icon="si:close-line" :width="18" :height="18" />
+                            </button>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="ml-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Name</label>
+                                <input v-model="clientForm.name" type="text" class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]" />
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="ml-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Email</label>
+                                    <input v-model="clientForm.email" type="email" class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]" />
+                                </div>
+                                <div>
+                                    <label class="ml-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Phone</label>
+                                    <input v-model="clientForm.phone" type="text" class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="ml-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Tax Number</label>
+                                <input v-model="clientForm.company" type="text" class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]" />
+                            </div>
+                            <div>
+                                <label class="ml-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Industry Sector</label>
+                                <select v-model="clientForm.industry_sector" class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]">
+                                    <option value="" disabled>Select industry</option>
+                                    <option v-for="option in industryOptions" :key="option" :value="option">{{ option }}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="ml-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Address</label>
+                                <textarea v-model="clientForm.address" rows="3" class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a] resize-none"></textarea>
+                            </div>
+                            <div class="flex justify-end gap-3 pt-2">
+                                <button type="button" @click="showAddClient = false" class="px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700">Cancel</button>
+                                <button type="button" @click="submitClient" :disabled="clientForm.processing" class="rounded-xl bg-[#07304a] px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 hover:bg-[#002d66] disabled:opacity-50">
+                                    {{ clientForm.processing ? 'Saving...' : 'Save Client' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+        </Teleport>
+
+        <Teleport to="body">
+            <Transition name="modal">
+                <div v-if="showAddProduct" class="fixed inset-0 z-[90] flex items-center justify-center overflow-y-auto bg-slate-900/40 p-4 md:p-6">
+                    <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl max-h-[calc(100vh-7rem)] overflow-y-auto">
+                        <div class="mb-6 flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-slate-900">Add Product</h3>
+                            <button type="button" @click="showAddProduct = false" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                                <Icon icon="si:close-line" :width="18" :height="18" />
+                            </button>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="ml-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Name</label>
+                                <input v-model="productForm.name" type="text" class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]" />
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="ml-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">SKU</label>
+                                    <input v-model="productForm.sku" type="text" class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]" />
+                                </div>
+                                <div>
+                                    <label class="ml-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Price</label>
+                                    <input v-model="productForm.price" type="number" min="0" class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="ml-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Description</label>
+                                <textarea v-model="productForm.description" rows="3" class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a] resize-none"></textarea>
+                            </div>
+                            <div class="flex justify-end gap-3 pt-2">
+                                <button type="button" @click="showAddProduct = false" class="px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700">Cancel</button>
+                                <button type="button" @click="submitProduct" :disabled="productForm.processing" class="rounded-xl bg-[#07304a] px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 hover:bg-[#002d66] disabled:opacity-50">
+                                    {{ productForm.processing ? 'Saving...' : 'Save Product' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+        </Teleport>
     </AppLayout>
 </template>
+
+<style scoped>
+:deep(.quotation-date-input) {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    background: rgb(248 250 252);
+    padding: 1rem 1rem 1rem 3rem;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgb(15 23 42);
+    box-shadow: 0 0 0 1px rgb(241 245 249);
+    outline: none;
+    transition: all 200ms ease;
+}
+
+:deep(.quotation-date-input:focus) {
+    box-shadow: 0 0 0 2px #07304a;
+}
+
+:deep(.dp__theme_light) {
+    --dp-primary-color: #07304a;
+    --dp-primary-text-color: #ffffff;
+}
+
+:deep([data-test-id='open-time-picker-btn']) {
+    display: none !important;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+    transition: opacity 180ms ease-out;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+    opacity: 0;
+}
+
+.modal-enter-active .rounded-xl,
+.modal-leave-active .rounded-xl {
+    transition: transform 180ms ease-out, opacity 180ms ease-out;
+}
+
+.modal-enter-from .rounded-xl,
+.modal-leave-to .rounded-xl {
+    transform: translateY(8px) scale(0.98);
+    opacity: 0;
+}
+</style>

@@ -30,6 +30,14 @@ const props = defineProps({
     inputClass: {
         type: String,
         default: 'rounded-lg px-3 py-3 text-sm font-semibold'
+    },
+    showDefaultItems: {
+        type: Boolean,
+        default: false
+    },
+    mergeWithInput: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -48,15 +56,15 @@ watch(() => props.modelValue, (newValue) => {
 });
 
 const filteredItems = computed(() => {
-    if (!searchQuery.value) return [];
+    if (!searchQuery.value) {
+        return props.showDefaultItems ? props.items.slice(0, 5) : [];
+    }
+
     const query = searchQuery.value.toLowerCase();
-    
-    // exact match check to avoid showing dropdown if already selected exactly? 
-    // actually user might want to see other options.
-    
-    return props.items.filter(item => 
-        item[props.itemLabel].toLowerCase().includes(query)
-    ).slice(0, 5); // Limit to 5 results
+
+    return props.items
+        .filter(item => String(item?.[props.itemLabel] || '').toLowerCase().includes(query))
+        .slice(0, 5);
 });
 
 const onInput = (e) => {
@@ -129,7 +137,10 @@ onUnmounted(() => {
         <div 
             v-if="isOpen && (filteredItems.length > 0 || showAddOption)"
             ref="listRef"
-            class="absolute z-10 w-full mt-1 bg-white rounded-xl border border-slate-100 shadow-xl overflow-hidden"
+            :class="[
+                'absolute z-10 w-full bg-white border border-slate-100 shadow-xl overflow-hidden',
+                mergeWithInput ? '-mt-px rounded-b-xl rounded-t-none border-t-0' : 'mt-1 rounded-xl'
+            ]"
         >
             <ul>
                 <li

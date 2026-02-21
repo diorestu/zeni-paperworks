@@ -23,7 +23,7 @@ const submit = () => {
         <Head title="Login" />
         <!-- Logo -->
         <div class="mb-[15px]">
-            <img src="/img/logo/logo_text_blue.png" alt="Paperwork Logo" class="h-14 w-auto">
+            <img src="/img/logo/logo.svg" alt="Paperwork Logo" class="h-14 w-auto">
         </div>
 
         <!-- Main Card -->

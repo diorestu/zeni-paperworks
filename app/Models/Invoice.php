@@ -21,6 +21,8 @@ class Invoice extends Model
         'company_id',
         'client_id',
         'bank_account_id',
+        'is_down_payment',
+        'parent_invoice_id',
         'invoice_number',
         'invoice_date',
         'due_date',
@@ -32,6 +34,7 @@ class Invoice extends Model
     ];
 
     protected $casts = [
+        'is_down_payment' => 'boolean',
         'invoice_date' => 'date',
         'due_date' => 'date',
         'subtotal' => 'decimal:2',
@@ -52,5 +55,15 @@ class Invoice extends Model
     public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function parentInvoice(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_invoice_id');
+    }
+
+    public function continuationInvoices(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_invoice_id');
     }
 }

@@ -1,11 +1,15 @@
 <script setup>
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, onUnmounted } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     invoice: Object,
+    companyLogoUrl: {
+        type: String,
+        default: null,
+    },
 });
 
 const formatDate = (dateString) => {
@@ -37,6 +41,8 @@ const getStatusColor = (status) => {
 
 const variant = ref('classic');
 const printVariant = ref(null);
+const isSwitchingVariant = ref(false);
+let variantTimer = null;
 
 const statusForm = useForm({
     status: props.invoice.status,
@@ -79,6 +85,21 @@ const updateStatus = () => {
         preserveScroll: true,
     });
 };
+
+const setVariant = (nextVariant) => {
+    if (variant.value === nextVariant) return;
+    isSwitchingVariant.value = true;
+    variant.value = nextVariant;
+
+    if (variantTimer) clearTimeout(variantTimer);
+    variantTimer = setTimeout(() => {
+        isSwitchingVariant.value = false;
+    }, 320);
+};
+
+onUnmounted(() => {
+    if (variantTimer) clearTimeout(variantTimer);
+});
 </script>
 
 <template>
@@ -98,11 +119,27 @@ const updateStatus = () => {
                             <span :class="['rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest', getStatusColor(invoice.status)]">
                                 {{ invoice.status }}
                             </span>
+                            <span
+                                v-if="invoice.is_down_payment"
+                                class="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-amber-700"
+                            >
+                                Down Payment
+                            </span>
                         </div>
+                        <p v-if="invoice.parent_invoice" class="mt-2 text-xs font-semibold text-slate-500">
+                            Continuation of {{ invoice.parent_invoice.invoice_number }}
+                        </p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-3">
+                    <Link
+                        :href="route('invoices.create', { source_invoice: invoice.invoice_number })"
+                        class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-all"
+                    >
+                        <Icon icon="si:add-line" :width="18" :height="18" />
+                        <span>Create Continuation</span>
+                    </Link>
                     <div class="flex items-center gap-2">
                         <select
                             v-model="statusForm.status"
@@ -136,20 +173,23 @@ const updateStatus = () => {
             <div class="flex items-start gap-10">
                 <div class="flex-1 overflow-visible">
                     <!-- Invoice Card -->
-                    <div class="origin-top-left scale-[0.9] invoice-print">
+                    <div class="origin-top-left scale-[0.63] invoice-print">
                         <div
                             class="overflow-hidden relative"
                             :class="[variantStyles[variant].card, printVariant ? `print-variant-${printVariant}` : '']"
                             style="width: 210mm; height: 297mm;"
-                        > 
+                        >
+                            <div v-if="isSwitchingVariant" class="absolute inset-0 z-20 flex items-center justify-center bg-white/65 backdrop-blur-[2px]">
+                                <div class="h-11 w-11 animate-spin rounded-full border-4 border-[#07304a] border-t-transparent"></div>
+                            </div>
                             <div class="p-10 sm:p-14">
                     <!-- Top Branding -->
                     <div class="flex justify-between items-start mb-12">
                          <div class="flex-1">
-                            <h1 class="text-3xl font-black text-slate-900 tracking-tighter mb-6">INVOICE</h1>
+                            <h1 class="text-3xl font-semibold text-slate-900 tracking-tighter mb-6">INVOICE</h1>
                             <div v-if="variant !== 'modern'" class="space-y-1">
-                                <h2 class="text-xl font-bold text-slate-900 tracking-tight">PT Solusi Usaha Adijaya</h2>
-                                <p class="text-[11px] text-slate-500 font-normal leading-relaxed max-w-sm mt-2">
+                                <h2 class="text-xl font-normal text-slate-900 tracking-tight">PT Solusi Usaha Adijaya</h2>
+                                <p class="text-[11px] text-slate-600 font-normal leading-relaxed max-w-sm mt-2">
                                     Bimasakti Office, Jl. Ahmad Yani Utara No.319, Peguyangan, Denpasar<br>
                                     Utara, Kota Denpasar, Bali 80115<br>
                                     ID<br>
@@ -159,9 +199,9 @@ const updateStatus = () => {
                             </div>
                          </div>
                          <div class="flex flex-col items-end">
-                             <img src="/img/logo/logo_text_blue.png" alt="Company Logo" class="h-16 w-auto object-contain">
+                             <img :src="companyLogoUrl || '/img/logo/logo.svg'" alt="Company Logo" class="h-16 w-auto object-contain">
                              <!-- Optional logo subtitle like in image -->
-                             <p class="text-[8px] font-bold text-[#07304a] uppercase tracking-[0.2em] mt-2">Accounting | Business | Tax Consulting</p>
+                             <p class="text-[8px] font-normal text-[#07304a] uppercase tracking-[0.2em] mt-2">Accounting | Business | Tax Consulting</p>
                          </div>
                     </div>
 
@@ -169,9 +209,9 @@ const updateStatus = () => {
                     <div class="bg-slate-100/80 rounded-xl p-6 mb-10">
                         <div v-if="variant === 'modern'" class="grid grid-cols-12 gap-6">
                             <div class="col-span-6">
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">FROM</p>
-                                <h3 class="text-xl font-bold text-slate-900 tracking-tight">PT Solusi Usaha Adijaya</h3>
-                                <p class="mt-2 text-[11px] text-slate-500 leading-relaxed">
+                                <p class="text-[10px] font-normal uppercase tracking-widest text-slate-500 mb-3">FROM</p>
+                                <h3 class="text-xl font-normal text-slate-900 tracking-tight">PT Solusi Usaha Adijaya</h3>
+                                <p class="mt-2 text-[11px] text-slate-600 leading-relaxed">
                                     Bimasakti Office, Jl. Ahmad Yani Utara No.319, Peguyangan, Denpasar<br>
                                     Utara, Kota Denpasar, Bali 80115<br>
                                     ID<br>
@@ -180,9 +220,9 @@ const updateStatus = () => {
                                 </p>
                             </div>
                             <div class="col-span-6">
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">BILL TO</p>
-                                <h3 class="text-xl font-bold text-slate-800 tracking-tight">{{ invoice.client.name }}</h3>
-                                <div class="mt-2 text-[11px] text-slate-500 leading-relaxed">
+                                <p class="text-[10px] font-normal uppercase tracking-widest text-slate-500 mb-3">BILL TO</p>
+                                <h3 class="text-[16px] font-normal text-slate-800 tracking-tight">{{ invoice.client.name }}</h3>
+                                <div class="mt-2 text-[11px] text-slate-600 leading-relaxed">
                                     <div v-if="invoice.client.company">{{ invoice.client.company }}</div>
                                     <div v-if="invoice.client.address">{{ invoice.client.address }}</div>
                                     <div v-if="invoice.client.phone">{{ invoice.client.phone }}</div>
@@ -191,21 +231,21 @@ const updateStatus = () => {
                                 </div>
                                 <div class="mt-4 space-y-2">
                                     <div class="flex justify-between items-center">
-                                        <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px]">INVOICE NUMBER</span>
-                                        <span class="text-sm font-semibold text-slate-900">{{ invoice.invoice_number.split('/').pop() }}</span>
+                                        <span class="font-normal text-slate-600 uppercase tracking-widest text-[10px]">INVOICE NUMBER</span>
+                                        <span class="text-sm font-normal text-slate-900">{{ invoice.invoice_number }}</span>
                                     </div>
                                     <div class="flex justify-between items-center">
-                                        <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px]">ISSUED</span>
-                                        <span class="text-sm font-semibold text-slate-900">{{ formatDate(invoice.invoice_date) }}</span>
+                                        <span class="font-normal text-slate-600 uppercase tracking-widest text-[10px]">ISSUED</span>
+                                        <span class="text-sm font-normal text-slate-900">{{ formatDate(invoice.invoice_date) }}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div v-else class="grid grid-cols-12 gap-6">
                             <div class="col-span-8">
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">BILL TO</p>
-                                <h3 class="text-xl font-bold text-slate-800 tracking-tight">{{ invoice.client.name }}</h3>
-                                <div class="mt-2 text-[11px] text-slate-500 leading-relaxed">
+                                <p class="text-[10px] font-normal uppercase tracking-widest text-slate-500 mb-4">BILL TO</p>
+                                <h3 class="text-[16px] font-normal text-slate-800 tracking-tight">{{ invoice.client.name }}</h3>
+                                <div class="mt-2 text-[11px] text-slate-600 leading-relaxed">
                                     <div v-if="invoice.client.company">{{ invoice.client.company }}</div>
                                     <div v-if="invoice.client.address">{{ invoice.client.address }}</div>
                                     <div v-if="invoice.client.phone">{{ invoice.client.phone }}</div>
@@ -215,12 +255,12 @@ const updateStatus = () => {
                             </div>
                             <div class="col-span-4 flex flex-col justify-between space-y-4">
                                 <div class="flex justify-between items-center">
-                                    <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px]">INVOICE NUMBER</span>
-                                    <span class="text-sm font-semibold text-slate-900">{{ invoice.invoice_number.split('/').pop() }}</span>
+                                    <span class="font-normal text-slate-600 uppercase tracking-widest text-[10px]">INVOICE NUMBER</span>
+                                    <span class="text-sm font-normal text-slate-900">{{ invoice.invoice_number }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px]">ISSUED</span>
-                                    <span class="text-sm font-semibold text-slate-900">{{ formatDate(invoice.invoice_date) }}</span>
+                                    <span class="font-normal text-slate-600 uppercase tracking-widest text-[10px]">ISSUED</span>
+                                    <span class="text-sm font-normal text-slate-900">{{ formatDate(invoice.invoice_date) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -231,27 +271,27 @@ const updateStatus = () => {
                         <table class="w-full">
                             <thead>
                                 <tr :class="variantStyles[variant].header">
-                                    <th class="px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-left">ITEM</th>
-                                    <th class="px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-right">PRICE</th>
-                                    <th class="px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-center">QUANTITY</th>
-                                    <th class="px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-right">AMOUNT</th>
+                                    <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-left">ITEM</th>
+                                    <th class="px-6 py-3 text-[10px] font-normal uppercase tracking-widest text-right">PRICE</th>
+                                    <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-center">QUANTITY</th>
+                                    <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-right">AMOUNT</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
                                 <tr v-for="item in invoice.items" :key="item.id" class="align-top">
                                     <td class="px-6 py-5">
-                                        <p class="text-sm font-bold text-slate-900 mb-1">{{ item.description.split('\n')[0] }}</p>
-                                        <div v-if="item.description.includes('\n')" class="text-[11px] text-slate-500 font-normal leading-relaxed whitespace-pre-line">
+                                        <p class="text-sm font-normal text-slate-900 mb-1">{{ item.description.split('\n')[0] }}</p>
+                                        <div v-if="item.description.includes('\n')" class="text-[11px] text-slate-600 font-normal leading-relaxed whitespace-pre-line">
                                             {{ item.description.split('\n').slice(1).join('\n') }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-5 text-right text-sm font-semibold text-slate-900">
+                                    <td class="px-6 py-5 text-right text-sm font-normal text-slate-900">
                                         {{ formatCurrency(item.unit_price) }}
                                     </td>
-                                    <td class="px-6 py-5 text-center text-sm font-semibold text-slate-900">
+                                    <td class="px-6 py-5 text-center text-sm font-medium text-slate-900">
                                         {{ item.quantity }}
                                     </td>
-                                    <td class="px-6 py-5 text-right text-sm font-bold text-slate-900">
+                                    <td class="px-6 py-5 text-right text-sm font-medium text-slate-900">
                                         {{ formatCurrency(item.subtotal) }}
                                     </td>
                                 </tr>
@@ -264,19 +304,32 @@ const updateStatus = () => {
                     <div class="flex justify-end mt-12 border-t border-slate-100 pt-6">
                         <div class="w-64 space-y-3">
                             <div class="flex justify-between items-center">
-                                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Subtotal</span>
-                                <span class="text-sm font-bold text-slate-900">{{ formatCurrency(invoice.subtotal) }}</span>
+                                <span class="text-xs font-medium text-slate-400 uppercase tracking-widest">Subtotal</span>
+                                <span class="text-sm font-medium text-slate-900">{{ formatCurrency(invoice.subtotal) }}</span>
                             </div>
                             <div class="flex justify-between items-center border-t border-slate-100 pt-4">
-                                <span class="text-xs font-bold text-[#000140] uppercase tracking-widest">Total Amount</span>
-                                <span class="text-xl font-black text-[#000140] tracking-tighter">{{ formatCurrency(invoice.total) }}</span>
+                                <span class="text-xs font-semibold text-[#000140] uppercase tracking-widest">Total Amount</span>
+                                <span class="text-xl font-semibold text-[#000140] tracking-tighter">{{ formatCurrency(invoice.total) }}</span>
                             </div>
                         </div>
                     </div>
 
+                    <div v-if="invoice.bank_account" class="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-5">
+                        <p class="text-[10px] font-medium uppercase tracking-widest text-slate-500 mb-3">Payment Information</p>
+                        <p class="text-[11px] text-slate-700 leading-relaxed">
+                            Please transfer payment to <span class="font-medium">{{ invoice.bank_account.bank_name }}</span>,
+                            account number <span class="font-medium">{{ invoice.bank_account.account_number }}</span>
+                            under name <span class="font-medium">{{ invoice.bank_account.account_name }}</span>.
+                        </p>
+                        <p class="mt-2 text-[11px] text-slate-700 leading-relaxed">
+                            After payment, please send confirmation to your registered number:
+                            <span class="font-medium">{{ invoice.client.phone || '—' }}</span>.
+                        </p>
+                    </div>
+
                     <!-- Footer Notes -->
                     <div v-if="invoice.notes" class="mt-12 pt-6 border-t border-slate-50">
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">Terms & Conditions</p>
+                        <p class="text-[10px] font-normal uppercase tracking-widest text-slate-400 mb-4">Terms & Conditions</p>
                         <p class="text-[11px] text-slate-500 leading-relaxed italic">{{ invoice.notes }}</p>
                     </div>
                             </div>
@@ -288,7 +341,7 @@ const updateStatus = () => {
                     <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Variants</div>
                     <button
                         type="button"
-                        @click="variant = 'classic'"
+                        @click="setVariant('classic')"
                         class="w-full rounded-xl border px-4 py-3 text-left transition"
                         :class="variant === 'classic' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:border-slate-300'"
                     >
@@ -297,7 +350,7 @@ const updateStatus = () => {
                     </button>
                     <button
                         type="button"
-                        @click="variant = 'modern'"
+                        @click="setVariant('modern')"
                         class="w-full rounded-xl border px-4 py-3 text-left transition"
                         :class="variant === 'modern' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:border-slate-300'"
                     >
@@ -306,7 +359,7 @@ const updateStatus = () => {
                     </button>
                     <button
                         type="button"
-                        @click="variant = 'minimal'"
+                        @click="setVariant('minimal')"
                         class="w-full rounded-xl border px-4 py-3 text-left transition"
                         :class="variant === 'minimal' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:border-slate-300'"
                     >
