@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\InvoiceItem;
+use App\Models\QuotationItem;
 use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -68,8 +70,17 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
+        $isUsedInInvoice = InvoiceItem::where('product_id', $product->id)->exists();
+        $isUsedInQuotation = QuotationItem::where('product_id', $product->id)->exists();
+
+        if ($isUsedInInvoice || $isUsedInQuotation) {
+            return redirect()
+                ->back()
+                ->with('error', 'Product cannot be deleted because it is already used in invoice or quotation items.');
+        }
+
         $product->delete();
 
-        return redirect()->back()->with('status', 'Product deleted');
+        return redirect()->back()->with('status', 'Product deleted successfully.');
     }
 }

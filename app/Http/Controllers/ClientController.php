@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Invoice;
+use App\Models\Quotation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -53,8 +55,17 @@ class ClientController extends Controller
 
     public function destroy(Client $client): RedirectResponse
     {
+        $hasInvoices = Invoice::where('client_id', $client->id)->exists();
+        $hasQuotations = Quotation::where('client_id', $client->id)->exists();
+
+        if ($hasInvoices || $hasQuotations) {
+            return redirect()
+                ->back()
+                ->with('error', 'Client cannot be deleted because it is already used in invoice or quotation data.');
+        }
+
         $client->delete();
 
-        return redirect()->back()->with('status', 'Client deleted');
+        return redirect()->back()->with('status', 'Client deleted successfully.');
     }
 }

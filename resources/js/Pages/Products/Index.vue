@@ -134,7 +134,7 @@ const submitUpdate = () => {
 
 const deleteProduct = () => {
     if (!editForm.id) return;
-    if (!confirm('Delete this product?')) return;
+    if (!confirm('Delete this product permanently?')) return;
     router.delete(`/products/${editForm.id}`, {
         onSuccess: () => {
             showEdit.value = false;
@@ -167,6 +167,13 @@ const formatPrice = (value) =>
                 </span>
                 <div class="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
             </button>
+        </div>
+
+        <div v-if="$page.props.flash.status" class="mb-8 rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-xs font-semibold text-emerald-600">
+            {{ $page.props.flash.status }}
+        </div>
+        <div v-if="$page.props.flash.error" class="mb-8 rounded-xl bg-rose-50 border border-rose-100 p-4 text-xs font-semibold text-rose-600">
+            {{ $page.props.flash.error }}
         </div>
 
         <!-- Controls Section -->
@@ -356,7 +363,7 @@ const formatPrice = (value) =>
                                 @click="deleteProduct"
                             >
                                 <Icon icon="si:bin-line" :width="18" :height="18"  />
-                                <span>Retire Asset</span>
+                                <span>Delete Product</span>
                             </button>
                             <button type="submit" class="flex items-center gap-3 rounded-xl bg-[#07304a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#07304a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95">
                                 <Icon icon="si:archive-line" :width="18" :height="18"  />

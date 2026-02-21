@@ -33,6 +33,21 @@ const partnerNames = [
     'BRI', 'BNI', 'UOB', 'DigiPay', 'Kredivo', 'QRIS',
 ];
 
+const partnerIndustries = [
+    'Finance',
+    'Hospitality',
+    'Retail',
+    'Healthcare',
+    'Education',
+    'Technology',
+    'Manufacturing',
+    'Logistics',
+    'F&B',
+    'Real Estate',
+    'Professional Services',
+    'Construction',
+];
+
 const currentYear = new Date().getFullYear();
 const showMobileMenu = ref(false);
 
@@ -237,15 +252,6 @@ const closeMobileMenu = () => {
                 </div>
             </section>
 
-            <section class="mx-auto mt-16 max-w-6xl px-6">
-                <div class="rounded-[28px] bg-gradient-to-b from-[#0b1e4d] to-[#3b79da] p-7 text-white shadow-2xl shadow-[#194090]/30">
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-white/70">Paper Horizon Card</p>
-                    <h3 class="mt-2 text-2xl font-bold">Beragam Kartu Kredit Bisnis untuk Segala Kebutuhan</h3>
-                    <p class="mt-3 max-w-2xl text-sm text-white/80">Integrasi pembayaran, pencatatan transaksi, dan laporan operasional dalam antarmuka yang rapi.</p>
-                    <Link :href="primaryAction.href" class="mt-6 inline-flex rounded-xl bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-widest text-[#0b1e4d] hover:bg-[#eaf3ff]">Get Started</Link>
-                </div>
-            </section>
-
             <section class="mt-16 bg-[#eaf6ff] py-14">
                 <div class="mx-auto max-w-6xl px-6">
                     <p class="text-center text-[10px] font-semibold uppercase tracking-widest text-slate-400">Powering Your Financial Operation</p>
@@ -277,10 +283,10 @@ const closeMobileMenu = () => {
 
             <section class="mx-auto mt-14 max-w-6xl px-6 text-center">
                 <h2 class="text-3xl font-bold text-[#07304a]">Partner Kami</h2>
-                <p class="mx-auto mt-2 max-w-xl text-sm text-slate-600">Kolaborasi dengan berbagai jaringan pembayaran dan institusi finansial.</p>
+                <p class="mx-auto mt-2 max-w-xl text-sm text-slate-600">Dipakai oleh berbagai bidang industri untuk operasional transaksi bisnis.</p>
                 <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                    <div v-for="name in partnerNames" :key="name" class="rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-semibold text-slate-600 shadow-sm">
-                        {{ name }}
+                    <div v-for="industry in partnerIndustries" :key="industry" class="rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-semibold text-slate-600 shadow-sm">
+                        {{ industry }}
                     </div>
                 </div>
             </section>

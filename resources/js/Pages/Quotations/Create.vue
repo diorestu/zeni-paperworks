@@ -23,12 +23,12 @@ const form = useForm({
     valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     notes: '',
     items: [
-        { product_id: null, description: '', quantity: 1, unit_price: 0 }
+        { product_id: null, description: '', quantity: 1, unit_price: 0, unit_price_input: '0' },
     ],
 });
 
 const addItem = () => {
-    form.items.push({ product_id: null, description: '', quantity: 1, unit_price: 0 });
+    form.items.push({ product_id: null, description: '', quantity: 1, unit_price: 0, unit_price_input: '0' });
 };
 
 const removeItem = (index) => {
@@ -37,10 +37,34 @@ const removeItem = (index) => {
     }
 };
 
+const parseRupiah = (value) => {
+    const digitsOnly = String(value ?? '').replace(/[^\d]/g, '');
+    return digitsOnly ? Number(digitsOnly) : 0;
+};
+
+const formatRupiah = (value) => {
+    const numberValue = Number(value ?? 0);
+    return numberValue.toLocaleString('id-ID');
+};
+
 const updateItem = (index, product) => {
     form.items[index].product_id = product.id;
     form.items[index].description = product.name;
-    form.items[index].unit_price = product.price;
+    const parsedPrice = parseRupiah(product.price);
+    form.items[index].unit_price = parsedPrice;
+    form.items[index].unit_price_input = formatRupiah(parsedPrice);
+};
+
+const onUnitPriceInput = (index, value) => {
+    if (String(value).trim() === '') {
+        form.items[index].unit_price = 0;
+        form.items[index].unit_price_input = '';
+        return;
+    }
+
+    const parsed = parseRupiah(value);
+    form.items[index].unit_price = parsed;
+    form.items[index].unit_price_input = formatRupiah(parsed);
 };
 
 const subtotal = computed(() => {
@@ -48,12 +72,12 @@ const subtotal = computed(() => {
 });
 
 const selectedTaxes = computed(() => {
-    return props.taxes.filter(tax => selectedTaxIds.value.includes(tax.id));
+    return props.taxes.filter((tax) => selectedTaxIds.value.includes(tax.id));
 });
 
 const taxAmount = computed(() => {
     let amount = 0;
-    selectedTaxes.value.forEach(tax => {
+    selectedTaxes.value.forEach((tax) => {
         const taxValue = (subtotal.value * tax.rate) / 100;
         if (tax.type === 'add') {
             amount += taxValue;
@@ -67,7 +91,12 @@ const taxAmount = computed(() => {
 const total = computed(() => subtotal.value + taxAmount.value);
 
 const submit = () => {
-    form.post(route('quotations.store'));
+    form
+        .transform((data) => ({
+            ...data,
+            items: data.items.map(({ unit_price_input, ...item }) => item),
+        }))
+        .post(route('quotations.store'));
 };
 </script>
 
@@ -75,7 +104,7 @@ const submit = () => {
     <AppLayout>
         <Head title="Create Quotation" />
 
-        <div class="max-w-5xl mx-auto">
+        <div class="w-full">
             <div class="mb-10 flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <Link :href="route('quotations.index')" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 transition-all border border-slate-100">
@@ -86,8 +115,8 @@ const submit = () => {
                         <p class="text-slate-500 font-normal">Create a new quotation for your client.</p>
                     </div>
                 </div>
-                
-                <button 
+
+                <button
                     @click="submit"
                     :disabled="form.processing"
                     class="flex items-center gap-2 rounded-xl bg-[#07304a] px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
@@ -98,72 +127,60 @@ const submit = () => {
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Left: Quotation Details -->
                 <div class="lg:col-span-2 space-y-8">
-                    <!-- Basic Info -->
-                    <div class="bg-white rounded-[2rem] border border-slate-100 p-8 shadow-xl shadow-slate-200/20">
+                    <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-xl shadow-slate-200/20">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Client</label>
                                 <div class="relative">
-                                    <Icon icon="si:user-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
-                                    <select 
-                                         v-model="form.client_id"
-                                         class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
-                                     >
-                                         <option value="" disabled>Select a client</option>
-                                         <option v-for="client in clients" :key="client.id" :value="client.id">
-                                             {{ client.name }} ({{ client.company }})
-                                         </option>
-                                     </select>
-                                 </div>
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Quotation Number</label>
-                                <div class="relative">
-                                    <Icon icon="si:text-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
-                                    <input 
-                                        type="text" 
-                                        v-model="form.quotation_number"
+                                    <Icon icon="si:user-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none"  />
+                                    <select
+                                        v-model="form.client_id"
                                         class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
                                     >
+                                        <option value="" disabled>Select a client...</option>
+                                        <option v-for="client in clients" :key="client.id" :value="client.id">
+                                            {{ client.name }}{{ client.company ? ` (${client.company})` : '' }}
+                                        </option>
+                                    </select>
                                 </div>
                             </div>
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Quotation Date</label>
-                                <div class="relative">
-                                    <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
-                                    <input 
-                                        type="date" 
-                                        v-model="form.quotation_date"
-                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
-                                    >
+                            <div class="space-y-6">
+                                <div class="space-y-2">
+                                    <label class="block w-3/5 ml-auto text-[10px] font-semibold uppercase tracking-widest text-slate-400">Quotation Date</label>
+                                    <div class="relative w-3/5 ml-auto">
+                                        <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"  />
+                                        <input
+                                            type="date"
+                                            v-model="form.quotation_date"
+                                            class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
+                                        >
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Valid Until</label>
-                                <div class="relative">
-                                    <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
-                                    <input 
-                                        type="date" 
-                                        v-model="form.valid_until"
-                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
-                                    >
+                                <div class="space-y-2">
+                                    <label class="block w-3/5 ml-auto text-[10px] font-semibold uppercase tracking-widest text-slate-400">Valid Until</label>
+                                    <div class="relative w-3/5 ml-auto">
+                                        <Icon icon="si:clock-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"  />
+                                        <input
+                                            type="date"
+                                            v-model="form.valid_until"
+                                            class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
+                                        >
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Items Section -->
-                    <div class="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/20 overflow-hidden">
-                        <div class="bg-slate-50/50 px-8 py-5 border-b border-slate-50">
-                            <h3 class="text-sm font-semibold text-slate-900 uppercase tracking-widest">Line Items</h3>
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/20 overflow-hidden">
+                        <div class="bg-slate-50/50 px-8 py-5 border-b border-slate-50 flex items-center justify-between">
+                            <div></div>
                         </div>
-                        <div class="p-8 space-y-6">
+                        <div class="p-6 space-y-6">
                             <div v-for="(item, index) in form.items" :key="index" class="grid grid-cols-12 gap-4 items-end pb-6 border-b border-slate-50 last:border-0 last:pb-0">
-                                <div class="col-span-5 space-y-2">
+                                <div class="col-span-6 space-y-2">
                                     <label class="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Product / Description</label>
-                                    <Autocomplete 
+                                    <Autocomplete
                                         v-model="item.description"
                                         :items="products"
                                         item-label="name"
@@ -172,19 +189,21 @@ const submit = () => {
                                         @select="(product) => updateItem(index, product)"
                                     />
                                 </div>
-                                <div class="col-span-2 space-y-2">
+                                <div class="col-span-1 space-y-2">
                                     <label class="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Qty</label>
-                                    <input 
-                                        type="number" 
+                                    <input
+                                        type="number"
                                         v-model="item.quantity"
                                         class="w-full bg-slate-50 border-none rounded-lg px-3 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none shadow-sm"
                                     >
                                 </div>
                                 <div class="col-span-3 space-y-2">
                                     <label class="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Unit Price</label>
-                                    <input 
-                                        type="number" 
-                                        v-model="item.unit_price"
+                                    <input
+                                        type="text"
+                                        inputmode="numeric"
+                                        :value="item.unit_price_input"
+                                        @input="onUnitPriceInput(index, $event.target.value)"
                                         class="w-full bg-slate-50 border-none rounded-lg px-3 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none shadow-sm"
                                     >
                                 </div>
@@ -192,7 +211,7 @@ const submit = () => {
                                     <span class="text-xs font-semibold text-slate-900">Rp{{ (item.quantity * item.unit_price).toLocaleString('id-ID') }}</span>
                                 </div>
                                 <div class="col-span-1 flex justify-end pb-1">
-                                    <button 
+                                    <button
                                         @click="removeItem(index)"
                                         class="p-2 text-rose-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                                     >
@@ -201,7 +220,7 @@ const submit = () => {
                                 </div>
                             </div>
 
-                            <button 
+                            <button
                                 @click="addItem"
                                 class="w-full py-4 border-2 border-dashed border-slate-100 rounded-[1.5rem] text-xs font-semibold text-slate-400 uppercase tracking-widest hover:bg-slate-50 hover:border-slate-200 transition-all flex items-center justify-center gap-2"
                             >
@@ -212,19 +231,20 @@ const submit = () => {
                     </div>
                 </div>
 
-                <!-- Right: Summary & Notes -->
                 <div class="space-y-8">
-                    <!-- Totals -->
-                    <div class="bg-[#07304a] rounded-[2.5rem] p-8 text-white shadow-2xl shadow-[#07304a]/30">
-                        <h3 class="text-xs font-semibold uppercase tracking-widest text-white/50 mb-6">Order Summary</h3>
+                    <div class="bg-[#07304a] rounded-2xl p-6 text-white shadow-2xl shadow-[#07304a]/30">
+                        <div class="mb-5 rounded-xl bg-white/10 px-4 py-3">
+                            <div class="text-[9px] font-semibold uppercase tracking-widest text-white/60">Quotation Number</div>
+                            <div class="mt-1 text-sm font-semibold tracking-wide">{{ form.quotation_number }}</div>
+                        </div>
+                        <h3 class="text-xs font-semibold uppercase tracking-widest text-white/50 mb-6">Quotation Summary</h3>
                         <div class="space-y-4">
                             <div class="flex justify-between text-sm font-semibold">
                                 <span class="text-white/70">Subtotal</span>
                                 <span>Rp{{ subtotal.toLocaleString('id-ID') }}</span>
                             </div>
-                            
-                            <!-- Tax Button -->
-                            <button 
+
+                            <button
                                 @click="showTaxSelector = true"
                                 class="w-full flex justify-between items-center text-sm font-semibold py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
                             >
@@ -238,10 +258,9 @@ const submit = () => {
                                 <span>{{ taxAmount >= 0 ? '+' : '' }}Rp{{ taxAmount.toLocaleString('id-ID') }}</span>
                             </button>
 
-                            <!-- Selected Taxes Display -->
                             <div v-if="selectedTaxes.length > 0" class="space-y-2 pt-2">
-                                <div 
-                                    v-for="tax in selectedTaxes" 
+                                <div
+                                    v-for="tax in selectedTaxes"
                                     :key="tax.id"
                                     class="flex justify-between text-xs font-semibold text-white/60 pl-4"
                                 >
@@ -259,14 +278,13 @@ const submit = () => {
                         </div>
                     </div>
 
-                    <!-- Notes -->
-                    <div class="bg-white rounded-[2rem] border border-slate-100 p-8 shadow-xl shadow-slate-200/20">
+                    <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-xl shadow-slate-200/20">
                         <div class="space-y-4">
                             <label class="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
                                 <Icon icon="si:ai-note-line" :width="14" :height="14"  />
                                 Notes / Terms
                             </label>
-                            <textarea 
+                            <textarea
                                 v-model="form.notes"
                                 rows="4"
                                 placeholder="Thank you for your business..."
@@ -281,8 +299,7 @@ const submit = () => {
             </div>
         </div>
 
-        <!-- Tax Selector Modal -->
-        <TaxSelector 
+        <TaxSelector
             v-if="showTaxSelector"
             :taxes="taxes"
             v-model="selectedTaxIds"

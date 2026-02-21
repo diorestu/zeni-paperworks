@@ -18,7 +18,6 @@ const showTaxSelector = ref(false);
 const selectedTaxIds = ref([]);
 const showAddClient = ref(false);
 const showAddProduct = ref(false);
-const clientSearch = ref('');
 
 const form = useForm({
     client_id: '',
@@ -164,9 +163,6 @@ const openAddProduct = () => {
     showAddProduct.value = true;
 };
 
-const openAddClient = () => {
-    showAddClient.value = true;
-};
 </script>
 
 <template>
@@ -205,19 +201,23 @@ const openAddClient = () => {
                                 <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Client</label>
                                 <div class="relative">
                                     <Icon icon="si:user-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none"  />
-                                    <Autocomplete
-                                        v-model="clientSearch"
-                                        :items="clients"
-                                        item-label="name"
-                                        placeholder="Select a client..."
-                                        @update:modelValue="form.client_id = ''"
-                                        @select="(client) => { form.client_id = client.id; clientSearch = client.name; }"
-                                        :show-add-option="true"
-                                        add-option-label="Add Client"
-                                        @add="openAddClient"
-                                        input-class="pl-12 pr-4 py-4 rounded-xl text-sm font-semibold"
-                                    />
+                                    <select
+                                        v-model="form.client_id"
+                                        class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
+                                    >
+                                        <option value="" disabled>Select a client...</option>
+                                        <option v-for="client in clients" :key="client.id" :value="client.id">
+                                            {{ client.name }}{{ client.company ? ` (${client.company})` : '' }}
+                                        </option>
+                                    </select>
                                 </div>
+                                <button
+                                    type="button"
+                                    @click="showAddClient = true"
+                                    class="text-[10px] font-semibold uppercase tracking-widest text-[#07304a] hover:underline ml-1"
+                                >
+                                    Add Client
+                                </button>
                             </div>
                             <div class="space-y-6">
                                 <div class="space-y-2">

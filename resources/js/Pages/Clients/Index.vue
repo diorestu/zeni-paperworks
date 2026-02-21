@@ -134,7 +134,7 @@ const submitUpdate = () => {
 
 const deleteClient = () => {
     if (!editForm.id) return;
-    if (!confirm('Delete this client?')) return;
+    if (!confirm('Delete this client permanently?')) return;
     router.delete(`/clients/${editForm.id}`, {
         onSuccess: () => {
             showEdit.value = false;
@@ -168,6 +168,9 @@ const deleteClient = () => {
 
         <div v-if="$page.props.flash.status" class="mb-8 rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-xs font-semibold text-emerald-600">
             {{ $page.props.flash.status }}
+        </div>
+        <div v-if="$page.props.flash.error" class="mb-8 rounded-xl bg-rose-50 border border-rose-100 p-4 text-xs font-semibold text-rose-600">
+            {{ $page.props.flash.error }}
         </div>
 
         <!-- Controls Section -->
@@ -385,7 +388,7 @@ const deleteClient = () => {
                                 @click="deleteClient"
                             >
                                 <Icon icon="si:bin-line" :width="18" :height="18"  />
-                                <span>Delete Record</span>
+                                <span>Delete Client</span>
                             </button>
                             <button type="submit" class="flex items-center gap-3 rounded-xl bg-[#07304a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#07304a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95">
                                 <Icon icon="si:archive-line" :width="18" :height="18"  />
