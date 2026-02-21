@@ -199,7 +199,7 @@ onUnmounted(() => {
                             </div>
                          </div>
                          <div class="flex flex-col items-end">
-                             <img :src="companyLogoUrl || '/img/logo/logo.svg'" alt="Company Logo" class="h-16 w-auto object-contain">
+                             <img :src="companyLogoUrl || '/img/logo/logo_colorful.png'" alt="Company Logo" class="h-16 w-auto object-contain">
                              <!-- Optional logo subtitle like in image -->
                              <p class="text-[8px] font-normal text-[#07304a] uppercase tracking-[0.2em] mt-2">Accounting | Business | Tax Consulting</p>
                          </div>

@@ -78,7 +78,7 @@ const closeMenu = () => {
         <header class="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
             <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
                 <Link :href="route('landing')" class="flex items-center gap-3">
-                    <img src="/img/logo/favicon.png" alt="Paperwork" class="h-9 w-9">
+                    <img src="/img/logo/sq_white_rounded.png" alt="Paperwork" class="h-9 w-9">
                     <div>
                         <p class="text-sm font-extrabold tracking-wide text-[#0b2d6b]">PAPERWORK</p>
                         <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Business Operating System</p>

@@ -25,7 +25,7 @@ const submit = () => {
         <Head title="Register" />
 
         <div class="mb-[15px]">
-            <img src="/img/logo/logo.svg" alt="Paperwork Logo" class="h-14 w-auto">
+            <img src="/img/logo/logo_colorful.png" alt="Paperwork Logo" class="h-14 w-auto">
         </div>
 
         <div class="w-full max-w-[520px] bg-white rounded-[2.5rem] border border-slate-200/60 p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100">

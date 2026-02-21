@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title inertia>{{ config('app.name', 'Zeni') }}</title>
-    <link rel="icon" type="image/png" href="/img/logo/favicon.png">
+    <link rel="icon" type="image/png" href="/img/logo/sq_white_rounded.png">
     @routes
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @if (filled(config('services.midtrans.client_key')))

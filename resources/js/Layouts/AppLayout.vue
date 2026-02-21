@@ -240,7 +240,7 @@ const submitFeedback = () => {
                         aria-label="Go to landing page"
                     >
                         <img
-                            :src="isSidebarCollapsed ? '/img/logo/favicon.png' : '/img/logo/logo.svg'"
+                            :src="isSidebarCollapsed ? '/img/logo/sq_white_rounded.png' : '/img/logo/logo_colorful.png'"
                             alt="Paperwork Logo"
                             :class="isSidebarCollapsed ? 'h-[3.125rem] w-[3.125rem] object-contain shrink-0' : 'h-[3.75rem] w-auto max-w-[225px] object-contain shrink-0'"
                         >

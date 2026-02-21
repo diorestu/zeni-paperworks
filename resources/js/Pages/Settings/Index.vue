@@ -289,7 +289,7 @@ const deleteTax = (tax) => {
                                     >
                                     <img
                                         v-else
-                                        src="/img/logo/logo.svg"
+                                        src="/img/logo/logo_colorful.png"
                                         alt="Default logo preview"
                                         class="h-full w-full object-contain object-left opacity-70"
                                     >
