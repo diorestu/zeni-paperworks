@@ -98,6 +98,18 @@ resources/js/
 
 By **namespacing** the module under `Accounting/` in both backend and frontend, the module stays cleanly separated and can be toggled on/off without touching core code.
 
+### Critical Design Principles
+
+The following principles are **mandatory** across the entire accounting module:
+
+| # | Principle | Rationale |
+|---|---|---|
+| 1 | **Soft Deletes** | All financial tables use `SoftDeletes`. Accounting records must never be hard-deleted — they are voided instead. Applies to: `journal_entries`, `journal_entry_lines`, `expenses`, `bills`, `bill_items`, `payments`. |
+| 2 | **Multi-Currency** | Every financial transaction carries `currency_code` + `exchange_rate`. A `currencies` table stores available currencies per company. Base currency defaults to `IDR`. |
+| 3 | **Audit Trail** | All CUD (Create/Update/Delete) + status change actions (post, void, approve) are logged to `audit_logs` for compliance and traceability. |
+| 4 | **Form Request Validation** | All controller store/update actions use dedicated `FormRequest` classes under `App\Http\Requests\Accounting\`. No inline validation in controllers. |
+| 5 | **BankAccount Scope Alignment** | The existing `BankAccount` model uses `user_id` + `BelongsToCompany` trait (already company-scoped). Accounting adds an `accounting_account_id` FK to link bank accounts to Chart of Accounts entries. |
+
 ---
 
 ## 2. Module Activation & Subscription Gating
@@ -429,6 +441,89 @@ Schema::create('bank_reconciliations', function (Blueprint $table) {
 });
 ```
 
+### Migration 12: `create_currencies_table`
+
+```php
+Schema::create('currencies', function (Blueprint $table) {
+    $table->id();
+    $table->unsignedBigInteger('company_id')->index();
+    $table->string('code', 3);                    // ISO 4217: IDR, USD, EUR
+    $table->string('name');                       // Indonesian Rupiah, US Dollar
+    $table->string('symbol', 5);                  // Rp, $, €
+    $table->decimal('exchange_rate', 15, 6)->default(1); // rate to base currency
+    $table->boolean('is_base')->default(false);   // one per company
+    $table->boolean('is_active')->default(true);
+    $table->timestamps();
+
+    $table->unique(['company_id', 'code']);
+});
+```
+
+### Migration 13: `create_audit_logs_table`
+
+```php
+Schema::create('audit_logs', function (Blueprint $table) {
+    $table->id();
+    $table->unsignedBigInteger('company_id')->index();
+    $table->unsignedBigInteger('user_id')->nullable();
+    $table->string('auditable_type');             // e.g., App\Models\Accounting\JournalEntry
+    $table->unsignedBigInteger('auditable_id');
+    $table->string('action');                     // created, updated, deleted, posted, voided, approved
+    $table->json('old_values')->nullable();
+    $table->json('new_values')->nullable();
+    $table->string('ip_address', 45)->nullable();
+    $table->string('user_agent')->nullable();
+    $table->timestamps();
+
+    $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
+    $table->index(['auditable_type', 'auditable_id']);
+    $table->index('action');
+});
+```
+
+### Migration 14: `alter_bank_accounts_add_accounting_fields`
+
+```php
+// Link existing BankAccount to Chart of Accounts for accounting integration
+Schema::table('bank_accounts', function (Blueprint $table) {
+    $table->unsignedBigInteger('accounting_account_id')->nullable()->after('is_default');
+    $table->decimal('opening_balance', 15, 2)->default(0)->after('accounting_account_id');
+    $table->foreign('accounting_account_id')->references('id')->on('accounts')->nullOnDelete();
+});
+```
+
+> **Note:** The existing `user_id` on `bank_accounts` is kept for backwards compatibility. The `BelongsToCompany` trait already scopes by `company_id`, so bank accounts are accessible company-wide in the accounting module.
+
+### Soft Deletes — Amendments to Existing Migrations
+
+The following tables **must include** `$table->softDeletes()` before `$table->timestamps()`:
+
+| Migration | Table |
+|---|---|
+| Migration 3 | `journal_entries` |
+| Migration 4 | `journal_entry_lines` |
+| Migration 6 | `expenses` |
+| Migration 7 | `bills` |
+| Migration 8 | `bill_items` |
+| Migration 9 | `payments` |
+
+### Multi-Currency — Amendments to Existing Migrations
+
+The following tables **must include** currency fields after `company_id`:
+
+```php
+// Add to: journal_entries, expenses, bills, payments
+$table->string('currency_code', 3)->default('IDR')->after('company_id');
+$table->decimal('exchange_rate', 15, 6)->default(1)->after('currency_code');
+```
+
+| Migration | Table |
+|---|---|
+| Migration 3 | `journal_entries` |
+| Migration 6 | `expenses` |
+| Migration 7 | `bills` |
+| Migration 9 | `payments` |
+
 ### Summary of All Migrations
 
 | # | Migration File | Table Created |
@@ -436,17 +531,20 @@ Schema::create('bank_reconciliations', function (Blueprint $table) {
 | 1 | `add_addons_to_users_table` | Alter `users` |
 | 2 | `create_accounts_table` | `accounts` |
 | 3 | `create_fiscal_periods_table` | `fiscal_periods` |
-| 4 | `create_journal_entries_table` | `journal_entries` |
-| 5 | `create_journal_entry_lines_table` | `journal_entry_lines` |
+| 4 | `create_journal_entries_table` | `journal_entries` *(+ softDeletes, currency)* |
+| 5 | `create_journal_entry_lines_table` | `journal_entry_lines` *(+ softDeletes)* |
 | 6 | `create_expense_categories_table` | `expense_categories` |
-| 7 | `create_expenses_table` | `expenses` |
-| 8 | `create_bills_table` | `bills` |
-| 9 | `create_bill_items_table` | `bill_items` |
-| 10 | `create_payments_table` | `payments` |
+| 7 | `create_expenses_table` | `expenses` *(+ softDeletes, currency)* |
+| 8 | `create_bills_table` | `bills` *(+ softDeletes, currency)* |
+| 9 | `create_bill_items_table` | `bill_items` *(+ softDeletes)* |
+| 10 | `create_payments_table` | `payments` *(+ softDeletes, currency)* |
 | 11 | `create_bank_transactions_table` | `bank_transactions` |
 | 12 | `create_bank_reconciliations_table` | `bank_reconciliations` |
+| 13 | `create_currencies_table` | `currencies` |
+| 14 | `create_audit_logs_table` | `audit_logs` |
+| 15 | `alter_bank_accounts_add_accounting_fields` | Alter `bank_accounts` |
 
-**Total: 12 migrations** (1 alter + 11 new tables)
+**Total: 15 migrations** (2 alter + 13 new tables)
 
 ---
 
@@ -562,6 +660,46 @@ App\Models\Accounting\BankReconciliation
 Traits: BelongsToCompany
 ```
 
+### 4.12 `Currency`
+
+```
+App\Models\Accounting\Currency
+Traits: BelongsToCompany
+```
+
+### 4.13 `AuditLog`
+
+```
+App\Models\Accounting\AuditLog
+├── belongsTo: user (User)
+├── morphTo: auditable
+Traits: BelongsToCompany
+```
+
+### Soft Deletes on Models
+
+The following models **must use** the `Illuminate\Database\Eloquent\SoftDeletes` trait:
+
+| Model | Trait |
+|---|---|
+| `JournalEntry` | `use SoftDeletes;` |
+| `JournalEntryLine` | `use SoftDeletes;` |
+| `Expense` | `use SoftDeletes;` |
+| `Bill` | `use SoftDeletes;` |
+| `BillItem` | `use SoftDeletes;` |
+| `Payment` | `use SoftDeletes;` |
+
+### Multi-Currency on Models
+
+The following models include `currency_code` and `exchange_rate` in `$fillable` and have a helper method `convertToBase()`:
+
+| Model | Fields Added |
+|---|---|
+| `JournalEntry` | `currency_code`, `exchange_rate` |
+| `Expense` | `currency_code`, `exchange_rate` |
+| `Bill` | `currency_code`, `exchange_rate` |
+| `Payment` | `currency_code`, `exchange_rate` |
+
 ### Relationships to Add on Existing Models
 
 | Existing Model | New Relationship |
@@ -570,6 +708,7 @@ Traits: BelongsToCompany
 | `Invoice` | `hasOne: journalEntry` → through payment |
 | `BankAccount` | `hasMany: bankTransactions` → `Accounting\BankTransaction` |
 | `BankAccount` | `hasMany: reconciliations` → `Accounting\BankReconciliation` |
+| `BankAccount` | `belongsTo: accountingAccount` → `Accounting\Account` |
 | `Client` | `hasMany: bills` → `Accounting\Bill` (as vendor) |
 | `Client` | `hasMany: expenses` → `Accounting\Expense` (as vendor) |
 
@@ -593,6 +732,111 @@ All controllers under `App\Http\Controllers\Accounting\`.
 | `AccountingDashboardController` | `index` | Module-specific dashboard with KPIs |
 
 **Total: 10 controllers**
+
+### Form Request Validation Classes
+
+All store/update actions use dedicated `FormRequest` classes under `App\Http\Requests\Accounting\`:
+
+| Form Request | Used By | Key Validation Rules |
+|---|---|---|
+| `StoreAccountRequest` | `ChartOfAccountController@store` | `code` unique per company, valid `type`↔`subtype` mapping |
+| `UpdateAccountRequest` | `ChartOfAccountController@update` | Same as store, exclude self from unique check |
+| `StoreJournalEntryRequest` | `JournalEntryController@store` | `lines` array min:2, total debits == total credits, `entry_date` within open fiscal period, all `account_id` belong to company |
+| `UpdateJournalEntryRequest` | `JournalEntryController@update` | Same as store; only allowed if status == `draft` |
+| `StoreExpenseRequest` | `ExpenseController@store` | `account_id` must be `expense` type, `amount` > 0, valid date, receipt file max 5MB |
+| `UpdateExpenseRequest` | `ExpenseController@update` | Same as store; only allowed if status == `pending` |
+| `StoreBillRequest` | `BillController@store` | `items` array required, `due_date` >= `bill_date`, all `account_id` valid |
+| `UpdateBillRequest` | `BillController@update` | Same as store; only allowed if status == `draft` |
+| `StorePaymentRequest` | `PaymentController@store` | `amount` > 0, `amount` <= remaining balance on invoice/bill, valid `deposit_account_id` |
+| `StoreFiscalPeriodRequest` | `FiscalPeriodController@store` | `start_date` < `end_date`, no overlapping periods for same company |
+| `StoreBankReconciliationRequest` | `BankReconciliationController@store` | `bank_account_id` belongs to company, valid statement date |
+
+**Total: 11 Form Request classes**
+
+#### Example: `StoreJournalEntryRequest`
+
+```php
+// app/Http/Requests/Accounting/StoreJournalEntryRequest.php
+namespace App\Http\Requests\Accounting;
+
+use App\Models\Accounting\Account;
+use App\Models\Accounting\FiscalPeriod;
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreJournalEntryRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true; // handled by middleware
+    }
+
+    public function rules(): array
+    {
+        return [
+            'entry_date'            => 'required|date',
+            'description'           => 'nullable|string|max:1000',
+            'reference'             => 'nullable|string|max:255',
+            'currency_code'         => 'required|string|size:3|exists:currencies,code',
+            'lines'                 => 'required|array|min:2',
+            'lines.*.account_id'    => 'required|exists:accounts,id',
+            'lines.*.description'   => 'nullable|string|max:500',
+            'lines.*.debit'         => 'required|numeric|min:0',
+            'lines.*.credit'        => 'required|numeric|min:0',
+        ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $lines = $this->input('lines', []);
+
+            // 1. Validate debit == credit
+            $totalDebit = collect($lines)->sum('debit');
+            $totalCredit = collect($lines)->sum('credit');
+            if (round($totalDebit, 2) !== round($totalCredit, 2)) {
+                $validator->errors()->add('lines',
+                    "Total debit ({$totalDebit}) must equal total credit ({$totalCredit}).");
+            }
+
+            // 2. Each line must have either debit OR credit, not both
+            foreach ($lines as $i => $line) {
+                if (($line['debit'] ?? 0) > 0 && ($line['credit'] ?? 0) > 0) {
+                    $validator->errors()->add("lines.{$i}",
+                        'A line cannot have both debit and credit values.');
+                }
+                if (($line['debit'] ?? 0) == 0 && ($line['credit'] ?? 0) == 0) {
+                    $validator->errors()->add("lines.{$i}",
+                        'A line must have either a debit or credit value.');
+                }
+            }
+
+            // 3. Validate entry_date is within an open fiscal period
+            $entryDate = $this->input('entry_date');
+            if ($entryDate) {
+                $period = FiscalPeriod::where('company_id', auth()->user()->company_id)
+                    ->where('start_date', '<=', $entryDate)
+                    ->where('end_date', '>=', $entryDate)
+                    ->first();
+
+                if ($period && $period->status !== 'open') {
+                    $validator->errors()->add('entry_date',
+                        "Fiscal period '{$period->name}' is {$period->status}.");
+                }
+            }
+
+            // 4. Validate all account_ids belong to the user's company
+            $accountIds = collect($lines)->pluck('account_id')->filter()->unique();
+            $validCount = Account::whereIn('id', $accountIds)
+                ->where('company_id', auth()->user()->company_id)
+                ->count();
+            if ($validCount !== $accountIds->count()) {
+                $validator->errors()->add('lines',
+                    'One or more accounts do not belong to your company.');
+            }
+        });
+    }
+}
+```
 
 ---
 
@@ -773,6 +1017,68 @@ class ReconciliationService
 }
 ```
 
+### 7.5 `AuditService`
+
+Responsible for logging all accounting actions. Provides a consistent audit trail for compliance.
+
+```php
+namespace App\Services\Accounting;
+
+use App\Models\Accounting\AuditLog;
+use Illuminate\Database\Eloquent\Model;
+
+class AuditService
+{
+    /**
+     * Log a create/update/delete/status-change action.
+     */
+    public function log(
+        Model $model,
+        string $action,
+        ?array $oldValues = null,
+        ?array $newValues = null
+    ): AuditLog;
+
+    /**
+     * Convenience methods for common actions.
+     */
+    public function logCreated(Model $model): AuditLog;
+    public function logUpdated(Model $model, array $oldValues): AuditLog;
+    public function logDeleted(Model $model): AuditLog;
+    public function logStatusChange(Model $model, string $action, string $from, string $to): AuditLog;
+
+    /**
+     * Get audit history for a model instance.
+     */
+    public function getHistory(Model $model): Collection;
+}
+```
+
+### 7.6 `CurrencyService`
+
+Manages currency operations and exchange rate conversions.
+
+```php
+namespace App\Services\Accounting;
+
+use App\Models\Accounting\Currency;
+
+class CurrencyService
+{
+    // Get the base currency for a company
+    public function getBaseCurrency(int $companyId): Currency;
+
+    // Convert an amount from one currency to base currency
+    public function convertToBase(float $amount, string $currencyCode, int $companyId): float;
+
+    // Convert between two currencies
+    public function convert(float $amount, string $fromCode, string $toCode, int $companyId): float;
+
+    // Seed default currencies for a company (IDR as base + common currencies)
+    public function seedDefaults(int $companyId): void;
+}
+```
+
 ---
 
 ## 8. Middleware
@@ -884,6 +1190,13 @@ Add an **"Accounting"** section to the `AppLayout.vue` sidebar, conditionally re
 | Create `ChartOfAccounts/Index.vue` | Vue page |
 | Create `FiscalPeriods/Index.vue` | Vue page |
 | Update `AppLayout.vue` sidebar navigation | Conditional accounting section |
+| Create `currencies` migration + `Currency` model | Migration + `app/Models/Accounting/Currency.php` |
+| Create `audit_logs` migration + `AuditLog` model | Migration + `app/Models/Accounting/AuditLog.php` |
+| Create `AuditService` | `app/Services/Accounting/AuditService.php` |
+| Create `CurrencyService` + seed defaults | `app/Services/Accounting/CurrencyService.php` |
+| Alter `bank_accounts` migration (add `accounting_account_id`) | Migration |
+| Create `StoreAccountRequest` + `UpdateAccountRequest` | `app/Http/Requests/Accounting/` |
+| Create `StoreFiscalPeriodRequest` | `app/Http/Requests/Accounting/` |
 
 ### Phase 2: Journal Engine (Week 2)
 > Priority: 🔴 Critical
@@ -901,6 +1214,10 @@ Add an **"Accounting"** section to the `AppLayout.vue` sidebar, conditionally re
 | Create `JournalEntries/Show.vue` | Vue page |
 | Create `DebitCreditTable.vue` component | Shared component |
 | Create `AccountSelector.vue` component | Shared component |
+| Create `StoreJournalEntryRequest` + `UpdateJournalEntryRequest` | `app/Http/Requests/Accounting/` |
+| Add `SoftDeletes` trait to `JournalEntry` + `JournalEntryLine` | Models |
+| Add `currency_code`, `exchange_rate` to `JournalEntry` | Model + migration |
+| Integrate `AuditService` into `JournalEntryController` | Controller |
 
 ### Phase 3: Expenses & Bills (Week 3)
 > Priority: 🟡 Important
@@ -916,6 +1233,11 @@ Add an **"Accounting"** section to the `AppLayout.vue` sidebar, conditionally re
 | Add routes for expenses + bills | Routes |
 | Create `Expenses/` pages (Index, Create, Show) | Vue pages |
 | Create `Bills/` pages (Index, Create, Show) | Vue pages |
+| Create `StoreExpenseRequest` + `UpdateExpenseRequest` | `app/Http/Requests/Accounting/` |
+| Create `StoreBillRequest` + `UpdateBillRequest` | `app/Http/Requests/Accounting/` |
+| Add `SoftDeletes` trait to `Expense`, `Bill`, `BillItem` | Models |
+| Add `currency_code`, `exchange_rate` to `Expense`, `Bill` | Models + migrations |
+| Integrate `AuditService` into `ExpenseController`, `BillController` | Controllers |
 
 ### Phase 4: Payments & Integration (Week 4)
 > Priority: 🟡 Important
@@ -930,6 +1252,10 @@ Add an **"Accounting"** section to the `AppLayout.vue` sidebar, conditionally re
 | Add `payments` relationship to existing `Invoice` model | Model update |
 | Create `Payments/` pages (Index, Create, Show) | Vue pages |
 | Update existing invoice flow to optionally record payments | Invoice updates |
+| Create `StorePaymentRequest` | `app/Http/Requests/Accounting/` |
+| Add `SoftDeletes` trait to `Payment` | Model |
+| Add `currency_code`, `exchange_rate` to `Payment` | Model + migration |
+| Integrate `AuditService` into `PaymentController` | Controller |
 
 ### Phase 5: Bank Reconciliation (Week 5)
 > Priority: 🟢 Nice to have
@@ -976,10 +1302,11 @@ Add an **"Accounting"** section to the `AppLayout.vue` sidebar, conditionally re
 
 | Category | Count |
 |---|---|
-| **New Migrations** | 12 |
-| **New Models** | 11 |
+| **New Migrations** | 15 *(+3: currencies, audit_logs, alter bank_accounts)* |
+| **New Models** | 13 *(+2: Currency, AuditLog)* |
 | **New Controllers** | 10 |
-| **New Service Classes** | 4 |
+| **New Service Classes** | 6 *(+2: AuditService, CurrencyService)* |
+| **New Form Request Classes** | 11 |
 | **New Middleware** | 1 |
 | **New Route Endpoints** | ~35 |
 | **New Vue Pages** | ~20 |
@@ -2114,10 +2441,11 @@ Add to **Phase 3** (Expenses & Bills):
 
 | Category | Count |
 |---|---|
-| **New Migrations** | 12 |
-| **New Models** | 11 |
+| **New Migrations** | 15 *(+3: currencies, audit_logs, alter bank_accounts)* |
+| **New Models** | 13 *(+2: Currency, AuditLog)* |
 | **New Controllers** | 11 *(+1 ImportExportController)* |
-| **New Service Classes** | 5 *(+1 AccountingImportService)* |
+| **New Service Classes** | 7 *(+1 AccountingImportService, +2 AuditService, CurrencyService)* |
+| **New Form Request Classes** | 11 |
 | **New Middleware** | 1 |
 | **New Import Classes** | 5 |
 | **New Export Classes** | 6 |

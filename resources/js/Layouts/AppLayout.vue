@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { Link, usePage, router } from '@inertiajs/vue3';
+import { Link, useForm, usePage, router } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const page = usePage();
@@ -11,8 +11,8 @@ const showNotifications = ref(false);
 const isSidebarCollapsed = ref(false);
 const showFeedbackModal = ref(false);
 const feedbackSubmitted = ref(false);
-const feedbackForm = ref({
-    name: '',
+const feedbackForm = useForm({
+    name: page.props.auth?.user?.name || '',
     company: '',
     role: '',
     rating: 5,
@@ -29,13 +29,19 @@ const navItems = computed(() => {
         ];
     }
 
+    if (role === 'super_admin') {
+        return [
+            { name: 'Dashboard', href: '/dashboard', icon: 'si:bar-chart-line' },
+        ];
+    }
+
     const items = [
         { name: 'Dashboard', href: '/dashboard', icon: 'si:bar-chart-line' },
         { name: 'Invoices', href: '/invoices', icon: 'si:ballot-line' },
         { name: 'Quotations', href: '/quotations', icon: 'si:assignment-line' },
     ];
 
-    if (role === 'super_admin' || role === 'admin') {
+    if (role === 'admin') {
         items.push(
             { name: 'Clients', href: '/clients', icon: 'si:user-alt-line' },
             { name: 'Products', href: '/products', icon: 'si:inventory-line' },
@@ -81,10 +87,10 @@ const closeDropdownHandler = (e) => {
     const toggle = document.getElementById('user-menu-toggle');
     const notifDropdown = document.getElementById('notif-dropdown');
     const notifToggle = document.getElementById('notif-toggle');
-    if (dropdown && !dropdown.contains(e.target) && !toggle.contains(e.target)) {
+    if (dropdown && toggle && !dropdown.contains(e.target) && !toggle.contains(e.target)) {
         showDropdown.value = false;
     }
-    if (notifDropdown && !notifDropdown.contains(e.target) && !notifToggle.contains(e.target)) {
+    if (notifDropdown && notifToggle && !notifDropdown.contains(e.target) && !notifToggle.contains(e.target)) {
         showNotifications.value = false;
     }
 };
@@ -97,6 +103,7 @@ const toggleSidebar = () => {
 const openFeedbackModal = () => {
     showFeedbackModal.value = true;
     feedbackSubmitted.value = false;
+    feedbackForm.clearErrors();
 };
 
 const closeFeedbackModal = () => {
@@ -104,14 +111,15 @@ const closeFeedbackModal = () => {
 };
 
 const submitFeedback = () => {
-    feedbackSubmitted.value = true;
-    feedbackForm.value = {
-        name: '',
-        company: '',
-        role: '',
-        rating: 5,
-        message: '',
-    };
+    feedbackForm.post(route('feedback.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            feedbackSubmitted.value = true;
+            feedbackForm.reset();
+            feedbackForm.name = page.props.auth?.user?.name || '';
+            feedbackForm.rating = 5;
+        },
+    });
 };
 </script>
 
@@ -369,16 +377,17 @@ const submitFeedback = () => {
                         </div>
 
                         <div>
-                            <label class="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Testimonial</label>
-                            <textarea v-model="feedbackForm.message" rows="4" required placeholder="Share your experience..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-[#07304a]"></textarea>
-                        </div>
+                                <label class="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Testimonial</label>
+                                <textarea v-model="feedbackForm.message" rows="4" required placeholder="Share your experience..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-[#07304a]"></textarea>
+                                <p v-if="feedbackForm.errors.message" class="mt-1 text-xs font-semibold text-rose-500">{{ feedbackForm.errors.message }}</p>
+                            </div>
 
                         <div class="flex items-center justify-end gap-2 pt-1">
                             <button type="button" @click="closeFeedbackModal" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600 hover:bg-slate-50">
                                 Cancel
                             </button>
-                            <button type="submit" class="rounded-xl bg-[#07304a] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-[#0a3f61]">
-                                Submit
+                            <button type="submit" :disabled="feedbackForm.processing" class="rounded-xl bg-[#07304a] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-[#0a3f61] disabled:cursor-not-allowed disabled:opacity-60">
+                                {{ feedbackForm.processing ? 'Submitting...' : 'Submit' }}
                             </button>
                         </div>
                     </form>

@@ -54,6 +54,7 @@ class ProfileController extends Controller
 
         return Inertia::render('Profile/Billing', [
             'currentPlan' => $user->plan_name ?? 'Free',
+            'midtransEnabled' => filled(config('services.midtrans.server_key')) && filled(config('services.midtrans.client_key')),
             'paymentHistory' => $user->subscriptionInvoices()
                 ->latest('invoice_date')
                 ->get()
@@ -65,6 +66,9 @@ class ProfileController extends Controller
                     'invoice_date' => optional($invoice->invoice_date)->toDateString(),
                     'due_date' => optional($invoice->due_date)->toDateString(),
                     'status' => $invoice->status,
+                    'receipt_url' => $invoice->status === 'paid'
+                        ? route('profile.billing.receipts.download', ['invoice' => $invoice->id])
+                        : null,
                 ]),
         ]);
     }

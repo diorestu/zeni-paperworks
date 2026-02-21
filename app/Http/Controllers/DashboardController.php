@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Feedback;
 use App\Models\Invoice;
+use App\Models\SubscriptionInvoice;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,6 +15,10 @@ class DashboardController extends Controller
 {
     public function index(Request $request): Response
     {
+        if ($request->user()?->isSuperAdmin()) {
+            return $this->superAdminDashboard();
+        }
+
         $now = Carbon::now();
         $start = $now->copy()->startOfMonth()->subMonths(11);
 
@@ -88,6 +95,89 @@ class DashboardController extends Controller
                 'paid' => $paidSeries,
                 'overdue' => $overdueSeries,
             ],
+        ]);
+    }
+
+    private function superAdminDashboard(): Response
+    {
+        $nonSuperAdminUsers = User::query()->where('role', '!=', 'super_admin');
+
+        $subscriptionBaseQuery = SubscriptionInvoice::query()->whereHas('user', function ($query) {
+            $query->where('role', '!=', 'super_admin');
+        });
+
+        $planBreakdown = (clone $nonSuperAdminUsers)
+            ->selectRaw("COALESCE(plan_name, 'Free') as plan_name, COUNT(*) as total")
+            ->groupBy('plan_name')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn ($row) => [
+                'plan_name' => $row->plan_name,
+                'total' => (int) $row->total,
+            ]);
+
+        $users = (clone $nonSuperAdminUsers)
+            ->latest('created_at')
+            ->limit(50)
+            ->get()
+            ->map(fn (User $user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'plan_name' => $user->plan_name ?? 'Free',
+                'plan_renews_at' => optional($user->plan_renews_at)->toDateString(),
+                'registered_at' => optional($user->created_at)->toDateString(),
+            ]);
+
+        $subscriptionHistory = (clone $subscriptionBaseQuery)
+            ->with('user:id,name,email')
+            ->latest('invoice_date')
+            ->limit(50)
+            ->get()
+            ->map(fn (SubscriptionInvoice $invoice) => [
+                'id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'user_name' => $invoice->user?->name,
+                'user_email' => $invoice->user?->email,
+                'plan_name' => $invoice->plan_name,
+                'amount' => (float) $invoice->amount,
+                'invoice_date' => optional($invoice->invoice_date)->toDateString(),
+                'due_date' => optional($invoice->due_date)->toDateString(),
+                'status' => $invoice->status,
+                'auto_generated' => (bool) $invoice->auto_generated,
+            ]);
+
+        $feedbacks = Feedback::query()
+            ->with('user:id,name,email')
+            ->latest('created_at')
+            ->limit(50)
+            ->get()
+            ->map(fn (Feedback $feedback) => [
+                'id' => $feedback->id,
+                'name' => $feedback->name,
+                'company' => $feedback->company,
+                'role' => $feedback->role,
+                'rating' => (int) $feedback->rating,
+                'message' => $feedback->message,
+                'created_at' => optional($feedback->created_at)->toDateTimeString(),
+                'user_name' => $feedback->user?->name,
+                'user_email' => $feedback->user?->email,
+            ]);
+
+        return Inertia::render('SuperAdmin/Dashboard', [
+            'kpis' => [
+                'registered_users' => (clone $nonSuperAdminUsers)->count(),
+                'paid_plan_users' => (clone $nonSuperAdminUsers)->where('plan_name', '!=', 'Free')->count(),
+                'total_revenue_paid' => (float) (clone $subscriptionBaseQuery)->where('status', 'paid')->sum('amount'),
+                'total_revenue_invoiced' => (float) (clone $subscriptionBaseQuery)->whereIn('status', ['draft', 'sent', 'paid', 'overdue'])->sum('amount'),
+                'subscription_invoices_count' => (clone $subscriptionBaseQuery)->count(),
+                'feedback_count' => Feedback::query()->count(),
+            ],
+            'plans' => $planBreakdown,
+            'users' => $users,
+            'subscriptionHistory' => $subscriptionHistory,
+            'feedbacks' => $feedbacks,
         ]);
     }
 }

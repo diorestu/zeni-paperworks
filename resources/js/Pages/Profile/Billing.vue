@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
@@ -13,9 +13,16 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    midtransEnabled: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const isYearly = ref(false);
+const processingPlan = ref(null);
+const flashMessage = ref('');
+const errorMessage = ref('');
 
 const basePlans = [
     { 
@@ -36,7 +43,7 @@ const basePlans = [
         yearly: '30.000',
         info: 'Save 23%',
         color: 'bg-[#07304a] text-white',
-        docs: ['100 Invoices / month', '10 Quotations / month', '100 Clients'],
+        docs: ['10 Invoices / month', '10 Quotations / month', '100 Clients'],
         features: ['1 User', 'Remove Watermark', 'Recurring Invoices', 'CSV/PDF Export', 'Email Support'],
         button: 'Upgrade Basic'
     },
@@ -96,6 +103,75 @@ const statusClass = (status) => {
         cancelled: 'bg-slate-100 text-slate-500 border-slate-200',
     }[status] ?? 'bg-slate-50 text-slate-600 border-slate-100';
 };
+
+const payPlan = async (plan) => {
+    if (plan.current || plan.name === 'Free') {
+        return;
+    }
+
+    errorMessage.value = '';
+    flashMessage.value = '';
+
+    if (!props.midtransEnabled) {
+        errorMessage.value = 'Midtrans belum dikonfigurasi. Isi MIDTRANS_SERVER_KEY dan MIDTRANS_CLIENT_KEY.';
+        return;
+    }
+
+    if (typeof window.snap?.pay !== 'function') {
+        errorMessage.value = 'Snap.js Midtrans tidak ter-load. Silakan refresh halaman.';
+        return;
+    }
+
+    processingPlan.value = plan.name;
+
+    try {
+        const { data } = await window.axios.post(route('profile.billing.checkout'), {
+            plan: plan.name,
+            billing_cycle: isYearly.value ? 'yearly' : 'monthly',
+        });
+
+        if (!data?.snap_token) {
+            throw new Error('Snap token tidak tersedia.');
+        }
+
+        window.snap.pay(data.snap_token, {
+            onSuccess: async () => {
+                await confirmPayment(data.order_id);
+            },
+            onPending: async () => {
+                await confirmPayment(data.order_id);
+                flashMessage.value = 'Pembayaran masih pending. Kami akan update otomatis setelah settlement.';
+            },
+            onError: () => {
+                processingPlan.value = null;
+                errorMessage.value = 'Pembayaran gagal diproses. Coba ulangi beberapa saat lagi.';
+            },
+            onClose: () => {
+                processingPlan.value = null;
+            },
+        });
+    } catch (error) {
+        processingPlan.value = null;
+        errorMessage.value = error?.response?.data?.message ?? 'Gagal membuat transaksi Midtrans.';
+    }
+};
+
+const confirmPayment = async (orderId) => {
+    try {
+        const { data } = await window.axios.post(route('profile.billing.confirm'), {
+            order_id: orderId,
+        });
+
+        if (data?.is_paid) {
+            flashMessage.value = 'Pembayaran berhasil. Plan Anda sudah diperbarui.';
+            router.reload({ only: ['currentPlan', 'paymentHistory'] });
+        }
+    } catch (error) {
+        errorMessage.value = error?.response?.data?.message ?? 'Transaksi berhasil dibuat, tapi konfirmasi status gagal.';
+    } finally {
+        processingPlan.value = null;
+    }
+};
 </script>
 
 <template>
@@ -103,6 +179,13 @@ const statusClass = (status) => {
         <Head title="Billing & Plans" />
 
         <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div v-if="errorMessage" class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+                {{ errorMessage }}
+            </div>
+            <div v-if="flashMessage" class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700">
+                {{ flashMessage }}
+            </div>
+
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
                 <div>
                     <h1 class="text-4xl font-semibold text-slate-900 tracking-tight mb-2">Upgrade your workspace</h1>
@@ -146,10 +229,12 @@ const statusClass = (status) => {
                         <h3 class="text-3xl font-bold text-slate-900">{{ plan.name }}</h3>
                     </div>
 
-                    <button 
+                    <button
+                        @click="payPlan(plan)"
+                        :disabled="plan.current || plan.name === 'Free' || processingPlan === plan.name"
                         :class="['w-full py-4.5 rounded-[1.25rem] text-[13px] font-bold tracking-wide transition-all active:scale-95 mb-4', plan.color]"
                     >
-                        {{ plan.button }}
+                        {{ processingPlan === plan.name ? 'Processing...' : (plan.current ? 'Current Plan' : plan.button) }}
                     </button>
 
                     <p class="text-[11px] font-semibold text-slate-400 mb-8">{{ plan.info }}</p>
@@ -218,6 +303,7 @@ const statusClass = (status) => {
                                 <th class="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Amount</th>
                                 <th class="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Status</th>
                                 <th class="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Invoice</th>
+                                <th class="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Receipt</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50">
@@ -229,9 +315,20 @@ const statusClass = (status) => {
                                     <span :class="['text-[10px] font-semibold uppercase tracking-widest px-3 py-1 rounded-md border', statusClass(payment.status)]">{{ payment.status }}</span>
                                 </td>
                                 <td class="px-10 py-6 text-sm font-semibold text-slate-700 text-nowrap">{{ payment.invoice_number }}</td>
+                                <td class="px-10 py-6 text-sm font-semibold text-slate-700 text-nowrap">
+                                    <a
+                                        v-if="payment.receipt_url"
+                                        :href="payment.receipt_url"
+                                        class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+                                    >
+                                        <Icon icon="si:file-download-line" :width="14" :height="14" />
+                                        Download
+                                    </a>
+                                    <span v-else class="text-xs text-slate-400">-</span>
+                                </td>
                             </tr>
                             <tr v-if="paymentHistory.length === 0">
-                                <td colspan="5" class="px-10 py-10 text-center">
+                                <td colspan="6" class="px-10 py-10 text-center">
                                     <p class="text-sm font-semibold text-slate-900">No payment history yet</p>
                                     <p class="text-xs text-slate-500 mt-1">Auto-generated subscription invoices will appear here.</p>
                                 </td>

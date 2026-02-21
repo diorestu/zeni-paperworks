@@ -8,6 +8,11 @@
     <link rel="icon" type="image/png" href="/img/logo/favicon_blue.png">
     @routes
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (filled(config('services.midtrans.client_key')))
+        <script
+            src="{{ config('services.midtrans.snap_url') }}"
+            data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+    @endif
     @inertiaHead
 </head>
 

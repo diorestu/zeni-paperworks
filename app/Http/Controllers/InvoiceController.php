@@ -14,6 +14,7 @@ use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class InvoiceController extends Controller
 {
@@ -37,7 +38,23 @@ class InvoiceController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $companyId = $request->user()->company_id;
+        $user = $request->user();
+        $companyId = $user->company_id;
+        $activePlan = $this->resolveActivePlanName($user);
+        $monthlyLimit = $this->planInvoiceLimit($activePlan);
+
+        if ($monthlyLimit !== null) {
+            $invoicesThisMonth = Invoice::query()
+                ->where('company_id', $companyId)
+                ->whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+                ->count();
+
+            if ($invoicesThisMonth >= $monthlyLimit) {
+                throw ValidationException::withMessages([
+                    'invoice_limit' => "Paket {$activePlan} hanya bisa membuat {$monthlyLimit} invoice per bulan. Upgrade paket untuk menambah limit.",
+                ]);
+            }
+        }
 
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
@@ -108,6 +125,29 @@ class InvoiceController extends Controller
 
         return redirect()->back()->with('status', 'Invoice status updated');
     }
+
+    private function resolveActivePlanName($user): string
+    {
+        $planName = $user->plan_name ?? 'Free';
+
+        if ($planName !== 'Free' && $user->plan_renews_at && Carbon::parse($user->plan_renews_at)->isPast()) {
+            return 'Free';
+        }
+
+        return $planName;
+    }
+
+    private function planInvoiceLimit(string $planName): ?int
+    {
+        $limits = config('plans.invoice_limits', []);
+
+        if (! array_key_exists($planName, $limits)) {
+            return $limits['Free'] ?? 10;
+        }
+
+        return $limits[$planName];
+    }
+
     private function generateInvoiceNumber(): string
     {
         $prefix = Setting::where('key', 'invoice_prefix')->value('value') ?? 'INV';

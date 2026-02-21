@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\BankAccount;
 use App\Models\Client;
+use App\Models\Feedback;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Quotation;
@@ -247,6 +248,16 @@ class DatabaseSeeder extends Seeder
             'status' => 'sent',
             'paid_at' => null,
             'auto_generated' => true,
+        ]);
+
+        Feedback::updateOrCreate([
+            'user_id' => $regularUser->id,
+            'message' => 'Dashboard bagus dan alur quotation ke invoice sudah sangat membantu tim finance.',
+        ], [
+            'name' => $regularUser->name,
+            'company' => 'CV Sinar Digital',
+            'role' => 'Finance Admin',
+            'rating' => 5,
         ]);
 
         DB::table('password_reset_tokens')->updateOrInsert([
