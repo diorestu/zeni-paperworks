@@ -27,6 +27,7 @@ const selectedTaxIds = ref([]);
 const showAddClient = ref(false);
 const showAddProduct = ref(false);
 const showAddBankAccount = ref(false);
+const isEditingInvoiceNumber = ref(false);
 const clientSearch = ref('');
 const defaultDueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 const formatInitialRupiah = (value) => Number(value ?? 0).toLocaleString('id-ID');
@@ -487,8 +488,29 @@ watch(
                     <!-- Totals -->
                     <div class="bg-[#07304a] rounded-2xl p-6 text-white shadow-2xl shadow-[#07304a]/30">
                         <div class="mb-5 rounded-xl bg-white/10 px-4 py-3">
-                            <div class="text-[9px] font-semibold uppercase tracking-widest text-white/60">Invoice Number</div>
-                            <div class="mt-1 text-sm font-semibold tracking-wide">{{ form.invoice_number }}</div>
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="text-[9px] font-semibold uppercase tracking-widest text-white/60">Invoice Number</div>
+                                <button
+                                    type="button"
+                                    @click="isEditingInvoiceNumber = !isEditingInvoiceNumber"
+                                    class="inline-flex items-center gap-1 rounded-md bg-white/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-widest text-white/80 hover:bg-white/20"
+                                >
+                                    <Icon :icon="isEditingInvoiceNumber ? 'si:check-line' : 'si:edit-line'" :width="10" :height="10" />
+                                    {{ isEditingInvoiceNumber ? 'Done' : 'Edit' }}
+                                </button>
+                            </div>
+                            <div v-if="!isEditingInvoiceNumber" class="mt-1 text-sm font-semibold tracking-wide">{{ form.invoice_number }}</div>
+                            <div v-else class="mt-2">
+                                <input
+                                    v-model="form.invoice_number"
+                                    type="text"
+                                    class="w-full rounded-lg border border-white/25 bg-white/40 px-3 py-2 text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-600/70 focus:border-white/50"
+                                    placeholder="INV/YYMMDD/001"
+                                >
+                                <p v-if="form.errors.invoice_number" class="mt-1 text-[10px] font-semibold text-rose-200">
+                                    {{ form.errors.invoice_number }}
+                                </p>
+                            </div>
                         </div>
                         <h3 class="text-xs font-semibold uppercase tracking-widest text-white/50 mb-6">Invoice Summary</h3>
                         <div class="space-y-4">

@@ -30,8 +30,8 @@ const primaryAction = computed(() =>
 
 const secondaryAction = computed(() =>
     props.isAuthenticated
-        ? { label: 'Billing', href: route('settings.billing') }
-        : { label: 'Hubungi Sales', href: '#bantuan' }
+        ? { label: 'Tagihan', href: route('settings.billing') }
+        : { label: 'Hubungi Penjualan', href: '#bantuan' }
 );
 
 const navLinks = [
@@ -49,14 +49,14 @@ const fiturMegaMenu = [
         icon: 'si:file-document-line',
     },
     {
-        title: 'Quotation Cepat',
-        description: 'Konversi quotation ke invoice tanpa input ulang.',
+        title: 'Penawaran Cepat',
+        description: 'Konversi penawaran ke invoice tanpa input ulang.',
         href: '#fitur',
         icon: 'si:briefcase-line',
     },
     {
-        title: 'Manajemen Client',
-        description: 'Semua data client tersimpan rapi dan terpusat.',
+        title: 'Manajemen Klien',
+        description: 'Semua data klien tersimpan rapi dan terpusat.',
         href: '#fitur',
         icon: 'si:user-circle-line',
     },
@@ -70,25 +70,25 @@ const fiturMegaMenu = [
 
 const solusiMegaMenu = [
     {
-        title: 'Untuk Finance Team',
-        description: 'Automasi alur billing dan kontrol cashflow.',
+        title: 'Untuk Tim Keuangan',
+        description: 'Otomasi alur penagihan dan kontrol arus kas.',
         href: '#solusi',
         icon: 'si:wallet-line',
     },
     {
-        title: 'Untuk Owner',
-        description: 'Lihat performa bisnis dan approval lebih cepat.',
+        title: 'Untuk Pemilik Bisnis',
+        description: 'Lihat performa bisnis dan persetujuan lebih cepat.',
         href: '#solusi',
         icon: 'si:building-line',
     },
     {
-        title: 'Untuk Sales',
-        description: 'Kirim quotation cepat dan follow-up terukur.',
+        title: 'Untuk Tim Penjualan',
+        description: 'Kirim penawaran cepat dan tindak lanjut terukur.',
         href: '#solusi',
         icon: 'si:target-line',
     },
     {
-        title: 'Untuk Multi-Industry',
+        title: 'Untuk Multi Industri',
         description: 'Template fleksibel untuk berbagai jenis bisnis.',
         href: '#solusi',
         icon: 'si:layers-line',
@@ -96,19 +96,20 @@ const solusiMegaMenu = [
 ];
 
 const partnerIndustries = [
-    'Finance',
-    'Hospitality',
-    'Retail',
-    'Healthcare',
-    'Education',
-    'Technology',
+    'Keuangan',
+    'Hospitalitas',
+    'Ritel',
+    'Kesehatan',
+    'Pendidikan',
+    'Teknologi',
     'F&B',
-    'Manufacturing',
+    'Manufaktur',
 ];
 
-const heroChecks = ['Invoice & Quotation', 'Pelacakan Pembayaran', 'Data Client Terpusat'];
+const heroChecks = ['Invoice & Penawaran', 'Pelacakan Pembayaran', 'Data Klien Terpusat'];
 const currentYear = new Date().getFullYear();
 const showMobileMenu = ref(false);
+const selectedLanguage = ref('id');
 const heroSectionRef = ref(null);
 const isPastHero = ref(false);
 const heroCursorStyle = ref({
@@ -120,26 +121,26 @@ let testimonialTimer = null;
 
 const testimonials = [
     {
-        quote: '“Tim kami sekarang tidak lagi bolak-balik spreadsheet. Quotation dan invoice jalan dalam satu flow, serta status pembayaran langsung kebaca.”',
-        author: 'Finance Lead',
-        company: 'SME Services',
+        quote: '“Tim kami sekarang tidak lagi bolak-balik spreadsheet. Penawaran dan invoice berjalan dalam satu alur, serta status pembayaran langsung terlihat.”',
+        author: 'Lead Keuangan',
+        company: 'Perusahaan Jasa',
     },
     {
         quote: '“Waktu pembuatan invoice turun drastis. Tim sales bisa langsung lanjut ke follow-up tanpa tunggu admin input ulang data.”',
-        author: 'Operations Manager',
-        company: 'Retail Group',
+        author: 'Manajer Operasional',
+        company: 'Grup Ritel',
     },
     {
-        quote: '“Sistemnya rapi untuk multi-client. Reminder pembayaran juga membantu cashflow jadi lebih terkontrol tiap minggu.”',
-        author: 'Business Owner',
-        company: 'Hospitality Co',
+        quote: '“Sistemnya rapi untuk banyak klien. Pengingat pembayaran juga membuat arus kas lebih terkontrol tiap minggu.”',
+        author: 'Pemilik Bisnis',
+        company: 'Perusahaan Hospitalitas',
     },
 ];
 
 const topStats = computed(() => [
-    { label: 'Invoices Diproses', value: Number(props.stats?.invoices || 0).toLocaleString('id-ID') },
-    { label: 'Quotation Terkirim', value: Number(props.stats?.quotations || 0).toLocaleString('id-ID') },
-    { label: 'Client Aktif', value: Number(props.stats?.clients || 0).toLocaleString('id-ID') },
+    { label: 'Invoice Diproses', value: Number(props.stats?.invoices || 0).toLocaleString('id-ID') },
+    { label: 'Penawaran Terkirim', value: Number(props.stats?.quotations || 0).toLocaleString('id-ID') },
+    { label: 'Klien Aktif', value: Number(props.stats?.clients || 0).toLocaleString('id-ID') },
 ]);
 
 const spotlightFeatures = computed(() => {
@@ -169,6 +170,12 @@ const mobileMenuButtonClass = computed(() =>
     isPastHero.value
         ? 'border-slate-200 bg-white text-slate-600'
         : 'border-white/35 bg-white/10 text-white'
+);
+
+const languageSelectClass = computed(() =>
+    isPastHero.value
+        ? 'border-slate-200 bg-white text-slate-600'
+        : 'border-white/30 bg-white/10 text-white'
 );
 
 const closeMenu = () => {
@@ -333,6 +340,15 @@ onBeforeUnmount(() => {
                 </nav>
 
                 <div class="hidden items-center gap-3 md:flex">
+                    <select
+                        v-model="selectedLanguage"
+                        class="rounded-xl border px-3 py-2.5 text-xs font-semibold uppercase tracking-widest transition outline-none"
+                        :class="languageSelectClass"
+                    >
+                        <option value="id" class="text-slate-700">Indonesia</option>
+                        <option value="en" class="text-slate-700">English</option>
+                        <option value="zh" class="text-slate-700">Mandarin</option>
+                    </select>
                     <a
                         :href="secondaryAction.href"
                         class="rounded-xl border px-4 py-2.5 text-xs font-semibold uppercase tracking-widest transition"
@@ -354,7 +370,7 @@ onBeforeUnmount(() => {
                     class="md:hidden flex h-10 w-10 items-center justify-center rounded-xl border transition-all duration-500"
                     :class="mobileMenuButtonClass"
                     @click="showMobileMenu = true"
-                    aria-label="Open menu"
+                    aria-label="Buka menu"
                 >
                     <Icon icon="si:menu-hamburger-line" :width="18" :height="18" />
                 </button>
@@ -375,10 +391,22 @@ onBeforeUnmount(() => {
                 class="fixed right-0 top-0 z-[60] h-screen w-[82vw] max-w-xs border-l border-slate-100 bg-white px-5 py-6 md:hidden"
             >
                 <div class="mb-8 flex items-center justify-between">
-                    <p class="text-sm font-bold tracking-wide text-[#0b2d6b]">MENU</p>
+                    <p class="text-sm font-bold tracking-wide text-[#0b2d6b]">NAVIGASI</p>
                     <button type="button" class="rounded-lg bg-slate-100 p-2 text-slate-600" @click="closeMenu">
                         <Icon icon="si:close-line" :width="16" :height="16" />
                     </button>
+                </div>
+
+                <div class="mb-5">
+                    <label class="mb-1 ml-1 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Bahasa</label>
+                    <select
+                        v-model="selectedLanguage"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-semibold uppercase tracking-widest text-slate-700 outline-none"
+                    >
+                        <option value="id">Indonesia</option>
+                        <option value="en">English</option>
+                        <option value="zh">Mandarin</option>
+                    </select>
                 </div>
 
                 <div class="space-y-2">
@@ -432,13 +460,13 @@ onBeforeUnmount(() => {
                     <div>
                         <p class="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-4 py-1 text-[10px] font-semibold uppercase tracking-widest text-white">
                             <Icon icon="si:flash-line" :width="12" :height="12" />
-                            Solusi Seperti Jurnal, Fokus Untuk Tim Growing
+                            Solusi Seperti Jurnal, Fokus untuk Tim Bertumbuh
                         </p>
                         <h1 class="hero-title mt-5 text-4xl font-extrabold leading-tight md:text-5xl">
-                            Kelola Invoice, Quotation, dan Pembayaran dalam Satu Platform
+                            Kelola Invoice, Penawaran, dan Pembayaran dalam Satu Platform
                         </h1>
                         <p class="mt-4 max-w-xl text-sm leading-relaxed text-white">
-                            Paperwork membantu tim finance dan owner bisnis memproses dokumen lebih cepat, lebih rapi, dan lebih minim input berulang.
+                            Paperwork membantu tim keuangan dan pemilik bisnis memproses dokumen lebih cepat, lebih rapi, dan minim input berulang.
                         </p>
 
                         <div class="mt-7 flex flex-wrap items-center gap-3">
@@ -467,8 +495,8 @@ onBeforeUnmount(() => {
 
                     <div class="rounded-[28px] border border-white/20 bg-white/95 p-6 text-slate-900 shadow-2xl shadow-[#0a2558]/40">
                         <div class="flex items-center justify-between">
-                            <p class="text-sm font-bold text-[#0b2d6b]">Finance Snapshot</p>
-                            <span class="rounded-lg bg-emerald-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-emerald-600">Live</span>
+                            <p class="text-sm font-bold text-[#0b2d6b]">Ringkasan Keuangan</p>
+                            <span class="rounded-lg bg-emerald-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-emerald-600">Aktif</span>
                         </div>
                         <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <div v-for="stat in topStats" :key="stat.label" class="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
@@ -515,8 +543,8 @@ onBeforeUnmount(() => {
             <section id="fitur" class="mx-auto mt-14 max-w-7xl px-6">
                 <div class="text-center">
                     <p class="text-[10px] font-semibold uppercase tracking-widest text-[#0b2d6b]">Kenapa Paperwork</p>
-                    <h2 class="mt-2 text-3xl font-extrabold text-[#0b2d6b]">Alur Kerja Finance Lebih Cepat dan Terukur</h2>
-                    <p class="mx-auto mt-3 max-w-2xl text-sm text-slate-600">Satu workspace untuk dokumen transaksi, status pembayaran, dan manajemen data client.</p>
+                    <h2 class="mt-2 text-3xl font-extrabold text-[#0b2d6b]">Alur Kerja Keuangan Lebih Cepat dan Terukur</h2>
+                    <p class="mx-auto mt-3 max-w-2xl text-sm text-slate-600">Satu ruang kerja untuk dokumen transaksi, status pembayaran, dan manajemen data klien.</p>
                 </div>
 
                 <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -559,7 +587,7 @@ onBeforeUnmount(() => {
             <section id="harga" class="mx-auto mt-16 max-w-7xl px-6">
                 <div class="rounded-[28px] border border-slate-200 bg-white p-7 shadow-sm md:p-10">
                     <div class="mb-8 text-center">
-                        <p class="text-[10px] font-semibold uppercase tracking-widest text-[#0b2d6b]">Pricing</p>
+                        <p class="text-[10px] font-semibold uppercase tracking-widest text-[#0b2d6b]">Harga</p>
                         <h2 class="mt-2 text-3xl font-extrabold text-slate-900">Pilih Paket Sesuai Tahap Bisnis</h2>
                         <p class="mt-3 text-sm text-slate-600">Mulai dari gratis untuk kebutuhan dasar hingga enterprise untuk volume transaksi tinggi.</p>
                     </div>
@@ -598,7 +626,7 @@ onBeforeUnmount(() => {
 
             <section id="testimoni" class="mx-auto mt-16 max-w-5xl px-6 pb-16">
                 <div class="rounded-[28px] bg-gradient-to-br from-[#0b2d6b] to-[#2c79dd] p-8 text-white shadow-2xl shadow-[#1b4e9f]/30 md:p-10">
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-white/90">Customer Story</p>
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-white/90">Kisah Pelanggan</p>
                     <transition name="fade" mode="out-in">
                         <div :key="testimonialIndex" class="mt-4">
                             <p class="text-lg font-semibold leading-relaxed text-white md:text-xl">
@@ -618,7 +646,7 @@ onBeforeUnmount(() => {
                             class="h-1.5 transition-all"
                             :class="testimonialIndex === index ? 'w-6 rounded-full bg-white' : 'w-2 rounded-full bg-white/40'"
                             @click="testimonialIndex = index"
-                            :aria-label="`Testimonial ${index + 1}`"
+                            :aria-label="`Testimoni ${index + 1}`"
                         ></button>
                     </div>
 
@@ -630,7 +658,7 @@ onBeforeUnmount(() => {
                             Mulai Sekarang
                         </Link>
                         <a href="https://wa.me/6285183440300" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-white/30 bg-white/10 px-6 py-3 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-white/20">
-                            Chat Sales
+                            Hubungi Penjualan
                         </a>
                     </div>
                 </div>
@@ -641,19 +669,19 @@ onBeforeUnmount(() => {
                     <div class="text-center">
                         <p class="text-[10px] font-semibold uppercase tracking-widest text-[#0b2d6b]">Bantuan</p>
                         <h2 class="mt-2 text-3xl font-extrabold text-slate-900">Butuh Bantuan Implementasi?</h2>
-                        <p class="mx-auto mt-3 max-w-2xl text-sm text-slate-600">Tim kami siap bantu onboarding, migrasi data, dan setup workflow sesuai kebutuhan bisnis kamu.</p>
+                        <p class="mx-auto mt-3 max-w-2xl text-sm text-slate-600">Tim kami siap bantu orientasi awal, migrasi data, dan pengaturan alur kerja sesuai kebutuhan bisnismu.</p>
                     </div>
                     <div class="mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
                         <a href="https://wa.me/6285183440300" target="_blank" rel="noopener noreferrer" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:border-[#0b2d6b]/30 hover:bg-white">
-                            <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Live Chat</p>
-                            <p class="mt-2 text-sm font-semibold text-slate-900">Konsultasi via WhatsApp</p>
+                            <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Obrolan Langsung</p>
+                            <p class="mt-2 text-sm font-semibold text-slate-900">Konsultasi lewat WhatsApp</p>
                         </a>
                         <a href="mailto:support@paperwork.local" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:border-[#0b2d6b]/30 hover:bg-white">
-                            <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Email Support</p>
+                            <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Dukungan Email</p>
                             <p class="mt-2 text-sm font-semibold text-slate-900">support@paperwork.local</p>
                         </a>
                         <a href="#fitur" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:border-[#0b2d6b]/30 hover:bg-white" @click="(event) => scrollToSection(event, '#fitur')">
-                            <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Product Tour</p>
+                            <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Tur Produk</p>
                             <p class="mt-2 text-sm font-semibold text-slate-900">Lihat fitur inti Paperwork</p>
                         </a>
                     </div>
@@ -680,7 +708,7 @@ onBeforeUnmount(() => {
             target="_blank"
             rel="noopener noreferrer"
             class="fixed bottom-6 right-6 z-[70] inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-xs font-semibold uppercase tracking-widest text-white shadow-xl shadow-[#25D366]/35 transition hover:scale-[1.02] hover:bg-[#1fb85a]"
-            aria-label="Chat WhatsApp"
+            aria-label="Hubungi via WhatsApp"
         >
             <Icon icon="logos:whatsapp-icon" :width="18" :height="18" />
             <span>WhatsApp</span>

@@ -1,11 +1,16 @@
 <script setup>
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     quotation: Object,
+});
+const page = usePage();
+const isFreePlan = computed(() => {
+    const planName = page.props?.auth?.user?.plan_name;
+    return String(planName || 'Free').toLowerCase() === 'free';
 });
 
 const formatDate = (dateString) => {
@@ -90,6 +95,13 @@ const convertToInvoice = () => {
                 </div>
 
                 <div class="flex items-center gap-3">
+                    <Link
+                        :href="route('quotations.edit', quotation)"
+                        class="flex items-center gap-2 rounded-xl bg-white border border-slate-100 px-5 py-3 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50 transition-all"
+                    >
+                        <Icon icon="si:edit-line" :width="18" :height="18"  />
+                        <span>Edit</span>
+                    </Link>
                     <button @click="printQuotation" class="flex items-center gap-2 rounded-xl bg-white border border-slate-100 px-5 py-3 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50 transition-all">
                         <Icon icon="si:file-download-line" :width="18" :height="18"  />
                         <span>Print</span>
@@ -99,7 +111,9 @@ const convertToInvoice = () => {
                         @click="convertToInvoice"
                         class="flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95"
                     >
-                        <Icon icon="si:file-transfer-line" :width="18" :height="18"  />
+                        <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/15">
+                            <Icon icon="si:file-export-line" :width="12" :height="12" class="text-white" />
+                        </span>
                         <span>Convert to Invoice</span>
                     </button>
                     <Link
@@ -121,7 +135,10 @@ const convertToInvoice = () => {
                             :class="[variantStyles[variant].card, printVariant ? `print-variant-${printVariant}` : '']"
                             style="width: 210mm; height: 297mm;"
                         >
-                            <div class="p-10 sm:p-14">
+                            <div v-if="isFreePlan" class="absolute inset-0 z-[1] pointer-events-none flex items-center justify-center">
+                                <img src="/img/logo/logo_colorful.png" alt="Watermark" class="h-40 w-auto opacity-[0.08] rotate-[-18deg] select-none">
+                            </div>
+                            <div class="relative z-[2] p-10 sm:p-14">
                                 <div class="flex justify-between items-start mb-12">
                                     <div class="flex-1">
                                         <h1 class="text-3xl font-black text-slate-900 tracking-tighter mb-6">QUOTATION</h1>

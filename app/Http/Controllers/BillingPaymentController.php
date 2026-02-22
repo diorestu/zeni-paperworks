@@ -289,7 +289,7 @@ class BillingPaymentController extends Controller
     private function callbacks(): array
     {
         return [
-            'finish' => route('settings.billing', ['payment' => 'finish']),
+            'finish' => route('settings.billing.success', ['status' => 'paid']),
             'unfinish' => route('settings.billing', ['payment' => 'unfinish']),
             'error' => route('settings.billing', ['payment' => 'error']),
         ];

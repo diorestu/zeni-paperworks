@@ -3,11 +3,14 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\BillingPaymentController;
+use App\Http\Controllers\NotificationController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 
@@ -22,7 +25,19 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+    Route::post('/email/verification-notification', [LoginController::class, 'sendVerification'])
+        ->name('verification.send')
+        ->middleware('throttle:6,1');
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+
+        return redirect()->route('dashboard')->with('status', 'Email berhasil diverifikasi.');
+    })->middleware(['signed'])->name('verification.verify');
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::get('/onboarding', [OnboardingController::class, 'show'])->name('onboarding.show');
+    Route::post('/onboarding/complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
 
     // Unverified users can still access dashboard.
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -38,8 +53,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show')->middleware('role:admin,user')->where('invoice', '.*');
 
         Route::resource('quotations', App\Http\Controllers\QuotationController::class)->only(['index', 'create', 'store'])->middleware('role:admin,user');
+        Route::get('/quotations/{quotation}/edit', [App\Http\Controllers\QuotationController::class, 'edit'])->name('quotations.edit')->middleware('role:admin,user')->where('quotation', '.*');
+        Route::patch('/quotations/{quotation}', [App\Http\Controllers\QuotationController::class, 'update'])->name('quotations.update')->middleware('role:admin,user')->where('quotation', '.*');
         Route::get('/quotations/{quotation}', [App\Http\Controllers\QuotationController::class, 'show'])->name('quotations.show')->middleware('role:admin,user')->where('quotation', '.*');
-        Route::post('/quotations/{quotation}/convert-to-invoice', [App\Http\Controllers\QuotationController::class, 'convertToInvoice'])->name('quotations.convert')->middleware('role:admin,user');
+        Route::post('/quotations/{quotation}/convert-to-invoice', [App\Http\Controllers\QuotationController::class, 'convertToInvoice'])->name('quotations.convert')->middleware('role:admin,user')->where('quotation', '.*');
 
         Route::prefix('profile')->name('profile.')->group(function () {
             Route::get('/', [ProfileController::class, 'edit'])->name('edit');
@@ -55,6 +72,8 @@ Route::middleware('auth')->group(function () {
 
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::get('/billing', [ProfileController::class, 'billing'])->name('billing')->middleware('role:admin,user');
+            Route::get('/billing/checkout', [ProfileController::class, 'billingCheckout'])->name('billing.checkout.page')->middleware('role:admin,user');
+            Route::get('/billing/success', [ProfileController::class, 'billingSuccess'])->name('billing.success')->middleware('role:admin,user');
             Route::post('/billing/checkout', [BillingPaymentController::class, 'createTransaction'])->name('billing.checkout')->middleware('role:admin,user');
             Route::post('/billing/confirm', [BillingPaymentController::class, 'confirmTransaction'])->name('billing.confirm')->middleware('role:admin,user');
             Route::get('/billing/receipts/{invoice}/download', [BillingPaymentController::class, 'downloadReceipt'])->name('billing.receipts.download')->middleware('role:admin,user');

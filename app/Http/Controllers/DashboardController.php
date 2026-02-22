@@ -7,20 +7,33 @@ use App\Models\Invoice;
 use App\Models\SubscriptionInvoice;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): Response|RedirectResponse
     {
-        if ($request->user()?->isSuperAdmin()) {
+        $user = $request->user();
+
+        if ($user?->isSuperAdmin()) {
             return $this->superAdminDashboard();
         }
 
+        if ($user && ! $user->wizard_completed) {
+            return redirect()->route('onboarding.show');
+        }
+
+        $allowedPeriods = [3, 6, 12, 24];
+        $periodMonths = (int) $request->integer('period', 12);
+        if (! in_array($periodMonths, $allowedPeriods, true)) {
+            $periodMonths = 12;
+        }
+
         $now = Carbon::now();
-        $start = $now->copy()->startOfMonth()->subMonths(11);
+        $start = $now->copy()->startOfMonth()->subMonths($periodMonths - 1);
 
         $monthlyCreated = Invoice::query()
             ->whereBetween('invoice_date', [$start->copy()->startOfMonth(), $now->copy()->endOfMonth()])
@@ -49,7 +62,7 @@ class DashboardController extends Controller
         $overdueSeries = [];
         $cursor = $start->copy();
 
-        for ($i = 0; $i < 12; $i++) {
+        for ($i = 0; $i < $periodMonths; $i++) {
             $ym = $cursor->format('Y-m');
             $labels[] = $cursor->format('M y');
             $createdSeries[] = (float) ($monthlyCreated[$ym] ?? 0);
@@ -68,11 +81,16 @@ class DashboardController extends Controller
         $unpaid = (float) Invoice::query()->whereIn('status', ['draft', 'sent'])->sum('total');
 
         $outstandingCount = Invoice::query()->where('status', 'sent')->count();
+        $draftCount = Invoice::query()->where('status', 'draft')->count();
+        $paidCount = Invoice::query()->where('status', 'paid')->count();
+        $totalInvoicesCount = Invoice::query()->count();
         $overdueCount = Invoice::query()
             ->where('status', '!=', 'paid')
             ->whereDate('due_date', '<', $now->toDateString())
             ->count();
         $unpaidCount = Invoice::query()->whereIn('status', ['draft', 'sent'])->count();
+        $averageInvoice = $totalInvoicesCount > 0 ? $totalCreated / $totalInvoicesCount : 0;
+        $collectionRate = $totalCreated > 0 ? ($totalPaid / $totalCreated) * 100 : 0;
 
         return Inertia::render('Dashboard', [
             'range' => [
@@ -86,14 +104,27 @@ class DashboardController extends Controller
                 'overdue' => $overdue,
                 'unpaid' => $unpaid,
                 'outstanding_count' => $outstandingCount,
+                'draft_count' => $draftCount,
+                'paid_count' => $paidCount,
+                'total_invoices_count' => $totalInvoicesCount,
                 'overdue_count' => $overdueCount,
                 'unpaid_count' => $unpaidCount,
+                'average_invoice' => $averageInvoice,
+                'collection_rate' => round($collectionRate, 2),
             ],
             'chart' => [
                 'labels' => $labels,
                 'created' => $createdSeries,
                 'paid' => $paidSeries,
                 'overdue' => $overdueSeries,
+            ],
+            'period' => [
+                'selected' => $periodMonths,
+                'options' => $allowedPeriods,
+            ],
+            'verification' => [
+                'email_verified' => (bool) $user?->email_verified_at,
+                'email' => $user?->email,
             ],
         ]);
     }

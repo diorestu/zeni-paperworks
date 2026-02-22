@@ -65,8 +65,22 @@ class LoginController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+        $user->sendEmailVerificationNotification();
 
         return redirect()->intended('/dashboard');
+    }
+
+    public function sendVerification(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
+            return back()->with('status', 'Email kamu sudah terverifikasi.');
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return back()->with('status', 'Link verifikasi telah dikirim ulang ke email kamu.');
     }
 
     public function destroy(Request $request)

@@ -28,6 +28,7 @@ class Quotation extends Model
         'tax_total',
         'total',
         'notes',
+        'applied_taxes',
         'invoice_id',
     ];
 
@@ -37,6 +38,7 @@ class Quotation extends Model
         'subtotal' => 'decimal:2',
         'tax_total' => 'decimal:2',
         'total' => 'decimal:2',
+        'applied_taxes' => 'array',
     ];
 
     public function client(): BelongsTo

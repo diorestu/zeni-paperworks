@@ -73,8 +73,50 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function billingCheckout(Request $request): Response
+    {
+        $plans = $this->billingPlans();
+        $validated = $request->validate([
+            'plan' => 'required|string',
+            'billing_cycle' => 'required|in:monthly,yearly',
+        ]);
+
+        abort_unless(isset($plans[$validated['plan']]), 404);
+
+        $plan = $plans[$validated['plan']];
+        $unitPrice = $plan[$validated['billing_cycle']];
+        $total = $validated['billing_cycle'] === 'yearly'
+            ? $unitPrice * 12
+            : $unitPrice;
+
+        return Inertia::render('Profile/BillingCheckout', [
+            'plan' => $validated['plan'],
+            'billingCycle' => $validated['billing_cycle'],
+            'unitPrice' => $unitPrice,
+            'totalAmount' => $total,
+            'midtransEnabled' => filled(config('services.midtrans.server_key')) && filled(config('services.midtrans.client_key')),
+        ]);
+    }
+
+    public function billingSuccess(Request $request): Response
+    {
+        return Inertia::render('Profile/BillingSuccess', [
+            'orderId' => (string) $request->query('order_id', ''),
+            'status' => (string) $request->query('status', 'paid'),
+        ]);
+    }
+
     public function security(): Response
     {
         return Inertia::render('Profile/Security');
+    }
+
+    private function billingPlans(): array
+    {
+        return [
+            'Basic' => ['monthly' => 49000, 'yearly' => 38000],
+            'Pro' => ['monthly' => 139000, 'yearly' => 106000],
+            'Enterprise' => ['monthly' => 199000, 'yearly' => 151000],
+        ];
     }
 }

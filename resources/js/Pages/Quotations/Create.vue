@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Autocomplete from '@/Components/Autocomplete.vue';
 import TaxSelector from '@/Components/TaxSelector.vue';
@@ -13,24 +13,40 @@ const props = defineProps({
     products: Array,
     taxes: Array,
     nextQuotationNumber: String,
+    quotation: {
+        type: Object,
+        default: null,
+    },
 });
 
 const showTaxSelector = ref(false);
-const selectedTaxIds = ref([]);
+const selectedTaxIds = ref((props.quotation?.applied_taxes || []).map((tax) => tax.id));
 const datePickerTimeConfig = { enableTimePicker: false };
 const showAddClient = ref(false);
 const showAddProduct = ref(false);
 const clientSearch = ref('');
+const isEditingQuotationNumber = ref(false);
+const isEditMode = computed(() => !!props.quotation);
 
 const form = useForm({
-    client_id: '',
-    quotation_number: props.nextQuotationNumber,
-    quotation_date: new Date().toISOString().split('T')[0],
-    valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    notes: '',
-    items: [
-        { product_id: null, description: '', quantity: 1, unit_price: 0, unit_price_input: '0' },
-    ],
+    client_id: props.quotation?.client_id ?? '',
+    quotation_number: props.quotation?.quotation_number ?? props.nextQuotationNumber,
+    quotation_date: props.quotation?.quotation_date
+        ? new Date(props.quotation.quotation_date).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
+    valid_until: props.quotation?.valid_until
+        ? new Date(props.quotation.valid_until).toISOString().split('T')[0]
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    notes: props.quotation?.notes ?? '',
+    items: props.quotation?.items?.length
+        ? props.quotation.items.map((item) => ({
+            product_id: item.product_id ?? null,
+            description: item.description ?? '',
+            quantity: Number(item.quantity ?? 1),
+            unit_price: Number(item.unit_price ?? 0),
+            unit_price_input: Number(item.unit_price ?? 0).toLocaleString('id-ID'),
+        }))
+        : [{ product_id: null, description: '', quantity: 1, unit_price: 0, unit_price_input: '0' }],
 });
 
 const clientForm = useForm({
@@ -134,9 +150,14 @@ const submit = () => {
     form
         .transform((data) => ({
             ...data,
+            selected_tax_ids: selectedTaxIds.value,
             items: data.items.map(({ unit_price_input, ...item }) => item),
         }))
-        .post(route('quotations.store'));
+        [isEditMode.value ? 'patch' : 'post'](
+            isEditMode.value
+                ? route('quotations.update', props.quotation)
+                : route('quotations.store')
+        );
 };
 
 const submitClient = () => {
@@ -164,11 +185,19 @@ const submitProduct = () => {
 const openAddProduct = () => {
     showAddProduct.value = true;
 };
+
+onMounted(() => {
+    if (!props.quotation?.client_id) return;
+    const selectedClient = (props.clients || []).find((client) => client.id === props.quotation.client_id);
+    if (selectedClient) {
+        clientSearch.value = selectedClient.name;
+    }
+});
 </script>
 
 <template>
     <AppLayout>
-        <Head title="Create Quotation" />
+        <Head :title="isEditMode ? `Edit ${form.quotation_number}` : 'Create Quotation'" />
 
         <div class="w-full">
             <div class="mb-10 flex items-center justify-between">
@@ -177,19 +206,10 @@ const openAddProduct = () => {
                         <Icon icon="si:arrow-left-line" :width="18" :height="18"  />
                     </Link>
                     <div>
-                        <h1 class="text-3xl font-semibold text-slate-900 tracking-tight">New Quotation</h1>
-                        <p class="text-slate-500 font-normal">Create a new quotation for your client.</p>
+                        <h1 class="text-3xl font-semibold text-slate-900 tracking-tight">{{ isEditMode ? 'Edit Quotation' : 'New Quotation' }}</h1>
+                        <p class="text-slate-500 font-normal">{{ isEditMode ? 'Update quotation details and save changes.' : 'Create a new quotation for your client.' }}</p>
                     </div>
                 </div>
-
-                <button
-                    @click="submit"
-                    :disabled="form.processing"
-                    class="flex items-center gap-2 rounded-xl bg-[#07304a] px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
-                >
-                    <Icon icon="si:archive-line" :width="18" :height="18"  />
-                    <span>{{ form.processing ? 'Saving...' : 'Save Quotation' }}</span>
-                </button>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -258,9 +278,6 @@ const openAddProduct = () => {
                     </div>
 
                     <div class="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/20 overflow-hidden">
-                        <div class="bg-slate-50/50 px-8 py-5 border-b border-slate-50 flex items-center justify-between">
-                            <div></div>
-                        </div>
                         <div class="p-6 space-y-6">
                             <div v-for="(item, index) in form.items" :key="index" class="grid grid-cols-12 gap-4 items-end pb-6 border-b border-slate-50 last:border-0 last:pb-0">
                                 <div class="col-span-6 space-y-2">
@@ -317,54 +334,6 @@ const openAddProduct = () => {
                             </button>
                         </div>
                     </div>
-                </div>
-
-                <div class="space-y-8">
-                    <div class="bg-[#07304a] rounded-2xl p-6 text-white shadow-2xl shadow-[#07304a]/30">
-                        <div class="mb-5 rounded-xl bg-white/10 px-4 py-3">
-                            <div class="text-[9px] font-semibold uppercase tracking-widest text-white/60">Quotation Number</div>
-                            <div class="mt-1 text-sm font-semibold tracking-wide">{{ form.quotation_number }}</div>
-                        </div>
-                        <h3 class="text-xs font-semibold uppercase tracking-widest text-white/50 mb-6">Quotation Summary</h3>
-                        <div class="space-y-4">
-                            <div class="flex justify-between text-sm font-semibold">
-                                <span class="text-white/70">Subtotal</span>
-                                <span>Rp{{ subtotal.toLocaleString('id-ID') }}</span>
-                            </div>
-
-                            <button
-                                @click="showTaxSelector = true"
-                                class="w-full flex justify-between items-center text-sm font-semibold py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
-                            >
-                                <div class="flex items-center gap-2">
-                                    <Icon icon="si:checklist-line" :width="16" :height="16"  />
-                                    <span class="text-white/70">Tax</span>
-                                    <span v-if="selectedTaxes.length > 0" class="px-2 py-0.5 bg-white/20 rounded-md text-xs">
-                                        {{ selectedTaxes.length }}
-                                    </span>
-                                </div>
-                                <span>{{ taxAmount >= 0 ? '+' : '' }}Rp{{ taxAmount.toLocaleString('id-ID') }}</span>
-                            </button>
-
-                            <div v-if="selectedTaxes.length > 0" class="space-y-2 pt-2">
-                                <div
-                                    v-for="tax in selectedTaxes"
-                                    :key="tax.id"
-                                    class="flex justify-between text-xs font-semibold text-white/60 pl-4"
-                                >
-                                    <span>{{ tax.name }} ({{ tax.type === 'add' ? '+' : '-' }}{{ tax.rate }}%)</span>
-                                    <span>{{ tax.type === 'add' ? '+' : '-' }}Rp{{ ((subtotal * tax.rate) / 100).toLocaleString('id-ID') }}</span>
-                                </div>
-                            </div>
-
-                            <div class="pt-4 mt-4 border-t border-white/10">
-                                <div class="flex justify-between items-end">
-                                    <span class="text-[10px] font-semibold uppercase tracking-widest text-white/50">Total Amount</span>
-                                    <span class="text-3xl font-semibold">Rp{{ total.toLocaleString('id-ID') }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-xl shadow-slate-200/20">
                         <div class="space-y-4">
@@ -383,6 +352,85 @@ const openAddProduct = () => {
                             </p>
                         </div>
                     </div>
+                </div>
+
+                <div class="space-y-8 self-start lg:sticky lg:top-24">
+                    <div class="bg-[#07304a] rounded-2xl p-6 text-white shadow-2xl shadow-[#07304a]/30">
+                        <div class="mb-5 rounded-xl bg-white/10 px-4 py-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="text-[9px] font-semibold uppercase tracking-widest text-white/60">Quotation Number</div>
+                                <button
+                                    type="button"
+                                    @click="isEditingQuotationNumber = !isEditingQuotationNumber"
+                                    class="inline-flex items-center gap-1 rounded-md bg-white/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-widest text-white/80 hover:bg-white/20"
+                                >
+                                    <Icon :icon="isEditingQuotationNumber ? 'si:check-line' : 'si:edit-line'" :width="10" :height="10" />
+                                    {{ isEditingQuotationNumber ? 'Done' : 'Edit' }}
+                                </button>
+                            </div>
+                            <div v-if="!isEditingQuotationNumber" class="mt-1 text-sm font-semibold tracking-wide">{{ form.quotation_number }}</div>
+                            <div v-else class="mt-2">
+                                <input
+                                    v-model="form.quotation_number"
+                                    type="text"
+                                    class="w-full rounded-lg border border-white/25 bg-white/40 px-3 py-2 text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-600/70 focus:border-white/50"
+                                    placeholder="QUO/YYMMDD/001"
+                                >
+                                <p v-if="form.errors.quotation_number" class="mt-1 text-[10px] font-semibold text-rose-200">
+                                    {{ form.errors.quotation_number }}
+                                </p>
+                            </div>
+                        </div>
+                        <h3 class="text-xs font-semibold uppercase tracking-widest text-white/50 mb-6">Quotation Summary</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between text-sm font-semibold">
+                                <span class="text-white/70">Subtotal</span>
+                                <span>Rp{{ subtotal.toLocaleString('id-ID') }}</span>
+                            </div>
+
+                            <button
+                                @click="showTaxSelector = true"
+                                class="w-full flex justify-between items-center py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                            >
+                                <div class="flex items-center gap-2 text-sm font-semibold text-white">
+                                    <Icon icon="si:checklist-line" :width="16" :height="16" class="text-white" />
+                                    <span class="text-white">Tax</span>
+                                    <span v-if="selectedTaxes.length > 0" class="px-2 py-0.5 bg-white/20 rounded-md text-xs text-white">
+                                        {{ selectedTaxes.length }}
+                                    </span>
+                                </div>
+                                <span class="text-sm font-semibold text-white">{{ taxAmount >= 0 ? '+' : '' }}Rp{{ taxAmount.toLocaleString('id-ID') }}</span>
+                            </button>
+
+                            <div v-if="selectedTaxes.length > 0" class="space-y-2 pt-2">
+                                <div
+                                    v-for="tax in selectedTaxes"
+                                    :key="tax.id"
+                                    class="flex justify-between text-xs font-semibold text-white pl-4"
+                                >
+                                    <span>{{ tax.name }} ({{ tax.type === 'add' ? '+' : '-' }}{{ tax.rate }}%)</span>
+                                    <span>{{ tax.type === 'add' ? '+' : '-' }}Rp{{ ((subtotal * tax.rate) / 100).toLocaleString('id-ID') }}</span>
+                                </div>
+                            </div>
+
+                            <div class="pt-4 mt-4 border-t border-white/10">
+                                <div class="flex justify-between items-end">
+                                    <span class="text-[10px] font-semibold uppercase tracking-widest text-white/50">Total Amount</span>
+                                    <span class="text-3xl font-semibold">Rp{{ total.toLocaleString('id-ID') }}</span>
+                                </div>
+                            </div>
+
+                            <button
+                                @click="submit"
+                                :disabled="form.processing"
+                                class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-[#07304a] shadow-xl shadow-black/10 transition-all hover:bg-slate-100 active:scale-95 disabled:opacity-50"
+                            >
+                                <Icon icon="si:archive-line" :width="16" :height="16"  />
+                                <span>{{ form.processing ? 'Saving...' : (isEditMode ? 'Update Quotation' : 'Save Quotation') }}</span>
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

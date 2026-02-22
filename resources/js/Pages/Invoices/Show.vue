@@ -1,7 +1,7 @@
 <script setup>
-import { ref, nextTick, onUnmounted } from 'vue';
+import { ref, nextTick, onUnmounted, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
@@ -10,6 +10,11 @@ const props = defineProps({
         type: String,
         default: null,
     },
+});
+const page = usePage();
+const isFreePlan = computed(() => {
+    const planName = page.props?.auth?.user?.plan_name;
+    return String(planName || 'Free').toLowerCase() === 'free';
 });
 
 const formatDate = (dateString) => {
@@ -179,10 +184,13 @@ onUnmounted(() => {
                             :class="[variantStyles[variant].card, printVariant ? `print-variant-${printVariant}` : '']"
                             style="width: 210mm; height: 297mm;"
                         >
+                            <div v-if="isFreePlan" class="absolute inset-0 z-[1] pointer-events-none flex items-center justify-center">
+                                <img src="/img/logo/logo_colorful.png" alt="Watermark" class="h-40 w-auto opacity-[0.08] rotate-[-18deg] select-none">
+                            </div>
                             <div v-if="isSwitchingVariant" class="absolute inset-0 z-20 flex items-center justify-center bg-white/65 backdrop-blur-[2px]">
                                 <div class="h-11 w-11 animate-spin rounded-full border-4 border-[#07304a] border-t-transparent"></div>
                             </div>
-                            <div class="p-10 sm:p-14">
+                            <div class="relative z-[2] p-10 sm:p-14">
                     <!-- Top Branding -->
                     <div class="flex justify-between items-start mb-12">
                          <div class="flex-1">

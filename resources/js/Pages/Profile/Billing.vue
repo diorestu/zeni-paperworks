@@ -82,6 +82,11 @@ const getDayPrice = (plan) => {
     const priceNum = parseInt(getPrice(plan).replaceAll('.', ''), 10);
     return Math.floor(priceNum / 30).toLocaleString('id-ID');
 };
+const getAnnualTotal = (plan) => {
+    if (plan.name === 'Free') return '0';
+    const yearlyMonthlyEquivalent = parseInt(plan.yearly.replaceAll('.', ''), 10);
+    return (yearlyMonthlyEquivalent * 12).toLocaleString('id-ID');
+};
 
 const formatCurrency = (amount) => `Rp${Number(amount).toLocaleString('id-ID')}`;
 
@@ -109,68 +114,10 @@ const payPlan = async (plan) => {
         return;
     }
 
-    errorMessage.value = '';
-    flashMessage.value = '';
-
-    if (!props.midtransEnabled) {
-        errorMessage.value = 'Midtrans belum dikonfigurasi. Isi MIDTRANS_SERVER_KEY dan MIDTRANS_CLIENT_KEY.';
-        return;
-    }
-
-    if (typeof window.snap?.pay !== 'function') {
-        errorMessage.value = 'Snap.js Midtrans tidak ter-load. Silakan refresh halaman.';
-        return;
-    }
-
-    processingPlan.value = plan.name;
-
-    try {
-        const { data } = await window.axios.post(route('settings.billing.checkout'), {
-            plan: plan.name,
-            billing_cycle: isYearly.value ? 'yearly' : 'monthly',
-        });
-
-        if (!data?.snap_token) {
-            throw new Error('Snap token tidak tersedia.');
-        }
-
-        window.snap.pay(data.snap_token, {
-            onSuccess: async () => {
-                await confirmPayment(data.order_id);
-            },
-            onPending: async () => {
-                await confirmPayment(data.order_id);
-                flashMessage.value = 'Pembayaran masih pending. Kami akan update otomatis setelah settlement.';
-            },
-            onError: () => {
-                processingPlan.value = null;
-                errorMessage.value = 'Pembayaran gagal diproses. Coba ulangi beberapa saat lagi.';
-            },
-            onClose: () => {
-                processingPlan.value = null;
-            },
-        });
-    } catch (error) {
-        processingPlan.value = null;
-        errorMessage.value = error?.response?.data?.message ?? 'Gagal membuat transaksi Midtrans.';
-    }
-};
-
-const confirmPayment = async (orderId) => {
-    try {
-        const { data } = await window.axios.post(route('settings.billing.confirm'), {
-            order_id: orderId,
-        });
-
-        if (data?.is_paid) {
-            flashMessage.value = 'Pembayaran berhasil. Plan Anda sudah diperbarui.';
-            router.reload({ only: ['currentPlan', 'paymentHistory'] });
-        }
-    } catch (error) {
-        errorMessage.value = error?.response?.data?.message ?? 'Transaksi berhasil dibuat, tapi konfirmasi status gagal.';
-    } finally {
-        processingPlan.value = null;
-    }
+    router.visit(route('settings.billing.checkout.page', {
+        plan: plan.name,
+        billing_cycle: isYearly.value ? 'yearly' : 'monthly',
+    }));
 };
 </script>
 
@@ -242,15 +189,19 @@ const confirmPayment = async (orderId) => {
                     <div class="h-px bg-slate-100 w-full mb-8"></div>
 
                     <div class="mb-10">
-                        <div v-if="plan.name !== 'Free'" class="flex items-baseline gap-2 mb-1">
-                            <span class="text-2xl font-bold text-slate-900 tracking-tight">Rp{{ getDayPrice(plan) }}</span>
-                            <span class="text-slate-400 text-[10px] font-bold uppercase">/ day</span>
-                        </div>
                         <div class="flex items-baseline gap-2">
-                            <span :class="[plan.name === 'Free' ? 'text-4xl font-bold text-slate-900' : 'text-slate-400 text-sm font-semibold']">
-                                Rp{{ getPrice(plan) }}
+                            <span :class="[plan.name === 'Free' ? 'text-4xl font-bold text-slate-900' : (!isYearly ? 'text-3xl font-bold text-slate-900 tracking-tight' : 'text-slate-400 text-sm font-semibold')]">
+                                Rp{{ plan.monthly }}
                             </span>
                             <span class="text-slate-400 text-[10px] font-semibold uppercase">/ month</span>
+                        </div>
+                        <div v-if="plan.name !== 'Free'" class="mt-2 flex items-baseline gap-2">
+                            <span class="text-slate-500 text-sm font-semibold">Rp{{ getDayPrice(plan) }}</span>
+                            <span class="text-slate-400 text-[10px] font-semibold uppercase">/ day</span>
+                        </div>
+                        <div v-if="isYearly && plan.name !== 'Free'" class="mt-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                            <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Total annually</p>
+                            <p class="mt-1 text-sm font-semibold text-slate-900">Rp{{ getAnnualTotal(plan) }} / year</p>
                         </div>
                         <p v-if="plan.name === 'Free'" class="text-slate-400 text-[10px] font-semibold uppercase mt-1">forever</p>
                     </div>

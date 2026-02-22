@@ -8,6 +8,9 @@ const userName = computed(() => page.props.auth?.user?.name || 'Ava Moore');
 const currentPackage = computed(() => page.props.auth?.user?.plan_name || 'Free');
 const showDropdown = ref(false);
 const showNotifications = ref(false);
+const notifications = ref([]);
+const unreadNotificationCount = ref(0);
+const notificationsLoading = ref(false);
 const isSidebarCollapsed = ref(false);
 const showFeedbackModal = ref(false);
 const feedbackSubmitted = ref(false);
@@ -88,6 +91,8 @@ let unregisterFinish;
 let feedbackTimer = null;
 let feedbackActiveStartedAt = null;
 let feedbackRemainingMs = 60000;
+let notificationsPoller = null;
+let lastNotificationServerTime = null;
 
 const feedbackStorageKey = computed(() => {
     const userId = page.props.auth?.user?.id || 'guest';
@@ -151,6 +156,10 @@ onMounted(() => {
     if (!hasSubmittedFeedback()) {
         startFeedbackCountdown();
     }
+    fetchNotifications({ force: true });
+    notificationsPoller = setInterval(() => {
+        fetchNotifications();
+    }, 20000);
 });
 
 onUnmounted(() => {
@@ -162,6 +171,10 @@ onUnmounted(() => {
     document.removeEventListener('visibilitychange', handleVisibilityOrFocusChange);
     window.removeEventListener('focus', handleVisibilityOrFocusChange);
     window.removeEventListener('blur', handleVisibilityOrFocusChange);
+    if (notificationsPoller) {
+        clearInterval(notificationsPoller);
+        notificationsPoller = null;
+    }
 });
 
 const closeDropdownHandler = (e) => {
@@ -180,6 +193,107 @@ const closeDropdownHandler = (e) => {
 const toggleSidebar = () => {
     isSidebarCollapsed.value = !isSidebarCollapsed.value;
     localStorage.setItem('sidebar-collapsed', String(isSidebarCollapsed.value));
+};
+
+const formatNotificationTime = (value) => {
+    if (!value) return '';
+
+    const date = new Date(value);
+    const diffMs = Date.now() - date.getTime();
+    const diffMinutes = Math.floor(diffMs / 60000);
+
+    if (diffMinutes < 1) return 'Baru saja';
+    if (diffMinutes < 60) return `${diffMinutes}m lalu`;
+
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `${diffHours}j lalu`;
+
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    });
+};
+
+const mergeNotifications = (incoming) => {
+    const byId = new Map();
+
+    [...incoming, ...notifications.value].forEach((item) => {
+        if (item?.id) byId.set(item.id, item);
+    });
+
+    notifications.value = Array.from(byId.values())
+        .sort((a, b) => new Date(b.occurred_at) - new Date(a.occurred_at))
+        .slice(0, 15);
+};
+
+const fetchNotifications = async ({ force = false } = {}) => {
+    if (notificationsLoading.value && !force) return;
+
+    notificationsLoading.value = true;
+
+    try {
+        let url = route('notifications.index');
+        if (lastNotificationServerTime && !force) {
+            url += `?since=${encodeURIComponent(lastNotificationServerTime)}`;
+        }
+
+        const response = await fetch(url, {
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin',
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const incoming = Array.isArray(data.notifications) ? data.notifications : [];
+
+        if (!lastNotificationServerTime || force) {
+            notifications.value = incoming;
+        } else if (incoming.length > 0) {
+            mergeNotifications(incoming);
+        }
+
+        unreadNotificationCount.value = Number(data.unread_count || 0);
+        lastNotificationServerTime = data.server_time || lastNotificationServerTime;
+    } catch (error) {
+        // Ignore network issues; next polling cycle will retry.
+    } finally {
+        notificationsLoading.value = false;
+    }
+};
+
+const markNotificationsAsRead = async () => {
+    if (unreadNotificationCount.value <= 0) return;
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        await fetch(route('notifications.read'), {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+            },
+            body: JSON.stringify({}),
+            credentials: 'same-origin',
+        });
+        unreadNotificationCount.value = 0;
+    } catch (error) {
+        // Ignore and wait for next sync.
+    }
+};
+
+const toggleNotifications = async () => {
+    showNotifications.value = !showNotifications.value;
+    if (!showNotifications.value) return;
+
+    await fetchNotifications({ force: true });
+    await markNotificationsAsRead();
 };
 
 const openFeedbackModal = () => {
@@ -321,24 +435,59 @@ const submitFeedback = () => {
                         <div class="relative">
                             <button
                                 id="notif-toggle"
-                                @click="showNotifications = !showNotifications"
-                                class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                                @click="toggleNotifications"
+                                class="relative flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
                                 :aria-expanded="showNotifications ? 'true' : 'false'"
                                 aria-haspopup="menu"
                             >
                                 <Icon icon="si:notifications-line" :width="18" :height="18"  />
+                                <span
+                                    v-if="unreadNotificationCount > 0"
+                                    class="absolute -right-1 -top-1 inline-flex min-w-[18px] items-center justify-center rounded-full bg-rose-500 px-1.5 py-0.5 text-[9px] font-semibold leading-none text-white"
+                                >
+                                    {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
+                                </span>
                             </button>
                             <transition name="scale-fade">
                                 <div
                                     v-if="showNotifications"
                                     id="notif-dropdown"
-                                    class="absolute right-0 mt-3 w-72 origin-top-right rounded-2xl border border-slate-100 bg-white p-3 shadow-2xl ring-1 ring-black/5 z-50"
+                                    class="absolute right-0 mt-3 w-80 origin-top-right rounded-2xl border border-slate-100 bg-white p-3 shadow-2xl ring-1 ring-black/5 z-50"
                                 >
-                                    <div class="px-3 py-2 border-b border-slate-50 mb-1">
+                                    <div class="mb-1 flex items-center justify-between border-b border-slate-50 px-3 py-2">
                                         <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Notifications</p>
+                                        <button
+                                            type="button"
+                                            class="text-[10px] font-semibold text-[#07304a] hover:underline disabled:cursor-not-allowed disabled:text-slate-300"
+                                            :disabled="unreadNotificationCount <= 0"
+                                            @click="markNotificationsAsRead"
+                                        >
+                                            Tandai dibaca
+                                        </button>
                                     </div>
-                                    <div class="px-3 py-4 text-sm text-slate-500">
-                                        No new notifications.
+                                    <div v-if="notificationsLoading" class="px-3 py-4 text-sm text-slate-500">
+                                        Memuat notifikasi...
+                                    </div>
+                                    <div v-else-if="notifications.length === 0" class="px-3 py-4 text-sm text-slate-500">
+                                        Belum ada notifikasi baru.
+                                    </div>
+                                    <div v-else class="max-h-80 space-y-1 overflow-y-auto py-1">
+                                        <Link
+                                            v-for="item in notifications"
+                                            :key="item.id"
+                                            :href="item.href || '#'"
+                                            class="flex items-start gap-3 rounded-xl px-3 py-2.5 transition hover:bg-slate-50"
+                                            @click="showNotifications = false"
+                                        >
+                                            <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                                <Icon :icon="item.icon || 'si:notifications-line'" :width="14" :height="14" />
+                                            </span>
+                                            <span class="min-w-0 flex-1">
+                                                <span class="block truncate text-[12px] font-semibold text-slate-700">{{ item.title }}</span>
+                                                <span class="block truncate text-[11px] text-slate-500">{{ item.message }}</span>
+                                                <span class="mt-1 block text-[10px] font-medium text-slate-400">{{ formatNotificationTime(item.occurred_at) }}</span>
+                                            </span>
+                                        </Link>
                                     </div>
                                 </div>
                             </transition>
