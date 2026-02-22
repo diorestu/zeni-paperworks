@@ -240,7 +240,7 @@ class DatabaseSeeder extends Seeder
         ], [
             'invoice_number' => 'SUB/'.$today->format('ymd').'/001',
             'plan_name' => $regularUser->plan_name,
-            'amount' => 99000.00,
+            'amount' => 139000.00,
             'period_start' => $renewalDate->copy()->subMonth()->toDateString(),
             'period_end' => $renewalDate->toDateString(),
             'invoice_date' => $today->toDateString(),

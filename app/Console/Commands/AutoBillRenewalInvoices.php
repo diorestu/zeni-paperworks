@@ -81,9 +81,9 @@ class AutoBillRenewalInvoices extends Command
     private function getPlanAmount(string $planName): float
     {
         return match ($planName) {
-            'Basic' => 39000,
-            'Pro' => 99000,
-            'Enterprise' => 249000,
+            'Basic' => 49000,
+            'Pro' => 139000,
+            'Enterprise' => 199000,
             default => 0,
         };
     }

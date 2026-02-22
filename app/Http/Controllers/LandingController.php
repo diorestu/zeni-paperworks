@@ -52,19 +52,19 @@ class LandingController extends Controller
                 ],
                 [
                     'name' => 'Basic',
-                    'price' => 'Rp39.000',
+                    'price' => 'Rp49.000',
                     'period' => '/ month',
                     'highlights' => ['100 Invoices / month', '10 Quotations / month', '100 Clients'],
                 ],
                 [
                     'name' => 'Pro',
-                    'price' => 'Rp99.000',
+                    'price' => 'Rp139.000',
                     'period' => '/ month',
                     'highlights' => ['500 Invoices / month', 'Unlimited Quotations', '500 Clients'],
                 ],
                 [
                     'name' => 'Enterprise',
-                    'price' => 'Rp249.000',
+                    'price' => 'Rp199.000',
                     'period' => '/ month',
                     'highlights' => ['Unlimited Invoices', 'Unlimited Quotations', 'Unlimited Clients'],
                 ],

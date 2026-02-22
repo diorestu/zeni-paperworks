@@ -251,16 +251,16 @@ class BillingPaymentController extends Controller
     {
         return [
             'Basic' => [
-                'monthly' => 39000,
-                'yearly' => 30000 * 12,
+                'monthly' => 49000,
+                'yearly' => 38000 * 12,
             ],
             'Pro' => [
-                'monthly' => 99000,
-                'yearly' => 75000 * 12,
+                'monthly' => 139000,
+                'yearly' => 106000 * 12,
             ],
             'Enterprise' => [
-                'monthly' => 249000,
-                'yearly' => 189000 * 12,
+                'monthly' => 199000,
+                'yearly' => 151000 * 12,
             ],
         ];
     }
