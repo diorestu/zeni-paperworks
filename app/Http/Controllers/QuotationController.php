@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Quotation;
 use App\Models\Setting;
 use App\Models\Tax;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -18,6 +19,10 @@ use Inertia\Response;
 
 class QuotationController extends Controller
 {
+    public function __construct(private readonly NotificationService $notificationService)
+    {
+    }
+
     public function index(): Response
     {
         return Inertia::render('Quotations/Index', [
@@ -62,7 +67,7 @@ class QuotationController extends Controller
             ],
         ]);
 
-        DB::transaction(function () use ($validated) {
+        $quotation = DB::transaction(function () use ($validated) {
             $totals = $this->buildQuotationTotals($validated['items'], $validated['selected_tax_ids'] ?? []);
 
             $quotation = Quotation::create([
@@ -87,7 +92,16 @@ class QuotationController extends Controller
                     'subtotal' => $item['quantity'] * $item['unit_price'],
                 ]);
             }
+            return $quotation;
         });
+
+        $this->notificationService->notifyUser($request->user(), [
+            'type' => 'quotation.created',
+            'title' => 'Quotation created',
+            'message' => "Quotation {$quotation->quotation_number} has been created.",
+            'href' => route('quotations.show', $quotation),
+            'icon' => 'si:assignment-line',
+        ]);
 
         return redirect()->route('quotations.index')->with('status', 'Quotation created successfully');
     }
@@ -158,6 +172,14 @@ class QuotationController extends Controller
             }
         });
 
+        $this->notificationService->notifyUser($request->user(), [
+            'type' => 'quotation.updated',
+            'title' => 'Quotation updated',
+            'message' => "Quotation {$quotation->quotation_number} has been updated.",
+            'href' => route('quotations.show', $quotation),
+            'icon' => 'si:edit-line',
+        ]);
+
         return redirect()->route('quotations.show', $validated['quotation_number'])->with('status', 'Quotation updated successfully');
     }
 
@@ -168,7 +190,7 @@ class QuotationController extends Controller
         ]);
     }
 
-    public function convertToInvoice(Quotation $quotation): RedirectResponse
+    public function convertToInvoice(Request $request, Quotation $quotation): RedirectResponse
     {
         if ($quotation->invoice_id) {
             return redirect()->back()->with('error', 'This quotation has already been converted to an invoice.');
@@ -205,6 +227,15 @@ class QuotationController extends Controller
                 'invoice_id' => $invoice->id,
             ]);
         });
+
+        $quotation->refresh();
+        $this->notificationService->notifyUser($request->user(), [
+            'type' => 'quotation.converted_to_invoice',
+            'title' => 'Converted to invoice',
+            'message' => "Quotation {$quotation->quotation_number} has been converted to an invoice.",
+            'href' => route('quotations.show', $quotation),
+            'icon' => 'si:file-transfer-line',
+        ]);
 
         return redirect()->route('quotations.index')->with('status', 'Quotation successfully converted to invoice');
     }

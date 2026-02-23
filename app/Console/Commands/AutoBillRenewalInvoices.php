@@ -2,10 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\SubscriptionExpiringSoonMail;
 use App\Models\SubscriptionInvoice;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class AutoBillRenewalInvoices extends Command
 {
@@ -69,6 +71,15 @@ class AutoBillRenewalInvoices extends Command
                 'auto_generated' => true,
                 'billed_for_renewal_date' => $renewalDate,
             ]);
+
+            if (!empty($user->email)) {
+                Mail::to($user->email)->send(new SubscriptionExpiringSoonMail(
+                    user: $user,
+                    planName: $user->plan_name,
+                    renewalDate: $renewalDate->format('d M Y'),
+                    amount: $amount
+                ));
+            }
 
             $created++;
         }

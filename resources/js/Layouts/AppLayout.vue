@@ -92,7 +92,6 @@ let feedbackTimer = null;
 let feedbackActiveStartedAt = null;
 let feedbackRemainingMs = 60000;
 let notificationsPoller = null;
-let lastNotificationServerTime = null;
 
 const feedbackStorageKey = computed(() => {
     const userId = page.props.auth?.user?.id || 'guest';
@@ -202,29 +201,17 @@ const formatNotificationTime = (value) => {
     const diffMs = Date.now() - date.getTime();
     const diffMinutes = Math.floor(diffMs / 60000);
 
-    if (diffMinutes < 1) return 'Baru saja';
-    if (diffMinutes < 60) return `${diffMinutes}m lalu`;
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
 
     const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `${diffHours}j lalu`;
+    if (diffHours < 24) return `${diffHours}h ago`;
 
-    return date.toLocaleDateString('id-ID', {
+    return date.toLocaleDateString('en-US', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
     });
-};
-
-const mergeNotifications = (incoming) => {
-    const byId = new Map();
-
-    [...incoming, ...notifications.value].forEach((item) => {
-        if (item?.id) byId.set(item.id, item);
-    });
-
-    notifications.value = Array.from(byId.values())
-        .sort((a, b) => new Date(b.occurred_at) - new Date(a.occurred_at))
-        .slice(0, 15);
 };
 
 const fetchNotifications = async ({ force = false } = {}) => {
@@ -233,12 +220,7 @@ const fetchNotifications = async ({ force = false } = {}) => {
     notificationsLoading.value = true;
 
     try {
-        let url = route('notifications.index');
-        if (lastNotificationServerTime && !force) {
-            url += `?since=${encodeURIComponent(lastNotificationServerTime)}`;
-        }
-
-        const response = await fetch(url, {
+        const response = await fetch(route('notifications.feed'), {
             headers: {
                 Accept: 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
@@ -251,14 +233,8 @@ const fetchNotifications = async ({ force = false } = {}) => {
         const data = await response.json();
         const incoming = Array.isArray(data.notifications) ? data.notifications : [];
 
-        if (!lastNotificationServerTime || force) {
-            notifications.value = incoming;
-        } else if (incoming.length > 0) {
-            mergeNotifications(incoming);
-        }
-
+        notifications.value = incoming;
         unreadNotificationCount.value = Number(data.unread_count || 0);
-        lastNotificationServerTime = data.server_time || lastNotificationServerTime;
     } catch (error) {
         // Ignore network issues; next polling cycle will retry.
     } finally {
@@ -271,7 +247,7 @@ const markNotificationsAsRead = async () => {
 
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-        await fetch(route('notifications.read'), {
+        await fetch(route('notifications.read-all'), {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -293,7 +269,32 @@ const toggleNotifications = async () => {
     if (!showNotifications.value) return;
 
     await fetchNotifications({ force: true });
-    await markNotificationsAsRead();
+};
+
+const openNotification = async (item) => {
+    if (!item?.id || item?.is_read) {
+        showNotifications.value = false;
+        return;
+    }
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        await fetch(route('notifications.read', item.id), {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+            },
+            body: JSON.stringify({}),
+            credentials: 'same-origin',
+        });
+    } catch (error) {
+        // Ignore and continue navigation.
+    } finally {
+        showNotifications.value = false;
+    }
 };
 
 const openFeedbackModal = () => {
@@ -462,14 +463,14 @@ const submitFeedback = () => {
                                             :disabled="unreadNotificationCount <= 0"
                                             @click="markNotificationsAsRead"
                                         >
-                                            Tandai dibaca
+                                            Mark all as read
                                         </button>
                                     </div>
                                     <div v-if="notificationsLoading" class="px-3 py-4 text-sm text-slate-500">
-                                        Memuat notifikasi...
+                                        Loading notifications...
                                     </div>
                                     <div v-else-if="notifications.length === 0" class="px-3 py-4 text-sm text-slate-500">
-                                        Belum ada notifikasi baru.
+                                        No notifications yet.
                                     </div>
                                     <div v-else class="max-h-80 space-y-1 overflow-y-auto py-1">
                                         <Link
@@ -477,7 +478,8 @@ const submitFeedback = () => {
                                             :key="item.id"
                                             :href="item.href || '#'"
                                             class="flex items-start gap-3 rounded-xl px-3 py-2.5 transition hover:bg-slate-50"
-                                            @click="showNotifications = false"
+                                            :class="item.is_read ? '' : 'bg-sky-50/50'"
+                                            @click="openNotification(item)"
                                         >
                                             <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
                                                 <Icon :icon="item.icon || 'si:notifications-line'" :width="14" :height="14" />
@@ -487,6 +489,16 @@ const submitFeedback = () => {
                                                 <span class="block truncate text-[11px] text-slate-500">{{ item.message }}</span>
                                                 <span class="mt-1 block text-[10px] font-medium text-slate-400">{{ formatNotificationTime(item.occurred_at) }}</span>
                                             </span>
+                                        </Link>
+                                    </div>
+                                    <div class="mt-2 border-t border-slate-100 px-3 pt-3">
+                                        <Link
+                                            :href="route('notifications.index')"
+                                            class="inline-flex items-center gap-1 text-xs font-semibold text-[#07304a] hover:underline"
+                                            @click="showNotifications = false"
+                                        >
+                                            View all notifications
+                                            <Icon icon="si:arrow-right-line" :width="12" :height="12" />
                                         </Link>
                                     </div>
                                 </div>

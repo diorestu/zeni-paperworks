@@ -35,9 +35,14 @@ Route::middleware('auth')->group(function () {
     })->middleware(['signed'])->name('verification.verify');
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::get('/notifications/feed', [NotificationController::class, 'feed'])->name('notifications.feed');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
     Route::get('/onboarding', [OnboardingController::class, 'show'])->name('onboarding.show');
     Route::post('/onboarding/complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
+    Route::post('/super-admin/users/{user}/verify', [DashboardController::class, 'verifyUser'])
+        ->name('super-admin.users.verify')
+        ->middleware('role:super_admin');
 
     // Unverified users can still access dashboard.
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -84,6 +89,8 @@ Route::middleware('auth')->group(function () {
         Route::prefix('settings')->name('settings.')->middleware('role:admin')->group(function () {
             Route::get('/', [App\Http\Controllers\SettingController::class, 'index'])->name('index');
             Route::put('/', [App\Http\Controllers\SettingController::class, 'update'])->name('update');
+            Route::post('/sub-users', [App\Http\Controllers\SettingController::class, 'storeSubUser'])->name('sub-users.store');
+            Route::delete('/sub-users/{user}', [App\Http\Controllers\SettingController::class, 'destroySubUser'])->name('sub-users.destroy');
 
             Route::post('/taxes', [App\Http\Controllers\TaxController::class, 'store'])->name('taxes.store');
             Route::put('/taxes/{tax}', [App\Http\Controllers\TaxController::class, 'update'])->name('taxes.update');

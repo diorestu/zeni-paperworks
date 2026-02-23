@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Models\Tax;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
@@ -27,6 +28,18 @@ class SettingController extends Controller
             'company_tax_id' => Setting::where('key', 'company_tax_id')->value('value') ?? '',
             'company_logo_url' => $this->resolveCompanyLogoUrl(),
             'taxes' => Tax::all(),
+            'sub_users' => User::query()
+                ->where('company_id', auth()->user()->company_id)
+                ->where('role', 'user')
+                ->latest('created_at')
+                ->get()
+                ->map(fn (User $user) => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'email_verified_at' => optional($user->email_verified_at)->toDateTimeString(),
+                    'created_at' => optional($user->created_at)->toDateTimeString(),
+                ]),
         ]);
     }
 
@@ -82,5 +95,38 @@ class SettingController extends Controller
         }
 
         return Storage::disk('public')->url($logoPath);
+    }
+
+    public function storeSubUser(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        User::query()->create([
+            'company_id' => $request->user()->company_id,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'role' => 'user',
+            'wizard_completed' => true,
+            'email_verified_at' => now(),
+        ]);
+
+        return redirect()->back()->with('status', 'Sub-user created successfully.');
+    }
+
+    public function destroySubUser(Request $request, User $user): RedirectResponse
+    {
+        abort_unless(
+            $user->company_id === $request->user()->company_id && $user->role === 'user',
+            403
+        );
+
+        $user->delete();
+
+        return redirect()->back()->with('status', 'Sub-user deleted successfully.');
     }
 }

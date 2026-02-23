@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Mail\SubscriptionPaymentSuccessMail;
 use App\Models\AuditLog;
 use App\Models\SubscriptionInvoice;
 use App\Services\MidtransService;
@@ -10,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -207,6 +209,7 @@ class BillingPaymentController extends Controller
         $transactionStatus = (string) ($payload['transaction_status'] ?? '');
         $fraudStatus = (string) ($payload['fraud_status'] ?? '');
         $normalizedStatus = $this->mapInvoiceStatus($transactionStatus, $fraudStatus);
+        $previousStatus = $invoice->status;
 
         if ($invoice->status === 'paid' && $normalizedStatus !== 'paid') {
             return $invoice->refresh();
@@ -230,6 +233,13 @@ class BillingPaymentController extends Controller
                 'plan_name' => $invoice->plan_name,
                 'plan_renews_at' => $invoice->period_end,
             ]);
+
+            if ($previousStatus !== 'paid' && !empty($invoice->user?->email)) {
+                Mail::to($invoice->user->email)->send(new SubscriptionPaymentSuccessMail(
+                    user: $invoice->user,
+                    invoice: $invoice
+                ));
+            }
         }
 
         return $invoice->refresh();

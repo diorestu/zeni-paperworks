@@ -1,6 +1,6 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 
 const props = defineProps({
     kpis: {
@@ -37,6 +37,14 @@ const statusBadgeClass = (status) => {
     };
 
     return map[(status || '').toLowerCase()] || 'bg-slate-100 text-slate-700';
+};
+
+const verifyUser = (user) => {
+    if (user?.email_verified_at) return;
+
+    router.post(route('super-admin.users.verify', user.id), {}, {
+        preserveScroll: true,
+    });
 };
 </script>
 
@@ -102,6 +110,7 @@ const statusBadgeClass = (status) => {
                                     <th class="px-3 py-2 font-semibold">Name</th>
                                     <th class="px-3 py-2 font-semibold">Email</th>
                                     <th class="px-3 py-2 font-semibold">Plan</th>
+                                    <th class="px-3 py-2 font-semibold">Verification</th>
                                     <th class="px-3 py-2 font-semibold">Registered</th>
                                 </tr>
                             </thead>
@@ -111,6 +120,22 @@ const statusBadgeClass = (status) => {
                                     <td class="px-3 py-3 text-slate-500">{{ user.email }}</td>
                                     <td class="px-3 py-3">
                                         <span class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">{{ user.plan_name }}</span>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <span
+                                            v-if="user.email_verified_at"
+                                            class="rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700"
+                                        >
+                                            Verified
+                                        </span>
+                                        <button
+                                            v-else
+                                            type="button"
+                                            class="rounded-lg bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white hover:bg-slate-800"
+                                            @click="verifyUser(user)"
+                                        >
+                                            Auto Verify
+                                        </button>
                                     </td>
                                     <td class="px-3 py-3 text-slate-500">{{ user.registered_at || '-' }}</td>
                                 </tr>
@@ -181,4 +206,3 @@ const statusBadgeClass = (status) => {
         </div>
     </AppLayout>
 </template>
-

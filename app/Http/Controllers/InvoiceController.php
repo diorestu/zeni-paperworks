@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Setting;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
@@ -19,6 +20,10 @@ use Illuminate\Validation\ValidationException;
 
 class InvoiceController extends Controller
 {
+    public function __construct(private readonly NotificationService $notificationService)
+    {
+    }
+
     public function index(): Response
     {
         return Inertia::render('Invoices/Index', [
@@ -103,7 +108,7 @@ class InvoiceController extends Controller
             'items.*.unit_price' => 'required|numeric|min:0',
         ]);
 
-        DB::transaction(function () use ($validated) {
+        $invoice = DB::transaction(function () use ($validated) {
             $subtotal = collect($validated['items'])->sum(fn($item) => $item['quantity'] * $item['unit_price']);
             $tax_total = $subtotal * 0; // Default 0 for now
             $total = $subtotal + $tax_total;
@@ -132,7 +137,16 @@ class InvoiceController extends Controller
                     'subtotal' => $item['quantity'] * $item['unit_price'],
                 ]);
             }
+            return $invoice;
         });
+
+        $this->notificationService->notifyUser($request->user(), [
+            'type' => 'invoice.created',
+            'title' => 'Invoice created',
+            'message' => "Invoice {$invoice->invoice_number} has been created.",
+            'href' => route('invoices.show', $invoice),
+            'icon' => 'si:ballot-line',
+        ]);
 
         return redirect()->route('invoices.index')->with('status', 'Invoice created successfully');
     }
@@ -142,6 +156,7 @@ class InvoiceController extends Controller
         return Inertia::render('Invoices/Show', [
             'invoice' => $invoice->load(['client', 'bankAccount', 'items.product', 'parentInvoice']),
             'companyLogoUrl' => $this->resolveCompanyLogoUrl(),
+            'companyProfile' => $this->resolveCompanyProfile(),
         ]);
     }
 
@@ -153,6 +168,14 @@ class InvoiceController extends Controller
 
         $invoice->update([
             'status' => $validated['status'],
+        ]);
+
+        $this->notificationService->notifyUser($request->user(), [
+            'type' => 'invoice.status_updated',
+            'title' => 'Invoice updated',
+            'message' => "Invoice {$invoice->invoice_number} status changed to {$validated['status']}.",
+            'href' => route('invoices.show', $invoice),
+            'icon' => 'si:checklist-line',
         ]);
 
         return redirect()->back()->with('status', 'Invoice status updated');
@@ -210,5 +233,17 @@ class InvoiceController extends Controller
         }
 
         return Storage::disk('public')->url($logoPath);
+    }
+
+    private function resolveCompanyProfile(): array
+    {
+        return [
+            'name' => Setting::where('key', 'company_name')->value('value') ?? '',
+            'address' => Setting::where('key', 'company_address')->value('value') ?? '',
+            'phone' => Setting::where('key', 'company_phone')->value('value') ?? '',
+            'email' => Setting::where('key', 'company_email')->value('value') ?? '',
+            'website' => Setting::where('key', 'company_website')->value('value') ?? '',
+            'tax_id' => Setting::where('key', 'company_tax_id')->value('value') ?? '',
+        ];
     }
 }

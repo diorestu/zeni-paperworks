@@ -16,6 +16,7 @@ const props = defineProps({
     company_tax_id: String,
     company_logo_url: String,
     taxes: Array,
+    sub_users: Array,
 });
 
 const activeTab = ref('general');
@@ -44,6 +45,12 @@ const taxForm = useForm({
 });
 
 const editingTax = ref(null);
+const subUserForm = useForm({
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+});
 
 const submitProfile = () => {
     profileForm.put(route('settings.update'), {
@@ -115,6 +122,23 @@ const deleteTax = (tax) => {
         });
     }
 };
+
+const submitSubUser = () => {
+    subUserForm.post(route('settings.sub-users.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            subUserForm.reset();
+        },
+    });
+};
+
+const deleteSubUser = (user) => {
+    if (!confirm(`Delete sub-user ${user.name}?`)) return;
+
+    router.delete(route('settings.sub-users.destroy', user.id), {
+        preserveScroll: true,
+    });
+};
 </script>
 
 <template>
@@ -168,6 +192,17 @@ const deleteTax = (tax) => {
                         ]"
                     >
                         Taxes
+                    </button>
+                    <button
+                        @click="activeTab = 'team'"
+                        :class="[
+                            'pb-4 text-sm font-semibold transition-all border-b-2',
+                            activeTab === 'team'
+                                ? 'text-[#07304a] border-[#07304a]'
+                                : 'text-slate-500 border-transparent hover:text-slate-700'
+                        ]"
+                    >
+                        Team Users
                     </button>
                     <button
                         @click="activeTab = 'profile'"
@@ -409,6 +444,103 @@ const deleteTax = (tax) => {
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <!-- Team Users Tab Content -->
+            <div v-show="activeTab === 'team'" class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                <div class="rounded-2xl border border-slate-100 bg-white p-8 shadow-sm">
+                    <h3 class="text-lg font-semibold text-slate-900 mb-2">Add Sub-user</h3>
+                    <p class="text-sm text-slate-500 mb-6">Sub-users get role <span class="font-semibold">User</span> and can manage dashboard, invoices, and quotations.</p>
+
+                    <form @submit.prevent="submitSubUser" class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Name</label>
+                            <input
+                                v-model="subUserForm.name"
+                                type="text"
+                                class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]"
+                                placeholder="Team member name"
+                            >
+                            <p v-if="subUserForm.errors.name" class="text-xs font-semibold text-rose-500">{{ subUserForm.errors.name }}</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Email</label>
+                            <input
+                                v-model="subUserForm.email"
+                                type="email"
+                                class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]"
+                                placeholder="member@company.com"
+                            >
+                            <p v-if="subUserForm.errors.email" class="text-xs font-semibold text-rose-500">{{ subUserForm.errors.email }}</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Password</label>
+                            <input
+                                v-model="subUserForm.password"
+                                type="password"
+                                class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]"
+                                placeholder="Minimum 8 characters"
+                            >
+                            <p v-if="subUserForm.errors.password" class="text-xs font-semibold text-rose-500">{{ subUserForm.errors.password }}</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Confirm Password</label>
+                            <input
+                                v-model="subUserForm.password_confirmation"
+                                type="password"
+                                class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]"
+                                placeholder="Repeat password"
+                            >
+                        </div>
+
+                        <button
+                            type="submit"
+                            :disabled="subUserForm.processing"
+                            class="inline-flex items-center gap-2 rounded-xl bg-[#07304a] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] disabled:opacity-50"
+                        >
+                            <Icon icon="si:add-line" :width="16" :height="16" />
+                            <span>{{ subUserForm.processing ? 'Creating...' : 'Create Sub-user' }}</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="lg:col-span-2 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+                    <div class="border-b border-slate-100 p-8">
+                        <h3 class="text-lg font-semibold text-slate-900">Sub-user List</h3>
+                        <p class="mt-1 text-sm text-slate-500">Users under the same company with role <span class="font-semibold">User</span>.</p>
+                    </div>
+
+                    <div v-if="!sub_users?.length" class="p-10 text-center">
+                        <p class="text-sm font-semibold text-slate-900">No sub-users yet</p>
+                        <p class="mt-1 text-xs text-slate-500">Create one using the form on the left.</p>
+                    </div>
+
+                    <div v-else class="divide-y divide-slate-100">
+                        <div
+                            v-for="member in sub_users"
+                            :key="member.id"
+                            class="flex items-center justify-between gap-4 px-6 py-4"
+                        >
+                            <div>
+                                <p class="text-sm font-semibold text-slate-900">{{ member.name }}</p>
+                                <p class="text-xs text-slate-500">{{ member.email }}</p>
+                                <p class="mt-1 text-[10px] font-semibold uppercase tracking-wider" :class="member.email_verified_at ? 'text-emerald-600' : 'text-amber-600'">
+                                    {{ member.email_verified_at ? 'Verified' : 'Unverified' }}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                class="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
+                                @click="deleteSubUser(member)"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Profile Tab Content -->

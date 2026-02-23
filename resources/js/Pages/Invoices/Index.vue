@@ -170,16 +170,31 @@ const statusCounts = computed(() => {
                     <tr v-for="invoice in filteredInvoices" :key="invoice.id" class="group hover:bg-slate-50/30 transition-all cursor-pointer" @click="$inertia.visit(route('invoices.show', invoice))">
                         <td class="px-8 py-6">
                             <div class="flex items-center gap-3">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-[#07304a] group-hover:bg-white group-hover:shadow-sm transition-all">
-                                    <Icon icon="si:quote-line" :width="18" :height="18"  />
-                                </div>
-                                <span class="text-sm font-semibold text-slate-900">{{ invoice.invoice_number }}</span>
+                                <span
+                                    v-if="invoice.status === 'paid'"
+                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"
+                                >
+                                    <Icon icon="si:check-line" :width="12" :height="12" />
+                                </span>
+                                <span
+                                    v-else-if="invoice.status === 'cancelled'"
+                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-slate-500"
+                                >
+                                    <Icon icon="si:close-line" :width="12" :height="12" />
+                                </span>
+                                <span
+                                    v-else-if="invoice.status === 'overdue'"
+                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 text-rose-500"
+                                >
+                                    <Icon icon="si:warning-line" :width="12" :height="12" />
+                                </span>
+                                <span class="text-sm font-normal text-slate-900">{{ invoice.invoice_number }}</span>
                             </div>
                         </td>
                         <td class="px-8 py-6">
                             <div class="flex flex-col">
-                                <span class="text-sm font-semibold text-slate-900">{{ invoice.client.name }}</span>
-                                <span class="text-xs font-normal text-slate-400">{{ invoice.client.phone || '—' }}</span>
+                                <span class="text-sm font-normal text-slate-900">{{ invoice.client.name }}</span>
+                                <span class="text-[8px] font-normal text-slate-400">{{ invoice.client.phone || '—' }}</span>
                             </div>
                         </td>
                         <td class="px-8 py-6 align-middle text-sm font-semibold text-slate-900 line-clamp-1">
@@ -187,8 +202,8 @@ const statusCounts = computed(() => {
                         </td>
                         <td class="px-8 py-6">
                             <div class="flex flex-col">
-                                <span class="text-sm font-semibold text-slate-900 text-nowrap">{{ new Date(invoice.invoice_date).toLocaleDateString() }}</span>
-                                <span class="text-[10px] font-semibold uppercase text-slate-400">Due {{ new Date(invoice.due_date).toLocaleDateString() }}</span>
+                                <span class="text-sm font-normal text-slate-900 text-nowrap">{{ new Date(invoice.invoice_date).toLocaleDateString() }}</span>
+                                <span class="text-[8px] font-normal uppercase text-slate-400">Due {{ new Date(invoice.due_date).toLocaleDateString() }}</span>
                             </div>
                         </td>
                         <td class="px-8 py-6">

@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\InvoiceItem;
 use App\Models\QuotationItem;
 use App\Models\Setting;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -14,6 +15,10 @@ use Inertia\Response;
 
 class ProductController extends Controller
 {
+    public function __construct(private readonly NotificationService $notificationService)
+    {
+    }
+
     public function index(): Response
     {
         $products = Product::latest()->get();
@@ -40,7 +45,15 @@ class ProductController extends Controller
             'description' => ['nullable', 'string'],
         ]);
 
-        Product::create($validated);
+        $product = Product::create($validated);
+
+        $this->notificationService->notifyUser($request->user(), [
+            'type' => 'product.created',
+            'title' => 'Product created',
+            'message' => "Product {$product->name} has been created.",
+            'href' => route('products.index'),
+            'icon' => 'si:inventory-line',
+        ]);
 
         return redirect()->back()->with('status', 'Product created');
     }
@@ -65,10 +78,18 @@ class ProductController extends Controller
 
         $product->update($validated);
 
+        $this->notificationService->notifyUser($request->user(), [
+            'type' => 'product.updated',
+            'title' => 'Product updated',
+            'message' => "Product {$product->name} has been updated.",
+            'href' => route('products.index'),
+            'icon' => 'si:edit-line',
+        ]);
+
         return redirect()->back()->with('status', 'Product updated');
     }
 
-    public function destroy(Product $product): RedirectResponse
+    public function destroy(Request $request, Product $product): RedirectResponse
     {
         $isUsedInInvoice = InvoiceItem::where('product_id', $product->id)->exists();
         $isUsedInQuotation = QuotationItem::where('product_id', $product->id)->exists();
@@ -79,7 +100,16 @@ class ProductController extends Controller
                 ->with('error', 'Product cannot be deleted because it is already used in invoice or quotation items.');
         }
 
+        $productName = $product->name;
         $product->delete();
+
+        $this->notificationService->notifyUser($request->user(), [
+            'type' => 'product.deleted',
+            'title' => 'Product deleted',
+            'message' => "Product {$productName} has been deleted.",
+            'href' => route('products.index'),
+            'icon' => 'si:bin-line',
+        ]);
 
         return redirect()->back()->with('status', 'Product deleted successfully.');
     }

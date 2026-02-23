@@ -303,15 +303,6 @@ watch(
                         <p class="text-slate-500 font-normal">Create a new billable document for your client.</p>
                     </div>
                 </div>
-                
-                <button 
-                    @click="submit"
-                    :disabled="form.processing"
-                    class="flex items-center gap-2 rounded-xl bg-[#07304a] px-8 py-4 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
-                >
-                    <Icon icon="si:archive-line" :width="18" :height="18"  />
-                    <span>{{ form.processing ? 'Saving...' : 'Save Invoice' }}</span>
-                </button>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -342,23 +333,16 @@ watch(
                                 <p v-if="form.errors.client_id" class="text-[10px] font-semibold text-rose-500 ml-1">
                                     {{ form.errors.client_id }}
                                 </p>
+                                <label class="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-600">
+                                    <input
+                                        v-model="form.is_down_payment"
+                                        type="checkbox"
+                                        class="h-4 w-4 rounded border-slate-200 text-[#07304a] focus:ring-[#07304a]"
+                                    />
+                                    Mark as Down Payment (DP)
+                                </label>
                             </div>
                             <div class="space-y-6">
-                                <div class="space-y-2">
-                                    <label class="block w-3/5 ml-auto text-[10px] font-semibold uppercase tracking-widest text-slate-400">Invoice Number</label>
-                                    <div class="relative w-3/5 ml-auto">
-                                        <Icon icon="si:text-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"  />
-                                        <input
-                                            type="text"
-                                            v-model="form.invoice_number"
-                                            class="w-full bg-slate-50 border-none rounded-xl pl-12 pr-4 py-4 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
-                                            placeholder="Invoice number"
-                                        >
-                                    </div>
-                                    <p v-if="form.errors.invoice_number" class="w-3/5 ml-auto text-[10px] font-semibold text-rose-500">
-                                        {{ form.errors.invoice_number }}
-                                    </p>
-                                </div>
                                 <div class="space-y-2">
                                     <label class="block w-3/5 ml-auto text-[10px] font-semibold uppercase tracking-widest text-slate-400">Invoice Date</label>
                                     <div class="relative w-3/5 ml-auto">
@@ -395,14 +379,6 @@ watch(
                                         />
                                     </div>
                                 </div>
-                                <label class="ml-auto flex w-3/5 items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-600">
-                                    <input
-                                        v-model="form.is_down_payment"
-                                        type="checkbox"
-                                        class="h-4 w-4 rounded border-slate-200 text-[#07304a] focus:ring-[#07304a]"
-                                    />
-                                    Mark as Down Payment (DP)
-                                </label>
                             </div>
                         </div>
                     </div>
@@ -559,6 +535,15 @@ watch(
                                     </div>
                                 </div>
                             </div>
+
+                            <button
+                                @click="submit"
+                                :disabled="form.processing"
+                                class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-[#07304a] shadow-xl shadow-black/10 transition-all hover:bg-slate-100 active:scale-95 disabled:opacity-50"
+                            >
+                                <Icon icon="si:archive-line" :width="16" :height="16"  />
+                                <span>{{ form.processing ? 'Saving...' : 'Save Invoice' }}</span>
+                            </button>
                         </div>
                     </div>
 

@@ -159,6 +159,7 @@ class DashboardController extends Controller
                 'plan_name' => $user->plan_name ?? 'Free',
                 'plan_renews_at' => optional($user->plan_renews_at)->toDateString(),
                 'registered_at' => optional($user->created_at)->toDateString(),
+                'email_verified_at' => optional($user->email_verified_at)->toDateTimeString(),
             ]);
 
         $subscriptionHistory = (clone $subscriptionBaseQuery)
@@ -210,5 +211,19 @@ class DashboardController extends Controller
             'subscriptionHistory' => $subscriptionHistory,
             'feedbacks' => $feedbacks,
         ]);
+    }
+
+    public function verifyUser(Request $request, User $user): RedirectResponse
+    {
+        abort_unless($request->user()?->isSuperAdmin(), 403);
+        abort_if($user->isSuperAdmin(), 422, 'Cannot verify super admin account from this action.');
+
+        if (!$user->email_verified_at) {
+            $user->forceFill([
+                'email_verified_at' => now(),
+            ])->save();
+        }
+
+        return redirect()->back()->with('status', 'User has been auto verified.');
     }
 }

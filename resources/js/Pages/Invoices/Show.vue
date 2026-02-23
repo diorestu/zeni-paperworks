@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, onUnmounted, computed } from 'vue';
+import { ref, nextTick, onUnmounted, computed, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
@@ -9,6 +9,10 @@ const props = defineProps({
     companyLogoUrl: {
         type: String,
         default: null,
+    },
+    companyProfile: {
+        type: Object,
+        default: () => ({}),
     },
 });
 const page = usePage();
@@ -52,6 +56,7 @@ let variantTimer = null;
 const statusForm = useForm({
     status: props.invoice.status,
 });
+const lastSavedStatus = ref(props.invoice.status);
 
 const statusOptions = [
     { value: 'draft', label: 'Draft' },
@@ -86,10 +91,28 @@ const printInvoice = async () => {
 };
 
 const updateStatus = () => {
+    if (statusForm.status === lastSavedStatus.value) return;
+
+    const nextStatus = statusForm.status;
     statusForm.patch(route('invoices.update', props.invoice.invoice_number), {
         preserveScroll: true,
+        onSuccess: () => {
+            lastSavedStatus.value = nextStatus;
+        },
+        onError: () => {
+            statusForm.status = lastSavedStatus.value;
+        },
     });
 };
+
+watch(
+    () => props.invoice.status,
+    (value) => {
+        if (!value) return;
+        statusForm.status = value;
+        lastSavedStatus.value = value;
+    }
+);
 
 const setVariant = (nextVariant) => {
     if (variant.value === nextVariant) return;
@@ -148,6 +171,8 @@ onUnmounted(() => {
                     <div class="flex items-center gap-2">
                         <select
                             v-model="statusForm.status"
+                            @change="updateStatus"
+                            :disabled="statusForm.processing"
                             class="rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm font-semibold text-slate-700 shadow-sm outline-none transition-all focus:ring-2 focus:ring-[#07304a] appearance-none"
                             style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2394a3b8%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;"
                         >
@@ -155,14 +180,7 @@ onUnmounted(() => {
                                 {{ option.label }}
                             </option>
                         </select>
-                        <button
-                            type="button"
-                            @click="updateStatus"
-                            :disabled="statusForm.processing"
-                            class="rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
-                        >
-                            {{ statusForm.processing ? 'Saving...' : 'Update Status' }}
-                        </button>
+                        <span v-if="statusForm.processing" class="text-xs font-medium text-slate-500">Saving...</span>
                     </div>
                     <button @click="printInvoice" class="flex items-center gap-2 rounded-xl bg-white border border-slate-100 px-5 py-3 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50 transition-all">
                         <Icon icon="si:file-download-line" :width="18" :height="18"  />
@@ -196,20 +214,20 @@ onUnmounted(() => {
                          <div class="flex-1">
                             <h1 class="text-3xl font-semibold text-slate-900 tracking-tighter mb-6">INVOICE</h1>
                             <div v-if="variant !== 'modern'" class="space-y-1">
-                                <h2 class="text-xl font-normal text-slate-900 tracking-tight">PT Solusi Usaha Adijaya</h2>
-                                <p class="text-[11px] text-slate-600 font-normal leading-relaxed max-w-sm mt-2">
-                                    Bimasakti Office, Jl. Ahmad Yani Utara No.319, Peguyangan, Denpasar<br>
-                                    Utara, Kota Denpasar, Bali 80115<br>
-                                    ID<br>
-                                    (+62) 851 8344 0300<br>
-                                    info@konsulin.id
-                                </p>
+                                <h2 class="text-[16px] font-normal text-slate-800 tracking-tight">{{ companyProfile?.name || 'Company Name' }}</h2>
+                                <div class="mt-2 text-[11px] text-slate-600 leading-relaxed space-y-0.5">
+                                    <p v-if="companyProfile?.address" class="whitespace-pre-line">{{ companyProfile.address }}</p>
+                                    <p v-if="companyProfile?.phone">{{ companyProfile.phone }}</p>
+                                    <p v-if="companyProfile?.email">{{ companyProfile.email }}</p>
+                                    <p v-if="companyProfile?.website">{{ companyProfile.website }}</p>
+                                    <p v-if="companyProfile?.tax_id">Tax ID: {{ companyProfile.tax_id }}</p>
+                                </div>
                             </div>
                          </div>
                          <div class="flex flex-col items-end">
                              <img :src="companyLogoUrl || '/img/logo/logo_colorful.png'" alt="Company Logo" class="h-16 w-auto object-contain">
                              <!-- Optional logo subtitle like in image -->
-                             <p class="text-[8px] font-normal text-[#07304a] uppercase tracking-[0.2em] mt-2">Accounting | Business | Tax Consulting</p>
+                             <p v-if="companyProfile?.website" class="text-[8px] font-normal text-[#07304a] uppercase tracking-[0.2em] mt-2">{{ companyProfile.website }}</p>
                          </div>
                     </div>
 
@@ -218,14 +236,14 @@ onUnmounted(() => {
                         <div v-if="variant === 'modern'" class="grid grid-cols-12 gap-6">
                             <div class="col-span-6">
                                 <p class="text-[10px] font-normal uppercase tracking-widest text-slate-500 mb-3">FROM</p>
-                                <h3 class="text-xl font-normal text-slate-900 tracking-tight">PT Solusi Usaha Adijaya</h3>
-                                <p class="mt-2 text-[11px] text-slate-600 leading-relaxed">
-                                    Bimasakti Office, Jl. Ahmad Yani Utara No.319, Peguyangan, Denpasar<br>
-                                    Utara, Kota Denpasar, Bali 80115<br>
-                                    ID<br>
-                                    (+62) 851 8344 0300<br>
-                                    info@konsulin.id
-                                </p>
+                                <h3 class="text-[16px] font-normal text-slate-800 tracking-tight">{{ companyProfile?.name || 'Company Name' }}</h3>
+                                <div class="mt-2 text-[11px] text-slate-600 leading-relaxed space-y-0.5">
+                                    <p v-if="companyProfile?.address" class="whitespace-pre-line">{{ companyProfile.address }}</p>
+                                    <p v-if="companyProfile?.phone">{{ companyProfile.phone }}</p>
+                                    <p v-if="companyProfile?.email">{{ companyProfile.email }}</p>
+                                    <p v-if="companyProfile?.website">{{ companyProfile.website }}</p>
+                                    <p v-if="companyProfile?.tax_id">Tax ID: {{ companyProfile.tax_id }}</p>
+                                </div>
                             </div>
                             <div class="col-span-6">
                                 <p class="text-[10px] font-normal uppercase tracking-widest text-slate-500 mb-3">BILL TO</p>
@@ -279,10 +297,10 @@ onUnmounted(() => {
                         <table class="w-full">
                             <thead>
                                 <tr :class="variantStyles[variant].header">
-                                    <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-left">ITEM</th>
-                                    <th class="px-6 py-3 text-[10px] font-normal uppercase tracking-widest text-right">PRICE</th>
-                                    <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-center">QUANTITY</th>
-                                    <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-right">AMOUNT</th>
+                                    <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-left text-white">ITEM</th>
+                                    <th class="px-6 py-3 text-[10px] font-normal uppercase tracking-widest text-right text-white">PRICE</th>
+                                    <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-center text-white">QUANTITY</th>
+                                    <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-right text-white">AMOUNT</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -310,26 +328,26 @@ onUnmounted(() => {
                     <!-- Totals and Signature Areas can go here if needed -->
                     <!-- In the image there is no explicit total section visible at the bottom of the snippet, but let's keep it clean -->
                     <div class="flex justify-end mt-12 border-t border-slate-100 pt-6">
-                        <div class="w-64 space-y-3">
+                        <div class="w-64 pr-6 space-y-3">
                             <div class="flex justify-between items-center">
                                 <span class="text-xs font-medium text-slate-400 uppercase tracking-widest">Subtotal</span>
                                 <span class="text-sm font-medium text-slate-900">{{ formatCurrency(invoice.subtotal) }}</span>
                             </div>
                             <div class="flex justify-between items-center border-t border-slate-100 pt-4">
-                                <span class="text-xs font-semibold text-[#000140] uppercase tracking-widest">Total Amount</span>
-                                <span class="text-xl font-semibold text-[#000140] tracking-tighter">{{ formatCurrency(invoice.total) }}</span>
+                                <span class="text-xs font-semibold text-[#000140] uppercase tracking-widest">Grand Total</span>
+                                <span class="text-[17px] font-semibold text-[#000140] tracking-tighter">{{ formatCurrency(invoice.total) }}</span>
                             </div>
                         </div>
                     </div>
 
                     <div v-if="invoice.bank_account" class="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-5">
                         <p class="text-[10px] font-medium uppercase tracking-widest text-slate-500 mb-3">Payment Information</p>
-                        <p class="text-[11px] text-slate-700 leading-relaxed">
+                        <p class="text-[11px] text-slate-700 leading-snug">
                             Please transfer payment to <span class="font-medium">{{ invoice.bank_account.bank_name }}</span>,
                             account number <span class="font-medium">{{ invoice.bank_account.account_number }}</span>
                             under name <span class="font-medium">{{ invoice.bank_account.account_name }}</span>.
                         </p>
-                        <p class="mt-2 text-[11px] text-slate-700 leading-relaxed">
+                        <p class="mt-2 text-[11px] text-slate-700 leading-snug">
                             After payment, please send confirmation to your registered number:
                             <span class="font-medium">{{ invoice.client.phone || '—' }}</span>.
                         </p>
