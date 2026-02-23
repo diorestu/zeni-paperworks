@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Product;
@@ -13,6 +14,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -240,6 +243,21 @@ class QuotationController extends Controller
         return redirect()->route('quotations.index')->with('status', 'Quotation successfully converted to invoice');
     }
 
+    public function downloadPdf(Request $request, Quotation $quotation)
+    {
+        abort_unless($quotation->company_id === $request->user()->company_id, 403);
+
+        $pdf = Pdf::loadView('quotations.pdf', [
+            'quotation' => $quotation->load(['client', 'items.product']),
+            'logoUrl' => $this->resolveCompanyLogoUrl(),
+            'company' => $this->resolveCompanyProfile(),
+        ])->setPaper('a4');
+
+        $filename = 'quotation-'.Str::slug($quotation->quotation_number).'.pdf';
+
+        return $pdf->download($filename);
+    }
+
     private function buildQuotationTotals(array $items, array $selectedTaxIds): array
     {
         $subtotal = collect($items)->sum(fn ($item) => $item['quantity'] * $item['unit_price']);
@@ -308,5 +326,28 @@ class QuotationController extends Controller
         }
 
         return "{$prefix}/{$dateCode}/{$nextSequence}";
+    }
+
+    private function resolveCompanyLogoUrl(): ?string
+    {
+        $logoPath = Setting::where('key', 'company_logo')->value('value');
+
+        if (empty($logoPath)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($logoPath);
+    }
+
+    private function resolveCompanyProfile(): array
+    {
+        return [
+            'name' => Setting::where('key', 'company_name')->value('value') ?? '',
+            'address' => Setting::where('key', 'company_address')->value('value') ?? '',
+            'phone' => Setting::where('key', 'company_phone')->value('value') ?? '',
+            'email' => Setting::where('key', 'company_email')->value('value') ?? '',
+            'website' => Setting::where('key', 'company_website')->value('value') ?? '',
+            'tax_id' => Setting::where('key', 'company_tax_id')->value('value') ?? '',
+        ];
     }
 }

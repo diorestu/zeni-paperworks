@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, computed } from 'vue';
+import { ref, nextTick, computed, onMounted } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
@@ -59,12 +59,14 @@ const variantStyles = {
 };
 
 const printQuotation = async () => {
-    printVariant.value = variant.value;
-    await nextTick();
-    window.print();
-    setTimeout(() => {
-        printVariant.value = null;
-    }, 0);
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.set('variant', variant.value);
+    window.open(url.toString(), '_blank', 'noopener,noreferrer');
+};
+
+const downloadQuotationPdf = () => {
+    window.open(route('quotations.download-pdf', props.quotation.quotation_number), '_blank', 'noopener,noreferrer');
 };
 
 const convertToInvoice = () => {
@@ -72,6 +74,27 @@ const convertToInvoice = () => {
         router.post(route('quotations.convert', props.quotation));
     }
 };
+
+onMounted(async () => {
+    const params = new URLSearchParams(window.location.search);
+    const printMode = params.get('print') === '1';
+    const variantFromQuery = params.get('variant');
+
+    if (variantFromQuery && ['classic', 'modern', 'minimal'].includes(variantFromQuery)) {
+        variant.value = variantFromQuery;
+    }
+
+    if (!printMode) return;
+
+    printVariant.value = variant.value;
+    await nextTick();
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+            printVariant.value = null;
+        }, 50);
+    }, 150);
+});
 </script>
 
 <template>
@@ -94,37 +117,7 @@ const convertToInvoice = () => {
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <Link
-                        :href="route('quotations.edit', quotation)"
-                        class="flex items-center gap-2 rounded-xl bg-white border border-slate-100 px-5 py-3 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50 transition-all"
-                    >
-                        <Icon icon="si:edit-line" :width="18" :height="18"  />
-                        <span>Edit</span>
-                    </Link>
-                    <button @click="printQuotation" class="flex items-center gap-2 rounded-xl bg-white border border-slate-100 px-5 py-3 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50 transition-all">
-                        <Icon icon="si:file-download-line" :width="18" :height="18"  />
-                        <span>Print</span>
-                    </button>
-                    <button
-                        v-if="!quotation.invoice_id"
-                        @click="convertToInvoice"
-                        class="flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95"
-                    >
-                        <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/15">
-                            <Icon icon="si:file-export-line" :width="12" :height="12" class="text-white" />
-                        </span>
-                        <span>Convert to Invoice</span>
-                    </button>
-                    <Link
-                        v-else
-                        :href="route('invoices.show', quotation.invoice)"
-                        class="flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95"
-                    >
-                        <Icon icon="si:text-line" :width="18" :height="18"  />
-                        <span>View Invoice</span>
-                    </Link>
-                </div>
+                <div class="w-64 shrink-0"></div>
             </div>
 
             <div class="flex items-start gap-10">
@@ -290,6 +283,45 @@ const convertToInvoice = () => {
                 </div>
 
                 <aside class="w-64 shrink-0 space-y-3 no-print sticky top-24 self-start">
+                    <div class="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+                        <Link
+                            :href="route('quotations.edit', quotation)"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
+                        >
+                            <Icon icon="si:edit-line" :width="16" :height="16" />
+                            <span>Edit</span>
+                        </Link>
+                        <button
+                            @click="printQuotation"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
+                        >
+                            <Icon icon="si:file-download-line" :width="16" :height="16" />
+                            <span>Print</span>
+                        </button>
+                        <button
+                            @click="downloadQuotationPdf"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
+                        >
+                            <Icon icon="si:file-text-line" :width="16" :height="16" />
+                            <span>Download PDF</span>
+                        </button>
+                        <button
+                            v-if="!quotation.invoice_id"
+                            @click="convertToInvoice"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#07304a] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95"
+                        >
+                            <Icon icon="si:file-export-line" :width="16" :height="16" />
+                            <span>Convert to Invoice</span>
+                        </button>
+                        <Link
+                            v-else
+                            :href="route('invoices.show', quotation.invoice)"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#07304a] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95"
+                        >
+                            <Icon icon="si:text-line" :width="16" :height="16" />
+                            <span>View Invoice</span>
+                        </Link>
+                    </div>
                     <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Variants</div>
                     <button
                         type="button"
@@ -326,6 +358,19 @@ const convertToInvoice = () => {
 
 <style scoped>
 @media print {
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+
+    :global(html),
+    :global(body) {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+    }
+
     .no-print {
         display: none !important;
     }
@@ -343,6 +388,9 @@ const convertToInvoice = () => {
         position: absolute;
         left: 0;
         top: 0;
+        margin: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
         transform: scale(1) !important;
         transform-origin: top left !important;
     }

@@ -51,6 +51,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('clients', ClientController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('role:admin');
         Route::resource('products', ProductController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('role:admin');
         Route::resource('invoices', InvoiceController::class)->only(['index', 'create', 'store'])->middleware('role:admin,user');
+        Route::get('/invoices/{invoice}/download-pdf', [InvoiceController::class, 'downloadPdf'])
+            ->name('invoices.download-pdf')
+            ->middleware('role:admin,user')
+            ->where('invoice', '.*');
         Route::patch('/invoices/{invoice}', [InvoiceController::class, 'update'])
             ->name('invoices.update')
             ->middleware('role:admin,user')
@@ -58,6 +62,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show')->middleware('role:admin,user')->where('invoice', '.*');
 
         Route::resource('quotations', App\Http\Controllers\QuotationController::class)->only(['index', 'create', 'store'])->middleware('role:admin,user');
+        Route::get('/quotations/{quotation}/download-pdf', [App\Http\Controllers\QuotationController::class, 'downloadPdf'])
+            ->name('quotations.download-pdf')
+            ->middleware('role:admin,user')
+            ->where('quotation', '.*');
         Route::get('/quotations/{quotation}/edit', [App\Http\Controllers\QuotationController::class, 'edit'])->name('quotations.edit')->middleware('role:admin,user')->where('quotation', '.*');
         Route::patch('/quotations/{quotation}', [App\Http\Controllers\QuotationController::class, 'update'])->name('quotations.update')->middleware('role:admin,user')->where('quotation', '.*');
         Route::get('/quotations/{quotation}', [App\Http\Controllers\QuotationController::class, 'show'])->name('quotations.show')->middleware('role:admin,user')->where('quotation', '.*');

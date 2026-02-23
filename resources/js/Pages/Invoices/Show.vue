@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, onUnmounted, computed, watch } from 'vue';
+import { ref, nextTick, onMounted, onUnmounted, computed, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
@@ -82,12 +82,14 @@ const variantStyles = {
 };
 
 const printInvoice = async () => {
-    printVariant.value = variant.value;
-    await nextTick();
-    window.print();
-    setTimeout(() => {
-        printVariant.value = null;
-    }, 0);
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.set('variant', variant.value);
+    window.open(url.toString(), '_blank', 'noopener,noreferrer');
+};
+
+const downloadInvoicePdf = () => {
+    window.open(route('invoices.download-pdf', props.invoice.invoice_number), '_blank', 'noopener,noreferrer');
 };
 
 const updateStatus = () => {
@@ -127,6 +129,27 @@ const setVariant = (nextVariant) => {
 
 onUnmounted(() => {
     if (variantTimer) clearTimeout(variantTimer);
+});
+
+onMounted(async () => {
+    const params = new URLSearchParams(window.location.search);
+    const printMode = params.get('print') === '1';
+    const variantFromQuery = params.get('variant');
+
+    if (variantFromQuery && ['classic', 'modern', 'minimal'].includes(variantFromQuery)) {
+        variant.value = variantFromQuery;
+    }
+
+    if (!printMode) return;
+
+    printVariant.value = variant.value;
+    await nextTick();
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+            printVariant.value = null;
+        }, 50);
+    }, 150);
 });
 </script>
 
@@ -182,14 +205,6 @@ onUnmounted(() => {
                         </select>
                         <span v-if="statusForm.processing" class="text-xs font-medium text-slate-500">Saving...</span>
                     </div>
-                    <button @click="printInvoice" class="flex items-center gap-2 rounded-xl bg-white border border-slate-100 px-5 py-3 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50 transition-all">
-                        <Icon icon="si:file-download-line" :width="18" :height="18"  />
-                        <span>Print</span>
-                    </button>
-                    <button class="flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95">
-                        <Icon icon="si:mail-line" :width="18" :height="18"  />
-                        <span>Send</span>
-                    </button>
                 </div>
             </div>
 
@@ -210,24 +225,19 @@ onUnmounted(() => {
                             </div>
                             <div class="relative z-[2] p-10 sm:p-14">
                     <!-- Top Branding -->
-                    <div class="flex justify-between items-start mb-12">
+                    <div class="flex justify-between items-start mb-8">
                          <div class="flex-1">
                             <h1 class="text-3xl font-semibold text-slate-900 tracking-tighter mb-6">INVOICE</h1>
                             <div v-if="variant !== 'modern'" class="space-y-1">
-                                <h2 class="text-[16px] font-normal text-slate-800 tracking-tight">{{ companyProfile?.name || 'Company Name' }}</h2>
+                                <h2 class="text-[16px] font-semibold text-slate-800 tracking-tight">{{ companyProfile?.name || 'Company Name' }}</h2>
                                 <div class="mt-2 text-[11px] text-slate-600 leading-relaxed space-y-0.5">
                                     <p v-if="companyProfile?.address" class="whitespace-pre-line">{{ companyProfile.address }}</p>
-                                    <p v-if="companyProfile?.phone">{{ companyProfile.phone }}</p>
-                                    <p v-if="companyProfile?.email">{{ companyProfile.email }}</p>
-                                    <p v-if="companyProfile?.website">{{ companyProfile.website }}</p>
                                     <p v-if="companyProfile?.tax_id">Tax ID: {{ companyProfile.tax_id }}</p>
                                 </div>
                             </div>
                          </div>
                          <div class="flex flex-col items-end">
                              <img :src="companyLogoUrl || '/img/logo/logo_colorful.png'" alt="Company Logo" class="h-16 w-auto object-contain">
-                             <!-- Optional logo subtitle like in image -->
-                             <p v-if="companyProfile?.website" class="text-[8px] font-normal text-[#07304a] uppercase tracking-[0.2em] mt-2">{{ companyProfile.website }}</p>
                          </div>
                     </div>
 
@@ -236,7 +246,7 @@ onUnmounted(() => {
                         <div v-if="variant === 'modern'" class="grid grid-cols-12 gap-6">
                             <div class="col-span-6">
                                 <p class="text-[10px] font-normal uppercase tracking-widest text-slate-500 mb-3">FROM</p>
-                                <h3 class="text-[16px] font-normal text-slate-800 tracking-tight">{{ companyProfile?.name || 'Company Name' }}</h3>
+                                <h3 class="text-[16px] font-semibold text-slate-800 tracking-tight">{{ companyProfile?.name || 'Company Name' }}</h3>
                                 <div class="mt-2 text-[11px] text-slate-600 leading-relaxed space-y-0.5">
                                     <p v-if="companyProfile?.address" class="whitespace-pre-line">{{ companyProfile.address }}</p>
                                     <p v-if="companyProfile?.phone">{{ companyProfile.phone }}</p>
@@ -247,7 +257,7 @@ onUnmounted(() => {
                             </div>
                             <div class="col-span-6">
                                 <p class="text-[10px] font-normal uppercase tracking-widest text-slate-500 mb-3">BILL TO</p>
-                                <h3 class="text-[16px] font-normal text-slate-800 tracking-tight">{{ invoice.client.name }}</h3>
+                                <h3 class="text-[16px] font-semibold text-slate-800 tracking-tight">{{ invoice.client.name }}</h3>
                                 <div class="mt-2 text-[11px] text-slate-600 leading-relaxed">
                                     <div v-if="invoice.client.company">{{ invoice.client.company }}</div>
                                     <div v-if="invoice.client.address">{{ invoice.client.address }}</div>
@@ -264,13 +274,17 @@ onUnmounted(() => {
                                         <span class="font-normal text-slate-600 uppercase tracking-widest text-[10px]">ISSUED</span>
                                         <span class="text-sm font-normal text-slate-900">{{ formatDate(invoice.invoice_date) }}</span>
                                     </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-normal text-slate-600 uppercase tracking-widest text-[10px]">DUE DATE</span>
+                                        <span class="text-sm font-normal text-slate-900">{{ formatDate(invoice.due_date) }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div v-else class="grid grid-cols-12 gap-6">
                             <div class="col-span-8">
                                 <p class="text-[10px] font-normal uppercase tracking-widest text-slate-500 mb-4">BILL TO</p>
-                                <h3 class="text-[16px] font-normal text-slate-800 tracking-tight">{{ invoice.client.name }}</h3>
+                                <h3 class="text-[16px] font-semibold text-slate-800 tracking-tight">{{ invoice.client.name }}</h3>
                                 <div class="mt-2 text-[11px] text-slate-600 leading-relaxed">
                                     <div v-if="invoice.client.company">{{ invoice.client.company }}</div>
                                     <div v-if="invoice.client.address">{{ invoice.client.address }}</div>
@@ -288,6 +302,10 @@ onUnmounted(() => {
                                     <span class="font-normal text-slate-600 uppercase tracking-widest text-[10px]">ISSUED</span>
                                     <span class="text-sm font-normal text-slate-900">{{ formatDate(invoice.invoice_date) }}</span>
                                 </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-normal text-slate-600 uppercase tracking-widest text-[10px]">DUE DATE</span>
+                                    <span class="text-sm font-normal text-slate-900">{{ formatDate(invoice.due_date) }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -297,24 +315,31 @@ onUnmounted(() => {
                         <table class="w-full">
                             <thead>
                                 <tr :class="variantStyles[variant].header">
+                                    <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-left text-white">NO</th>
                                     <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-left text-white">ITEM</th>
                                     <th class="px-6 py-3 text-[10px] font-normal uppercase tracking-widest text-right text-white">PRICE</th>
-                                    <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-center text-white">QUANTITY</th>
+                                    <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-right text-white">QUANTITY</th>
                                     <th class="px-6 py-3 text-[10px] font-medium uppercase tracking-widest text-right text-white">AMOUNT</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                <tr v-for="item in invoice.items" :key="item.id" class="align-top">
+                                <tr v-for="(item, index) in invoice.items" :key="item.id" class="align-top">
+                                    <td class="px-6 py-5 text-left text-sm font-normal text-slate-900">
+                                        {{ index + 1 }}
+                                    </td>
                                     <td class="px-6 py-5">
                                         <p class="text-sm font-normal text-slate-900 mb-1">{{ item.description.split('\n')[0] }}</p>
                                         <div v-if="item.description.includes('\n')" class="text-[11px] text-slate-600 font-normal leading-relaxed whitespace-pre-line">
                                             {{ item.description.split('\n').slice(1).join('\n') }}
                                         </div>
+                                        <p v-if="item.product?.description" class="mt-1 text-[11px] text-slate-600 font-normal leading-relaxed">
+                                            {{ item.product.description }}
+                                        </p>
                                     </td>
                                     <td class="px-6 py-5 text-right text-sm font-normal text-slate-900">
                                         {{ formatCurrency(item.unit_price) }}
                                     </td>
-                                    <td class="px-6 py-5 text-center text-sm font-medium text-slate-900">
+                                    <td class="px-6 py-5 text-right text-sm font-medium text-slate-900">
                                         {{ item.quantity }}
                                     </td>
                                     <td class="px-6 py-5 text-right text-sm font-medium text-slate-900">
@@ -364,6 +389,26 @@ onUnmounted(() => {
                 </div>
 
                 <aside class="w-64 shrink-0 space-y-3 no-print sticky top-24 self-start">
+                    <div class="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+                        <button
+                            @click="printInvoice"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
+                        >
+                            <Icon icon="si:file-download-line" :width="16" :height="16" />
+                            <span>Print</span>
+                        </button>
+                        <button
+                            @click="downloadInvoicePdf"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
+                        >
+                            <Icon icon="si:file-text-line" :width="16" :height="16" />
+                            <span>Download PDF</span>
+                        </button>
+                        <button class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#07304a] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95">
+                            <Icon icon="si:mail-line" :width="16" :height="16" />
+                            <span>Send</span>
+                        </button>
+                    </div>
                     <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Variants</div>
                     <button
                         type="button"
@@ -401,6 +446,19 @@ onUnmounted(() => {
 
 <style scoped>
 @media print {
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+
+    :global(html),
+    :global(body) {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+    }
+
     .no-print {
         display: none !important;
     }
@@ -418,6 +476,9 @@ onUnmounted(() => {
         position: absolute;
         left: 0;
         top: 0;
+        margin: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
         transform: scale(1) !important;
         transform-origin: top left !important;
     }
