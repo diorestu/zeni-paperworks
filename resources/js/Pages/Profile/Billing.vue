@@ -67,7 +67,7 @@ const basePlans = [
         color: 'bg-[#07304a] text-white',
         docs: ['Unlimited Invoices', 'Unlimited Quotations', 'Unlimited Clients'],
         features: ['Unlimited Users', 'SSO Login', 'Audit Logs', 'Advanced Permissions', 'Dedicated Manager'],
-        button: 'Contact Sales'
+        button: 'Upgrade Enterprise'
     },
 ];
 
@@ -193,7 +193,6 @@ const payPlan = async (plan) => {
                             <span :class="[plan.name === 'Free' ? 'text-4xl font-bold text-slate-900' : (!isYearly ? 'text-3xl font-bold text-slate-900 tracking-tight' : 'text-slate-400 text-sm font-semibold')]">
                                 Rp{{ plan.monthly }}
                             </span>
-                            <span class="text-slate-400 text-[10px] font-semibold uppercase">/ month</span>
                         </div>
                         <div v-if="plan.name !== 'Free'" class="mt-2 flex items-baseline gap-2">
                             <span class="text-slate-500 text-sm font-semibold">Rp{{ getDayPrice(plan) }}</span>

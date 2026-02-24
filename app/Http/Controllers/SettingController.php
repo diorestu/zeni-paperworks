@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,6 +17,18 @@ class SettingController extends Controller
 {
     public function index(): Response
     {
+        $user = auth()->user();
+        $activePlan = $this->resolveActivePlanName($user);
+        $subUsers = User::query()
+            ->where('company_id', $user->company_id)
+            ->where('role', 'user')
+            ->latest('created_at')
+            ->get();
+
+        $subUserLimit = $activePlan === 'Pro' ? 5 : null;
+        $canManageSubUsers = in_array($activePlan, ['Pro', 'Enterprise'], true);
+        $approvalRequired = $activePlan === 'Pro';
+
         return Inertia::render('Settings/Index', [
             'invoice_prefix' => Setting::where('key', 'invoice_prefix')->value('value') ?? 'INV',
             'quotation_prefix' => Setting::where('key', 'quotation_prefix')->value('value') ?? 'QUO',
@@ -28,18 +41,19 @@ class SettingController extends Controller
             'company_tax_id' => Setting::where('key', 'company_tax_id')->value('value') ?? '',
             'company_logo_url' => $this->resolveCompanyLogoUrl(),
             'taxes' => Tax::all(),
-            'sub_users' => User::query()
-                ->where('company_id', auth()->user()->company_id)
-                ->where('role', 'user')
-                ->latest('created_at')
-                ->get()
-                ->map(fn (User $user) => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'email_verified_at' => optional($user->email_verified_at)->toDateTimeString(),
-                    'created_at' => optional($user->created_at)->toDateTimeString(),
-                ]),
+            'active_plan' => $activePlan,
+            'can_manage_sub_users' => $canManageSubUsers,
+            'sub_user_limit' => $subUserLimit,
+            'sub_user_count' => $subUsers->count(),
+            'requires_sub_user_approval' => $approvalRequired,
+            'sub_users' => $subUsers->map(fn (User $member) => [
+                'id' => $member->id,
+                'name' => $member->name,
+                'email' => $member->email,
+                'email_verified_at' => optional($member->email_verified_at)->toDateTimeString(),
+                'approved_at' => optional($member->approved_at)->toDateTimeString(),
+                'created_at' => optional($member->created_at)->toDateTimeString(),
+            ]),
         ]);
     }
 
@@ -99,6 +113,20 @@ class SettingController extends Controller
 
     public function storeSubUser(Request $request): RedirectResponse
     {
+        $activePlan = $this->resolveActivePlanName($request->user());
+        if (! in_array($activePlan, ['Pro', 'Enterprise'], true)) {
+            return redirect()->back()->with('error', 'Sub-user feature is available for Pro and Enterprise plans only.');
+        }
+
+        $existingSubUserCount = User::query()
+            ->where('company_id', $request->user()->company_id)
+            ->where('role', 'user')
+            ->count();
+
+        if ($activePlan === 'Pro' && $existingSubUserCount >= 5) {
+            return redirect()->back()->with('error', 'Pro plan can only have up to 5 sub-users.');
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
@@ -112,10 +140,37 @@ class SettingController extends Controller
             'password' => $validated['password'],
             'role' => 'user',
             'wizard_completed' => true,
-            'email_verified_at' => now(),
+            'email_verified_at' => $activePlan === 'Enterprise' ? now() : null,
+            'approved_at' => $activePlan === 'Enterprise' ? now() : null,
         ]);
 
+        if ($activePlan === 'Pro') {
+            return redirect()->back()->with('status', 'Sub-user created and waiting for approval.');
+        }
+
         return redirect()->back()->with('status', 'Sub-user created successfully.');
+    }
+
+    public function approveSubUser(Request $request, User $user): RedirectResponse
+    {
+        abort_unless(
+            $user->company_id === $request->user()->company_id && $user->role === 'user',
+            403
+        );
+
+        $activePlan = $this->resolveActivePlanName($request->user());
+        if ($activePlan !== 'Pro') {
+            return redirect()->back()->with('error', 'Approval workflow is available on Pro plan only.');
+        }
+
+        if (! $user->approved_at) {
+            $user->update([
+                'approved_at' => now(),
+                'email_verified_at' => $user->email_verified_at ?: now(),
+            ]);
+        }
+
+        return redirect()->back()->with('status', 'Sub-user approved successfully.');
     }
 
     public function destroySubUser(Request $request, User $user): RedirectResponse
@@ -128,5 +183,16 @@ class SettingController extends Controller
         $user->delete();
 
         return redirect()->back()->with('status', 'Sub-user deleted successfully.');
+    }
+
+    private function resolveActivePlanName(User $user): string
+    {
+        $planName = $user->plan_name ?? 'Free';
+
+        if ($planName !== 'Free' && $user->plan_renews_at && Carbon::parse($user->plan_renews_at)->isPast()) {
+            return 'Free';
+        }
+
+        return $planName;
     }
 }

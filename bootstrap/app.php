@@ -1,8 +1,11 @@
 <?php
 
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Inertia\Inertia;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -26,5 +29,31 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (Throwable $exception, Request $request) {
+            if (config('app.debug')) {
+                return null;
+            }
+
+            $status = $exception instanceof HttpExceptionInterface
+                ? $exception->getStatusCode()
+                : 500;
+
+            if ($status === 419) {
+                return redirect()->back()->with('error', 'The page expired, please try again.');
+            }
+
+            if (! in_array($status, [403, 404, 429, 500, 503], true)) {
+                $status = 500;
+            }
+
+            if ($request->header('X-Inertia')) {
+                return Inertia::render('Error', [
+                    'status' => $status,
+                ])->toResponse($request)->setStatusCode($status);
+            }
+
+            return response()->view("errors.{$status}", [
+                'status' => $status,
+            ], $status);
+        });
     })->create();

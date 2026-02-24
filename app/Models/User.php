@@ -22,8 +22,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'company_id',
         'name',
         'email',
+        'google_id',
+        'google_avatar',
         'password',
         'email_verified_at',
+        'approved_at',
         'role',
         'wizard_completed',
         'plan_name',
@@ -50,6 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'approved_at' => 'datetime',
             'password' => 'hashed',
             'plan_renews_at' => 'date',
             'notification_last_seen_at' => 'datetime',

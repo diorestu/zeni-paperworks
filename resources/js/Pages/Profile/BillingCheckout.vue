@@ -23,12 +23,12 @@ const startPayment = async () => {
     errorMessage.value = '';
 
     if (!props.midtransEnabled) {
-        errorMessage.value = 'Midtrans belum dikonfigurasi. Isi MIDTRANS_SERVER_KEY dan MIDTRANS_CLIENT_KEY.';
+        errorMessage.value = 'Midtrans is not configured. Please set MIDTRANS_SERVER_KEY and MIDTRANS_CLIENT_KEY.';
         return;
     }
 
     if (typeof window.snap?.pay !== 'function') {
-        errorMessage.value = 'Snap.js Midtrans tidak ter-load. Silakan refresh halaman.';
+        errorMessage.value = 'Midtrans Snap.js is not loaded. Please refresh the page.';
         return;
     }
 
@@ -41,7 +41,7 @@ const startPayment = async () => {
         });
 
         if (!data?.snap_token || !data?.order_id) {
-            throw new Error('Snap token tidak tersedia.');
+            throw new Error('Snap token is not available.');
         }
 
         window.snap.pay(data.snap_token, {
@@ -53,7 +53,7 @@ const startPayment = async () => {
             },
             onError: () => {
                 processing.value = false;
-                errorMessage.value = 'Pembayaran gagal diproses. Coba ulangi beberapa saat lagi.';
+                errorMessage.value = 'Payment could not be processed. Please try again shortly.';
             },
             onClose: () => {
                 processing.value = false;
@@ -61,7 +61,7 @@ const startPayment = async () => {
         });
     } catch (error) {
         processing.value = false;
-        errorMessage.value = error?.response?.data?.message ?? 'Gagal membuat transaksi Midtrans.';
+        errorMessage.value = error?.response?.data?.message ?? 'Failed to create Midtrans transaction.';
     }
 };
 
@@ -84,7 +84,7 @@ const confirmAndRedirect = async (orderId, pending = false) => {
             replace: true,
         });
     } catch (error) {
-        errorMessage.value = error?.response?.data?.message ?? 'Transaksi berhasil dibuat, tapi konfirmasi status gagal.';
+        errorMessage.value = error?.response?.data?.message ?? 'Transaction created, but status confirmation failed.';
     } finally {
         processing.value = false;
     }
@@ -101,8 +101,8 @@ const confirmAndRedirect = async (orderId, pending = false) => {
                     <Icon icon="si:arrow-left-line" :width="18" :height="18" />
                 </Link>
                 <div>
-                    <h1 class="text-2xl font-semibold text-slate-900">Checkout Pembayaran</h1>
-                    <p class="text-sm text-slate-500">Konfirmasi paket sebelum lanjut ke pembayaran.</p>
+                    <h1 class="text-2xl font-semibold text-slate-900">Payment Checkout</h1>
+                    <p class="text-sm text-slate-500">Review your plan details before continuing to payment.</p>
                 </div>
             </div>
 
@@ -120,18 +120,18 @@ const confirmAndRedirect = async (orderId, pending = false) => {
                         </p>
                     </div>
                     <div class="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                        <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Harga Satuan</p>
+                        <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Unit Price</p>
                         <p class="mt-2 text-lg font-semibold text-slate-900">{{ formatCurrency(unitPrice) }}</p>
-                        <p class="mt-1 text-xs text-slate-500">{{ isYearly ? 'per bulan (tagihan tahunan)' : 'per bulan' }}</p>
+                        <p class="mt-1 text-xs text-slate-500">{{ isYearly ? 'per month (billed annually)' : 'per month' }}</p>
                     </div>
                 </div>
 
                 <div class="mt-6 rounded-xl bg-[#07304a] px-5 py-4 text-white">
                     <div class="flex items-center justify-between">
                         <p class="text-xs uppercase tracking-widest text-white/70">Total Payment</p>
-                        <p class="text-2xl font-semibold">{{ formatCurrency(totalAmount) }}</p>
+                        <p class="text-2xl font-semibold text-white">{{ formatCurrency(totalAmount) }}</p>
                     </div>
-                    <p class="mt-1 text-xs text-white/70">{{ isYearly ? 'Ditagih per tahun' : 'Ditagih per bulan' }}</p>
+                    <p class="mt-1 text-xs text-white/70">{{ isYearly ? 'Billed yearly' : 'Billed monthly' }}</p>
                 </div>
 
                 <div class="mt-6 flex flex-wrap items-center gap-3">
@@ -142,10 +142,10 @@ const confirmAndRedirect = async (orderId, pending = false) => {
                         class="inline-flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0a3f61] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         <Icon icon="si:wallet-line" :width="16" :height="16" />
-                        {{ processing ? 'Processing...' : 'Bayar Sekarang' }}
+                        {{ processing ? 'Processing...' : 'Pay Now' }}
                     </button>
                     <Link :href="route('settings.billing')" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">
-                        Kembali ke Billing
+                        Back to Billing
                     </Link>
                 </div>
             </div>

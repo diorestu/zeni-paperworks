@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
@@ -17,6 +17,11 @@ const props = defineProps({
     company_logo_url: String,
     taxes: Array,
     sub_users: Array,
+    active_plan: String,
+    can_manage_sub_users: Boolean,
+    sub_user_limit: Number,
+    sub_user_count: Number,
+    requires_sub_user_approval: Boolean,
 });
 
 const activeTab = ref('general');
@@ -50,6 +55,13 @@ const subUserForm = useForm({
     email: '',
     password: '',
     password_confirmation: '',
+});
+
+const canManageSubUsers = computed(() => Boolean(props.can_manage_sub_users));
+const reachedSubUserLimit = computed(() => {
+    if (props.active_plan !== 'Pro') return false;
+    if (!props.sub_user_limit) return false;
+    return Number(props.sub_user_count || 0) >= Number(props.sub_user_limit);
 });
 
 const submitProfile = () => {
@@ -124,11 +136,19 @@ const deleteTax = (tax) => {
 };
 
 const submitSubUser = () => {
+    if (!canManageSubUsers.value || reachedSubUserLimit.value) return;
+
     subUserForm.post(route('settings.sub-users.store'), {
         preserveScroll: true,
         onSuccess: () => {
             subUserForm.reset();
         },
+    });
+};
+
+const approveSubUser = (user) => {
+    router.post(route('settings.sub-users.approve', user.id), {}, {
+        preserveScroll: true,
     });
 };
 
@@ -450,7 +470,19 @@ const deleteSubUser = (user) => {
             <div v-show="activeTab === 'team'" class="grid grid-cols-1 gap-8 lg:grid-cols-3">
                 <div class="rounded-2xl border border-slate-100 bg-white p-8 shadow-sm">
                     <h3 class="text-lg font-semibold text-slate-900 mb-2">Add Sub-user</h3>
-                    <p class="text-sm text-slate-500 mb-6">Sub-users get role <span class="font-semibold">User</span> and can manage dashboard, invoices, and quotations.</p>
+                    <p class="text-sm text-slate-500 mb-2">Sub-users get role <span class="font-semibold">User</span> and can manage dashboard, invoices, and quotations.</p>
+                    <p class="text-xs font-semibold uppercase tracking-widest text-[#07304a] mb-4">
+                        Plan: {{ active_plan }} · {{ sub_user_count }}{{ sub_user_limit ? `/${sub_user_limit}` : '' }} users
+                    </p>
+                    <div v-if="!canManageSubUsers" class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-700">
+                        Sub-user feature is available for Pro and Enterprise plans only.
+                    </div>
+                    <div v-else-if="reachedSubUserLimit" class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-700">
+                        Pro plan reached max limit of {{ sub_user_limit }} sub-users.
+                    </div>
+                    <div v-else-if="requires_sub_user_approval" class="mb-6 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-xs font-semibold text-sky-700">
+                        New sub-users require admin approval before they can sign in.
+                    </div>
 
                     <form @submit.prevent="submitSubUser" class="space-y-4">
                         <div class="space-y-2">
@@ -460,6 +492,7 @@ const deleteSubUser = (user) => {
                                 type="text"
                                 class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]"
                                 placeholder="Team member name"
+                                :disabled="!canManageSubUsers || reachedSubUserLimit"
                             >
                             <p v-if="subUserForm.errors.name" class="text-xs font-semibold text-rose-500">{{ subUserForm.errors.name }}</p>
                         </div>
@@ -471,6 +504,7 @@ const deleteSubUser = (user) => {
                                 type="email"
                                 class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]"
                                 placeholder="member@company.com"
+                                :disabled="!canManageSubUsers || reachedSubUserLimit"
                             >
                             <p v-if="subUserForm.errors.email" class="text-xs font-semibold text-rose-500">{{ subUserForm.errors.email }}</p>
                         </div>
@@ -482,6 +516,7 @@ const deleteSubUser = (user) => {
                                 type="password"
                                 class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]"
                                 placeholder="Minimum 8 characters"
+                                :disabled="!canManageSubUsers || reachedSubUserLimit"
                             >
                             <p v-if="subUserForm.errors.password" class="text-xs font-semibold text-rose-500">{{ subUserForm.errors.password }}</p>
                         </div>
@@ -493,12 +528,13 @@ const deleteSubUser = (user) => {
                                 type="password"
                                 class="w-full rounded-xl border-none bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 outline-none focus:ring-2 focus:ring-[#07304a]"
                                 placeholder="Repeat password"
+                                :disabled="!canManageSubUsers || reachedSubUserLimit"
                             >
                         </div>
 
                         <button
                             type="submit"
-                            :disabled="subUserForm.processing"
+                            :disabled="subUserForm.processing || !canManageSubUsers || reachedSubUserLimit"
                             class="inline-flex items-center gap-2 rounded-xl bg-[#07304a] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] disabled:opacity-50"
                         >
                             <Icon icon="si:add-line" :width="16" :height="16" />
@@ -530,14 +566,27 @@ const deleteSubUser = (user) => {
                                 <p class="mt-1 text-[10px] font-semibold uppercase tracking-wider" :class="member.email_verified_at ? 'text-emerald-600' : 'text-amber-600'">
                                     {{ member.email_verified_at ? 'Verified' : 'Unverified' }}
                                 </p>
+                                <p v-if="requires_sub_user_approval" class="mt-1 text-[10px] font-semibold uppercase tracking-wider" :class="member.approved_at ? 'text-emerald-600' : 'text-amber-600'">
+                                    {{ member.approved_at ? 'Approved' : 'Pending Approval' }}
+                                </p>
                             </div>
-                            <button
-                                type="button"
-                                class="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
-                                @click="deleteSubUser(member)"
-                            >
-                                Delete
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button
+                                    v-if="requires_sub_user_approval && !member.approved_at"
+                                    type="button"
+                                    class="rounded-lg border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50"
+                                    @click="approveSubUser(member)"
+                                >
+                                    Approve
+                                </button>
+                                <button
+                                    type="button"
+                                    class="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
+                                    @click="deleteSubUser(member)"
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

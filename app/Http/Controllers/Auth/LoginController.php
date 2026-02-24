@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -35,6 +36,24 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+
+            $user = $request->user();
+            if ($user?->role === 'user' && ! $user->approved_at) {
+                $owner = User::query()->find($user->company_id);
+                $ownerPlan = $owner?->plan_name ?? 'Free';
+                $isProActive = $ownerPlan === 'Pro'
+                    && (! $owner?->plan_renews_at || ! Carbon::parse($owner->plan_renews_at)->isPast());
+
+                if ($isProActive) {
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    throw ValidationException::withMessages([
+                        'email' => 'Your account is pending approval from your company admin.',
+                    ]);
+                }
+            }
 
             return redirect()->intended('/dashboard');
         }

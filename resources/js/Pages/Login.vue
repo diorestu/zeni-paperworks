@@ -1,7 +1,6 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
 
 const form = useForm({
     email: '',
@@ -10,6 +9,7 @@ const form = useForm({
 });
 
 const showPassword = ref(false);
+const page = usePage();
 
 const submit = () => {
     form.post(route('login'), {
@@ -35,6 +35,29 @@ const submit = () => {
                 <p class="text-[13px] font-normal text-slate-500 leading-relaxed">
                     Keep your teams in sync with a single dashboard. Continue with your email to unlock personalized insights.
                 </p>
+            </div>
+
+            <div v-if="page.props.flash?.error" class="mb-4 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-600">
+                {{ page.props.flash.error }}
+            </div>
+
+            <a
+                :href="route('auth.google.redirect')"
+                class="mb-5 inline-flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-[13px] font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+            >
+                <svg class="h-4 w-4" viewBox="0 0 533.5 544.3" aria-hidden="true">
+                    <path fill="#4285F4" d="M533.5 278.4c0-18.5-1.5-36.1-4.7-53.2H272v100.7h146.9c-6.3 34.1-25 63-53.4 82.4v68h86.3c50.6-46.6 81.7-115.3 81.7-197.9z"/>
+                    <path fill="#34A853" d="M272 544.3c73.5 0 135.2-24.4 180.2-66.3l-86.3-68c-24 16.1-54.8 25.6-93.9 25.6-72 0-133-48.6-154.8-113.9h-89.2v71.6c44.8 89 137.2 150.9 243.9 150.9z"/>
+                    <path fill="#FBBC04" d="M117.2 321.7c-5.5-16.1-8.7-33.4-8.7-51.7s3.2-35.6 8.7-51.7v-71.6h-89.2C10.1 182.8 0 225.3 0 270s10.1 87.2 28 123.3l89.2-71.6z"/>
+                    <path fill="#EA4335" d="M272 107.7c40 0 75.9 13.8 104.2 40.8l78.2-78.2C407.1 24.9 345.5 0 272 0 165.3 0 72.9 61.8 28 150.9l89.2 71.6C139 156.2 200 107.7 272 107.7z"/>
+                </svg>
+                Continue with Google
+            </a>
+
+            <div class="mb-5 flex items-center gap-3">
+                <span class="h-px flex-1 bg-slate-200"></span>
+                <span class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">or</span>
+                <span class="h-px flex-1 bg-slate-200"></span>
             </div>
 
             <!-- Form -->

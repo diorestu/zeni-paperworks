@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OnboardingController;
@@ -13,14 +14,19 @@ use App\Http\Controllers\NotificationController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use Inertia\Inertia;
 
 Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/privacy-policy', fn () => Inertia::render('Legal/PrivacyPolicy'))->name('privacy-policy');
+Route::get('/terms-service', fn () => Inertia::render('Legal/TermsService'))->name('terms-service');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
     Route::post('/login', [LoginController::class, 'store']);
     Route::get('/register', [LoginController::class, 'createRegister'])->name('register');
     Route::post('/register', [LoginController::class, 'register']);
+    Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 });
 
 Route::middleware('auth')->group(function () {
@@ -53,6 +59,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('invoices', InvoiceController::class)->only(['index', 'create', 'store'])->middleware('role:admin,user');
         Route::get('/invoices/{invoice}/download-pdf', [InvoiceController::class, 'downloadPdf'])
             ->name('invoices.download-pdf')
+            ->middleware('role:admin,user')
+            ->where('invoice', '.*');
+        Route::post('/invoices/{invoice}/send', [InvoiceController::class, 'send'])
+            ->name('invoices.send')
             ->middleware('role:admin,user')
             ->where('invoice', '.*');
         Route::patch('/invoices/{invoice}', [InvoiceController::class, 'update'])
@@ -98,6 +108,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [App\Http\Controllers\SettingController::class, 'index'])->name('index');
             Route::put('/', [App\Http\Controllers\SettingController::class, 'update'])->name('update');
             Route::post('/sub-users', [App\Http\Controllers\SettingController::class, 'storeSubUser'])->name('sub-users.store');
+            Route::post('/sub-users/{user}/approve', [App\Http\Controllers\SettingController::class, 'approveSubUser'])->name('sub-users.approve');
             Route::delete('/sub-users/{user}', [App\Http\Controllers\SettingController::class, 'destroySubUser'])->name('sub-users.destroy');
 
             Route::post('/taxes', [App\Http\Controllers\TaxController::class, 'store'])->name('taxes.store');

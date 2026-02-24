@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Mail\InvoiceSentMail;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Product;
@@ -14,6 +15,7 @@ use Inertia\Response;
 use App\Models\Setting;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -186,16 +188,52 @@ class InvoiceController extends Controller
     public function downloadPdf(Request $request, Invoice $invoice)
     {
         abort_unless($invoice->company_id === $request->user()->company_id, 403);
+        $variant = (string) $request->query('variant', 'classic');
+        if (! in_array($variant, ['classic', 'modern', 'minimal'], true)) {
+            $variant = 'classic';
+        }
 
         $pdf = Pdf::loadView('invoices.pdf', [
             'invoice' => $invoice->load(['client', 'bankAccount', 'items.product']),
             'logoUrl' => $this->resolveCompanyLogoUrl(),
             'company' => $this->resolveCompanyProfile(),
-        ])->setPaper('a4');
+            'variant' => $variant,
+        ])->setPaper('a4', 'portrait');
 
         $filename = 'invoice-'.Str::slug($invoice->invoice_number).'.pdf';
 
         return $pdf->download($filename);
+    }
+
+    public function send(Request $request, Invoice $invoice): RedirectResponse
+    {
+        abort_unless($invoice->company_id === $request->user()->company_id, 403);
+
+        $invoice->load(['client', 'items.product', 'bankAccount']);
+
+        if (empty($invoice->client?->email)) {
+            return redirect()->back()->with('error', 'Client email is missing. Please update client email first.');
+        }
+
+        Mail::to($invoice->client->email)->send(new InvoiceSentMail(
+            invoice: $invoice,
+            companyProfile: $this->resolveCompanyProfile(),
+            companyLogoUrl: $this->resolveCompanyLogoUrl(),
+        ));
+
+        if ($invoice->status === 'draft') {
+            $invoice->update(['status' => 'sent']);
+        }
+
+        $this->notificationService->notifyUser($request->user(), [
+            'type' => 'invoice.sent',
+            'title' => 'Invoice sent',
+            'message' => "Invoice {$invoice->invoice_number} was sent to {$invoice->client->email}.",
+            'href' => route('invoices.show', $invoice),
+            'icon' => 'si:mail-line',
+        ]);
+
+        return redirect()->back()->with('status', 'Invoice email sent successfully.');
     }
 
     private function resolveActivePlanName($user): string

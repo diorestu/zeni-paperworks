@@ -1,7 +1,7 @@
 <script setup>
 import { ref, nextTick, onMounted, onUnmounted, computed, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
@@ -16,6 +16,9 @@ const props = defineProps({
     },
 });
 const page = usePage();
+const isSendingEmail = ref(false);
+const flashStatus = computed(() => page.props?.flash?.status || '');
+const flashError = computed(() => page.props?.flash?.error || '');
 const isFreePlan = computed(() => {
     const planName = page.props?.auth?.user?.plan_name;
     return String(planName || 'Free').toLowerCase() === 'free';
@@ -50,6 +53,7 @@ const getStatusColor = (status) => {
 
 const variant = ref('classic');
 const printVariant = ref(null);
+const isPrintMode = ref(false);
 const isSwitchingVariant = ref(false);
 let variantTimer = null;
 
@@ -89,7 +93,24 @@ const printInvoice = async () => {
 };
 
 const downloadInvoicePdf = () => {
-    window.open(route('invoices.download-pdf', props.invoice.invoice_number), '_blank', 'noopener,noreferrer');
+    const url = route('invoices.download-pdf', {
+        invoice: props.invoice.invoice_number,
+        variant: variant.value,
+    });
+
+    window.open(url, '_blank', 'noopener,noreferrer');
+};
+
+const sendInvoiceEmail = () => {
+    if (isSendingEmail.value) return;
+
+    isSendingEmail.value = true;
+    router.post(route('invoices.send', props.invoice.invoice_number), {}, {
+        preserveScroll: true,
+        onFinish: () => {
+            isSendingEmail.value = false;
+        },
+    });
 };
 
 const updateStatus = () => {
@@ -134,6 +155,7 @@ onUnmounted(() => {
 onMounted(async () => {
     const params = new URLSearchParams(window.location.search);
     const printMode = params.get('print') === '1';
+    isPrintMode.value = printMode;
     const variantFromQuery = params.get('variant');
 
     if (variantFromQuery && ['classic', 'modern', 'minimal'].includes(variantFromQuery)) {
@@ -145,8 +167,30 @@ onMounted(async () => {
     printVariant.value = variant.value;
     await nextTick();
     setTimeout(() => {
+        const source = document.querySelector('.invoice-print');
+        if (!source) {
+            window.print();
+            return;
+        }
+
+        const clone = source.cloneNode(true);
+        clone.classList.add('invoice-print-standalone');
+        clone.style.transform = 'scale(1)';
+        clone.style.transformOrigin = 'top left';
+        clone.style.width = '210mm';
+        clone.style.height = '297mm';
+        clone.style.margin = '0';
+        clone.style.position = 'fixed';
+        clone.style.left = '0';
+        clone.style.top = '0';
+
+        document.body.classList.add('print-standalone-mode');
+        document.body.appendChild(clone);
+
         window.print();
         setTimeout(() => {
+            clone.remove();
+            document.body.classList.remove('print-standalone-mode');
             printVariant.value = null;
         }, 50);
     }, 150);
@@ -185,6 +229,7 @@ onMounted(async () => {
 
                 <div class="flex items-center gap-3">
                     <Link
+                        v-if="invoice.is_down_payment"
                         :href="route('invoices.create', { source_invoice: invoice.invoice_number })"
                         class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-all"
                     >
@@ -206,6 +251,13 @@ onMounted(async () => {
                         <span v-if="statusForm.processing" class="text-xs font-medium text-slate-500">Saving...</span>
                     </div>
                 </div>
+            </div>
+
+            <div v-if="flashStatus" class="mb-4 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700 no-print">
+                {{ flashStatus }}
+            </div>
+            <div v-if="flashError" class="mb-4 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700 no-print">
+                {{ flashError }}
             </div>
 
             <div class="flex items-start gap-10">
@@ -401,12 +453,17 @@ onMounted(async () => {
                             @click="downloadInvoicePdf"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
                         >
-                            <Icon icon="si:file-text-line" :width="16" :height="16" />
+                            <Icon icon="si:file-download-line" :width="16" :height="16" />
                             <span>Download PDF</span>
                         </button>
-                        <button class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#07304a] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95">
+                        <button
+                            @click="sendInvoiceEmail"
+                            :disabled="isSendingEmail || !invoice.client?.email"
+                            :title="invoice.client?.email ? 'Send invoice email to client' : 'Client email is missing'"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#07304a] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+                        >
                             <Icon icon="si:mail-line" :width="16" :height="16" />
-                            <span>Send</span>
+                            <span>{{ isSendingEmail ? 'Sending...' : 'Send' }}</span>
                         </button>
                     </div>
                     <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Variants</div>
@@ -444,15 +501,15 @@ onMounted(async () => {
 
 </template>
 
-<style scoped>
+<style>
 @media print {
     @page {
         size: A4 portrait;
         margin: 0;
     }
 
-    :global(html),
-    :global(body) {
+    html,
+    body {
         margin: 0 !important;
         padding: 0 !important;
         width: 210mm !important;
@@ -463,24 +520,30 @@ onMounted(async () => {
         display: none !important;
     }
 
-    :global(body) {
+    body {
         background: #fff !important;
     }
 
-    :global(body *:not(.invoice-print):not(.invoice-print *)) {
-        visibility: hidden !important;
+    body.print-standalone-mode > *:not(.invoice-print-standalone) {
+        display: none !important;
     }
 
-    .invoice-print {
+    .invoice-print-standalone,
+    .invoice-print-standalone * {
         visibility: visible !important;
-        position: absolute;
-        left: 0;
-        top: 0;
+    }
+
+    .invoice-print-standalone {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        z-index: 9999 !important;
         margin: 0 !important;
         width: 210mm !important;
         height: 297mm !important;
         transform: scale(1) !important;
         transform-origin: top left !important;
+        overflow: hidden !important;
     }
 
     .print-variant-classic {
