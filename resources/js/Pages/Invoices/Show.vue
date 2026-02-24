@@ -3,6 +3,7 @@ import { ref, nextTick, onMounted, onUnmounted, computed, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
+import { useToast } from 'vue-toastification';
 
 const props = defineProps({
     invoice: Object,
@@ -101,12 +102,29 @@ const downloadInvoicePdf = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
 };
 
+const downloadReceipt = () => {
+    const url = route('invoices.download-receipt', {
+        invoice: props.invoice.invoice_number,
+    });
+
+    window.open(url, '_blank', 'noopener,noreferrer');
+};
+
 const sendInvoiceEmail = () => {
     if (isSendingEmail.value) return;
 
     isSendingEmail.value = true;
     router.post(route('invoices.send', props.invoice.invoice_number), {}, {
         preserveScroll: true,
+        onSuccess: () => {
+            useToast().success('Invoice email sent successfully.');
+        },
+        onError: (errors) => {
+            const errorMsg = typeof errors === 'object' && Object.values(errors).length 
+                ? Object.values(errors)[0] 
+                : 'Failed to send invoice email.';
+            useToast().error(errorMsg);
+        },
         onFinish: () => {
             isSendingEmail.value = false;
         },
@@ -141,6 +159,7 @@ const setVariant = (nextVariant) => {
     if (variant.value === nextVariant) return;
     isSwitchingVariant.value = true;
     variant.value = nextVariant;
+    localStorage.setItem('invoice_variant', nextVariant);
 
     if (variantTimer) clearTimeout(variantTimer);
     variantTimer = setTimeout(() => {
@@ -153,6 +172,11 @@ onUnmounted(() => {
 });
 
 onMounted(async () => {
+    const savedVariant = localStorage.getItem('invoice_variant');
+    if (savedVariant && ['classic', 'modern', 'minimal'].includes(savedVariant) && !isPrintMode.value) {
+        variant.value = savedVariant;
+    }
+
     const params = new URLSearchParams(window.location.search);
     const printMode = params.get('print') === '1';
     isPrintMode.value = printMode;
@@ -174,12 +198,13 @@ onMounted(async () => {
         }
 
         const clone = source.cloneNode(true);
+        clone.classList.remove('scale-[0.63]', 'origin-top-left', 'invoice-print');
         clone.classList.add('invoice-print-standalone');
-        clone.style.transform = 'scale(1)';
-        clone.style.transformOrigin = 'top left';
+        clone.style.transform = 'none';
         clone.style.width = '210mm';
         clone.style.height = '297mm';
         clone.style.margin = '0';
+        clone.style.padding = '0';
         clone.style.position = 'fixed';
         clone.style.left = '0';
         clone.style.top = '0';
@@ -253,12 +278,7 @@ onMounted(async () => {
                 </div>
             </div>
 
-            <div v-if="flashStatus" class="mb-4 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700 no-print">
-                {{ flashStatus }}
-            </div>
-            <div v-if="flashError" class="mb-4 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700 no-print">
-                {{ flashError }}
-            </div>
+            <!-- We handled flash via toast now -->
 
             <div class="flex items-start gap-10">
                 <div class="flex-1 overflow-visible">
@@ -457,6 +477,14 @@ onMounted(async () => {
                             <span>Download PDF</span>
                         </button>
                         <button
+                            v-if="invoice.status === 'paid'"
+                            @click="downloadReceipt"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-all"
+                        >
+                            <Icon icon="si:receipt-line" :width="16" :height="16" />
+                            <span>Download Receipt</span>
+                        </button>
+                        <button
                             @click="sendInvoiceEmail"
                             :disabled="isSendingEmail || !invoice.client?.email"
                             :title="invoice.client?.email ? 'Send invoice email to client' : 'Client email is missing'"
@@ -514,6 +542,8 @@ onMounted(async () => {
         padding: 0 !important;
         width: 210mm !important;
         height: 297mm !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 
     .no-print {
@@ -539,11 +569,16 @@ onMounted(async () => {
         top: 0 !important;
         z-index: 9999 !important;
         margin: 0 !important;
+        padding: 0 !important;
         width: 210mm !important;
         height: 297mm !important;
-        transform: scale(1) !important;
-        transform-origin: top left !important;
+        transform: none !important;
         overflow: hidden !important;
+    }
+
+    .invoice-print-standalone > div {
+        box-shadow: none !important;
+        border-radius: 0 !important;
     }
 
     .print-variant-classic {

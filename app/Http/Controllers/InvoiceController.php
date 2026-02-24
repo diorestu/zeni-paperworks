@@ -198,9 +198,25 @@ class InvoiceController extends Controller
             'logoUrl' => $this->resolveCompanyLogoUrl(),
             'company' => $this->resolveCompanyProfile(),
             'variant' => $variant,
+            'isFreePlan' => $this->resolveActivePlanName($request->user()) === 'Free',
         ])->setPaper('a4', 'portrait');
 
         $filename = 'invoice-'.Str::slug($invoice->invoice_number).'.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    public function downloadReceipt(Request $request, Invoice $invoice)
+    {
+        abort_unless($invoice->company_id === $request->user()->company_id, 403);
+        abort_unless($invoice->status === 'paid', 404, 'Receipt not available for unpaid invoice.');
+
+        $pdf = Pdf::loadView('invoices.receipt', [
+            'invoice' => $invoice->load(['client', 'items.product']),
+            'company' => $this->resolveCompanyProfile(),
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'receipt-'.Str::slug($invoice->invoice_number).'.pdf';
 
         return $pdf->download($filename);
     }
@@ -215,10 +231,23 @@ class InvoiceController extends Controller
             return redirect()->back()->with('error', 'Client email is missing. Please update client email first.');
         }
 
+        $pdf = Pdf::loadView('invoices.pdf', [
+            'invoice' => $invoice,
+            'logoUrl' => $this->resolveCompanyLogoUrl(),
+            'company' => $this->resolveCompanyProfile(),
+            'variant' => 'classic',
+            'isFreePlan' => $this->resolveActivePlanName($request->user()) === 'Free',
+        ])->setPaper('a4', 'portrait');
+
+        $pdfFilename = 'invoice-'.Str::slug($invoice->invoice_number).'.pdf';
+        $pdfContent = $pdf->output();
+
         Mail::to($invoice->client->email)->send(new InvoiceSentMail(
             invoice: $invoice,
             companyProfile: $this->resolveCompanyProfile(),
             companyLogoUrl: $this->resolveCompanyLogoUrl(),
+            pdfContent: $pdfContent,
+            pdfFilename: $pdfFilename,
         ));
 
         if ($invoice->status === 'draft') {

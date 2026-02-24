@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\Invoice;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -16,7 +17,9 @@ class InvoiceSentMail extends Mailable
     public function __construct(
         public Invoice $invoice,
         public array $companyProfile = [],
-        public ?string $companyLogoUrl = null
+        public ?string $companyLogoUrl = null,
+        public ?string $pdfContent = null,
+        public ?string $pdfFilename = null
     ) {
     }
 
@@ -34,5 +37,17 @@ class InvoiceSentMail extends Mailable
         return new Content(
             view: 'emails.invoice-sent',
         );
+    }
+
+    public function attachments(): array
+    {
+        $attachments = [];
+
+        if ($this->pdfContent && $this->pdfFilename) {
+            $attachments[] = Attachment::fromData(fn () => $this->pdfContent, $this->pdfFilename)
+                ->withMime('application/pdf');
+        }
+
+        return $attachments;
     }
 }

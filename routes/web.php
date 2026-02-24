@@ -61,6 +61,10 @@ Route::middleware('auth')->group(function () {
             ->name('invoices.download-pdf')
             ->middleware('role:admin,user')
             ->where('invoice', '.*');
+        Route::get('/invoices/{invoice}/download-receipt', [InvoiceController::class, 'downloadReceipt'])
+            ->name('invoices.download-receipt')
+            ->middleware('role:admin,user')
+            ->where('invoice', '.*');
         Route::post('/invoices/{invoice}/send', [InvoiceController::class, 'send'])
             ->name('invoices.send')
             ->middleware('role:admin,user')
