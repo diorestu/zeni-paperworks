@@ -29,7 +29,6 @@ const showAddProduct = ref(false);
 const showAddBankAccount = ref(false);
 const isEditingInvoiceNumber = ref(false);
 const clientSearch = ref('');
-const defaultDueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 const formatInitialRupiah = (value) => Number(value ?? 0).toLocaleString('id-ID');
 const defaultBankAccountId = props.sourceInvoice?.bank_account_id
     ?? (props.bankAccounts || []).find((bank) => bank.is_default)?.id
@@ -42,7 +41,7 @@ const form = useForm({
     is_down_payment: false,
     invoice_number: props.nextInvoiceNumber,
     invoice_date: new Date().toISOString().split('T')[0],
-    due_date: defaultDueDate,
+    due_date: null,
     notes: props.sourceInvoice?.notes ?? '',
     items: props.sourceInvoice?.items?.length
         ? props.sourceInvoice.items.map((item) => ({
@@ -362,7 +361,7 @@ watch(
                                     </div>
                                 </div>
                                 <div class="space-y-2">
-                                    <label class="block w-3/5 ml-auto text-[10px] font-semibold uppercase tracking-widest text-slate-400">Due Date</label>
+                                    <label class="block w-3/5 ml-auto text-[10px] font-semibold uppercase tracking-widest text-slate-400">Due Date (Optional)</label>
                                     <div class="relative w-3/5 ml-auto">
                                         <Icon icon="si:calendar-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10"  />
                                         <VueDatePicker
@@ -373,7 +372,7 @@ watch(
                                             :time-picker="false"
                                             :time-config="datePickerTimeConfig"
                                             :hide-input-icon="true"
-                                            :clearable="false"
+                                            :clearable="true"
                                             auto-apply
                                             input-class-name="invoice-date-input"
                                         />

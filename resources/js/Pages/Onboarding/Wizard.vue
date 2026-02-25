@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
@@ -13,19 +13,19 @@ const props = defineProps({
 const step = ref(0);
 const steps = [
     {
-        title: 'Selamat Datang',
-        description: 'Kami bantu kamu setup awal supaya langsung siap dipakai.',
-        points: ['Atur profil bisnis', 'Tambahkan klien pertama', 'Mulai buat invoice'],
+        title: 'Welcome',
+        description: 'We will help you complete the initial setup so you can get started quickly.',
+        points: ['Set up your business profile', 'Add your first client', 'Start creating invoices'],
     },
     {
-        title: 'Cara Kerja Paperwork',
-        description: 'Alur utama: Penawaran -> Invoice -> Pembayaran.',
-        points: ['Buat data klien dan produk', 'Susun penawaran atau invoice', 'Pantau status pembayaran'],
+        title: 'How Paperwork Works',
+        description: 'Main flow: Quotation -> Invoice -> Payment.',
+        points: ['Create client and product data', 'Prepare quotations or invoices', 'Track payment status'],
     },
     {
-        title: 'Siap Digunakan',
-        description: 'Kamu bisa lanjut ke dashboard dan mulai operasional harian.',
-        points: ['Cek insight di dashboard', 'Kelola dokumen transaksi', 'Atur pengaturan bisnis'],
+        title: 'Ready to Use',
+        description: 'You can continue to the dashboard and start your daily operations.',
+        points: ['Check insights in the dashboard', 'Manage transaction documents', 'Configure business settings'],
     },
 ];
 
@@ -57,10 +57,10 @@ const complete = () => {
             <div class="mb-8 flex items-center justify-between">
                 <div>
                     <p class="text-[10px] font-semibold uppercase tracking-widest text-[#07304a]">Onboarding</p>
-                    <h1 class="mt-2 text-2xl font-semibold text-slate-900">Halo {{ userName || 'Pengguna Baru' }}, selamat datang</h1>
+                    <h1 class="mt-2 text-2xl font-semibold text-slate-900">Hello {{ userName || 'New User' }}, welcome</h1>
                 </div>
                 <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
-                    Langkah {{ step + 1 }} dari {{ steps.length }}
+                    Step {{ step + 1 }} of {{ steps.length }}
                 </div>
             </div>
 
@@ -87,26 +87,35 @@ const complete = () => {
                     :disabled="step === 0"
                     @click="prev"
                 >
-                    Kembali
+                    Back
                 </button>
 
-                <button
-                    v-if="step < steps.length - 1"
-                    type="button"
-                    class="rounded-xl bg-[#07304a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0a3f61]"
-                    @click="next"
-                >
-                    Lanjut
-                </button>
-                <button
-                    v-else
-                    type="button"
-                    class="rounded-xl bg-[#07304a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0a3f61] disabled:opacity-60"
-                    :disabled="form.processing"
-                    @click="complete"
-                >
-                    {{ form.processing ? 'Memproses...' : 'Selesai & Masuk Dashboard' }}
-                </button>
+                <div class="flex items-center gap-3">
+                    <Link
+                        :href="route('settings.index')"
+                        class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                    >
+                        Settings
+                    </Link>
+
+                    <button
+                        v-if="step < steps.length - 1"
+                        type="button"
+                        class="rounded-xl bg-[#07304a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0a3f61]"
+                        @click="next"
+                    >
+                        Next
+                    </button>
+                    <button
+                        v-else
+                        type="button"
+                        class="rounded-xl bg-[#07304a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0a3f61] disabled:opacity-60"
+                        :disabled="form.processing"
+                        @click="complete"
+                    >
+                        {{ form.processing ? 'Processing...' : 'Finish & Go to Dashboard' }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>

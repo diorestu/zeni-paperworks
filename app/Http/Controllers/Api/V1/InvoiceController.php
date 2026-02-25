@@ -66,7 +66,7 @@ class InvoiceController extends Controller
                 Rule::unique('invoices', 'invoice_number')->where(fn ($q) => $q->where('company_id', $companyId)),
             ],
             'invoice_date' => ['required', 'date'],
-            'due_date' => ['required', 'date', 'after_or_equal:invoice_date'],
+            'due_date' => ['nullable', 'date', 'after_or_equal:invoice_date'],
             'notes' => ['nullable', 'string'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => [
@@ -90,7 +90,7 @@ class InvoiceController extends Controller
                 'parent_invoice_id' => $validated['parent_invoice_id'] ?? null,
                 'invoice_number' => $validated['invoice_number'] ?? $this->generateInvoiceNumber(),
                 'invoice_date' => $validated['invoice_date'],
-                'due_date' => $validated['due_date'],
+                'due_date' => $validated['due_date'] ?? null,
                 'status' => 'draft',
                 'subtotal' => $subtotal,
                 'tax_total' => $taxTotal,

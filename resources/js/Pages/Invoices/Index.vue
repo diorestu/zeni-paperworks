@@ -41,6 +41,11 @@ const statusCounts = computed(() => {
         overdue: props.invoices.filter(i => i.status === 'overdue').length,
     };
 });
+
+const formatShortDate = (dateString) => {
+    if (!dateString) return '—';
+    return new Date(dateString).toLocaleDateString();
+};
 </script>
 
 <template>
@@ -202,8 +207,8 @@ const statusCounts = computed(() => {
                         </td>
                         <td class="px-8 py-6">
                             <div class="flex flex-col">
-                                <span class="text-sm font-normal text-slate-900 text-nowrap">{{ new Date(invoice.invoice_date).toLocaleDateString() }}</span>
-                                <span class="text-[8px] font-normal uppercase text-slate-400">Due {{ new Date(invoice.due_date).toLocaleDateString() }}</span>
+                                <span class="text-sm font-normal text-slate-900 text-nowrap">{{ formatShortDate(invoice.invoice_date) }}</span>
+                                <span class="text-[8px] font-normal uppercase text-slate-400">Due {{ formatShortDate(invoice.due_date) }}</span>
                             </div>
                         </td>
                         <td class="px-8 py-6">
