@@ -53,6 +53,7 @@ class InvoiceController extends Controller
             'bankAccounts' => auth()->user()->bankAccounts()->latest()->get(),
             'taxes' => Tax::where('is_active', true)->get(),
             'nextInvoiceNumber' => $this->generateInvoiceNumber(),
+            'invoice' => null,
             'sourceInvoice' => $sourceInvoice ? [
                 'id' => $sourceInvoice->id,
                 'invoice_number' => $sourceInvoice->invoice_number,
@@ -66,6 +67,21 @@ class InvoiceController extends Controller
                     'unit_price' => (float) $item->unit_price,
                 ]),
             ] : null,
+        ]);
+    }
+
+    public function edit(Request $request, Invoice $invoice): Response
+    {
+        abort_unless($invoice->company_id === $request->user()->company_id, 403);
+
+        return Inertia::render('Invoices/Create', [
+            'clients' => Client::latest()->get(),
+            'products' => Product::all(),
+            'bankAccounts' => auth()->user()->bankAccounts()->latest()->get(),
+            'taxes' => Tax::where('is_active', true)->get(),
+            'nextInvoiceNumber' => $this->generateInvoiceNumber(),
+            'invoice' => $invoice->load(['items.product']),
+            'sourceInvoice' => null,
         ]);
     }
 
@@ -166,6 +182,82 @@ class InvoiceController extends Controller
 
     public function update(Request $request, Invoice $invoice): RedirectResponse
     {
+        abort_unless($invoice->company_id === $request->user()->company_id, 403);
+
+        $companyId = $request->user()->company_id;
+        $validated = $request->validate([
+            'client_id' => [
+                'required',
+                Rule::exists('clients', 'id')->where(fn ($query) => $query->where('company_id', $companyId)),
+            ],
+            'bank_account_id' => [
+                'nullable',
+                Rule::exists('bank_accounts', 'id')->where(fn ($query) => $query->where('company_id', $companyId)),
+            ],
+            'invoice_number' => [
+                'required',
+                'string',
+                Rule::unique('invoices', 'invoice_number')
+                    ->ignore($invoice->id)
+                    ->where(fn ($query) => $query->where('company_id', $companyId)),
+            ],
+            'invoice_date' => 'required|date',
+            'due_date' => 'nullable|date|after_or_equal:invoice_date',
+            'notes' => 'nullable|string',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => [
+                'nullable',
+                Rule::exists('products', 'id')->where(fn ($query) => $query->where('company_id', $companyId)),
+            ],
+            'items.*.description' => 'required|string',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.unit_price' => 'required|numeric|min:0',
+        ]);
+
+        DB::transaction(function () use ($invoice, $validated) {
+            $subtotal = collect($validated['items'])->sum(fn($item) => $item['quantity'] * $item['unit_price']);
+            $taxTotal = 0;
+            $total = $subtotal + $taxTotal;
+
+            $invoice->update([
+                'client_id' => $validated['client_id'],
+                'bank_account_id' => $validated['bank_account_id'] ?? null,
+                'invoice_number' => $validated['invoice_number'],
+                'invoice_date' => $validated['invoice_date'],
+                'due_date' => $validated['due_date'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                'subtotal' => $subtotal,
+                'tax_total' => $taxTotal,
+                'total' => $total,
+            ]);
+
+            $invoice->items()->delete();
+            foreach ($validated['items'] as $item) {
+                $invoice->items()->create([
+                    'product_id' => !empty($item['product_id']) ? $item['product_id'] : null,
+                    'description' => $item['description'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'subtotal' => $item['quantity'] * $item['unit_price'],
+                ]);
+            }
+        });
+
+        $this->notificationService->notifyUser($request->user(), [
+            'type' => 'invoice.updated',
+            'title' => 'Invoice updated',
+            'message' => "Invoice {$invoice->invoice_number} has been updated.",
+            'href' => route('invoices.show', $invoice),
+            'icon' => 'si:edit-line',
+        ]);
+
+        return redirect()->route('invoices.show', $validated['invoice_number'])->with('status', 'Invoice updated successfully');
+    }
+
+    public function updateStatus(Request $request, Invoice $invoice): RedirectResponse
+    {
+        abort_unless($invoice->company_id === $request->user()->company_id, 403);
+
         $validated = $request->validate([
             'status' => ['required', Rule::in(['draft', 'sent', 'paid', 'overdue', 'cancelled'])],
         ]);
@@ -183,6 +275,28 @@ class InvoiceController extends Controller
         ]);
 
         return redirect()->back()->with('status', 'Invoice status updated');
+    }
+
+    public function destroy(Request $request, Invoice $invoice): RedirectResponse
+    {
+        abort_unless($invoice->company_id === $request->user()->company_id, 403);
+
+        $invoiceNumber = $invoice->invoice_number;
+
+        DB::transaction(function () use ($invoice) {
+            $invoice->items()->delete();
+            $invoice->delete();
+        });
+
+        $this->notificationService->notifyUser($request->user(), [
+            'type' => 'invoice.deleted',
+            'title' => 'Invoice deleted',
+            'message' => "Invoice {$invoiceNumber} has been deleted.",
+            'href' => route('invoices.index'),
+            'icon' => 'si:bin-line',
+        ]);
+
+        return redirect()->route('invoices.index')->with('status', 'Invoice deleted successfully');
     }
 
     public function downloadPdf(Request $request, Invoice $invoice)

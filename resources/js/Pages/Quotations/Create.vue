@@ -27,6 +27,11 @@ const showAddProduct = ref(false);
 const clientSearch = ref('');
 const isEditingQuotationNumber = ref(false);
 const isEditMode = computed(() => !!props.quotation);
+const toIntegerAmount = (value) => {
+    const numeric = Number(value ?? 0);
+    if (!Number.isFinite(numeric)) return 0;
+    return Math.max(0, Math.trunc(numeric));
+};
 
 const form = useForm({
     client_id: props.quotation?.client_id ?? '',
@@ -43,8 +48,8 @@ const form = useForm({
             product_id: item.product_id ?? null,
             description: item.description ?? '',
             quantity: Number(item.quantity ?? 1),
-            unit_price: Number(item.unit_price ?? 0),
-            unit_price_input: Number(item.unit_price ?? 0).toLocaleString('id-ID'),
+            unit_price: toIntegerAmount(item.unit_price ?? 0),
+            unit_price_input: toIntegerAmount(item.unit_price ?? 0).toLocaleString('id-ID'),
         }))
         : [{ product_id: null, description: '', quantity: 1, unit_price: 0, unit_price_input: '0' }],
 });
@@ -106,7 +111,7 @@ const formatRupiah = (value) => {
 const updateItem = (index, product) => {
     form.items[index].product_id = product.id;
     form.items[index].description = product.name;
-    const parsedPrice = parseRupiah(product.price);
+    const parsedPrice = toIntegerAmount(product.price);
     form.items[index].unit_price = parsedPrice;
     form.items[index].unit_price_input = formatRupiah(parsedPrice);
 };

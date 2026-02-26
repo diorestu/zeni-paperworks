@@ -451,8 +451,11 @@
                                     <div class="item-details">{!! nl2br(e(implode("\n", $lines))) !!}</div>
                                 @endif
                                 @if (!empty($item->product?->description))
+                                    @php
+                                        $productDescriptionLines = preg_replace('/\s*-\s*/', "\n", (string) $item->product->description);
+                                    @endphp
                                     <div class="item-details" style="font-style: italic; margin-top: 2px;">
-                                        {{ $item->product->description }}</div>
+                                        {!! nl2br(e($productDescriptionLines)) !!}</div>
                                 @endif
                             </td>
                             <td style="text-align: right;">

@@ -16,6 +16,10 @@ const props = defineProps({
     taxes: Array,
     bankAccounts: Array,
     nextInvoiceNumber: String,
+    invoice: {
+        type: Object,
+        default: null,
+    },
     sourceInvoice: {
         type: Object,
         default: null,
@@ -29,26 +33,45 @@ const showAddProduct = ref(false);
 const showAddBankAccount = ref(false);
 const isEditingInvoiceNumber = ref(false);
 const clientSearch = ref('');
-const formatInitialRupiah = (value) => Number(value ?? 0).toLocaleString('id-ID');
-const defaultBankAccountId = props.sourceInvoice?.bank_account_id
+const isEditMode = computed(() => !!props.invoice);
+const toIntegerAmount = (value) => {
+    const numeric = Number(value ?? 0);
+    if (!Number.isFinite(numeric)) return 0;
+    return Math.max(0, Math.trunc(numeric));
+};
+const formatInitialRupiah = (value) => toIntegerAmount(value).toLocaleString('id-ID');
+const defaultBankAccountId = props.invoice?.bank_account_id
+    ?? props.sourceInvoice?.bank_account_id
     ?? (props.bankAccounts || []).find((bank) => bank.is_default)?.id
     ?? '';
 
 const form = useForm({
-    client_id: props.sourceInvoice?.client_id ?? '',
+    client_id: props.invoice?.client_id ?? props.sourceInvoice?.client_id ?? '',
     bank_account_id: defaultBankAccountId,
-    parent_invoice_id: props.sourceInvoice?.id ?? null,
-    is_down_payment: false,
-    invoice_number: props.nextInvoiceNumber,
-    invoice_date: new Date().toISOString().split('T')[0],
-    due_date: null,
-    notes: props.sourceInvoice?.notes ?? '',
-    items: props.sourceInvoice?.items?.length
+    parent_invoice_id: props.invoice?.parent_invoice_id ?? props.sourceInvoice?.id ?? null,
+    is_down_payment: props.invoice?.is_down_payment ?? false,
+    invoice_number: props.invoice?.invoice_number ?? props.nextInvoiceNumber,
+    invoice_date: props.invoice?.invoice_date
+        ? new Date(props.invoice.invoice_date).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
+    due_date: props.invoice?.due_date
+        ? new Date(props.invoice.due_date).toISOString().split('T')[0]
+        : null,
+    notes: props.invoice?.notes ?? props.sourceInvoice?.notes ?? '',
+    items: props.invoice?.items?.length
+        ? props.invoice.items.map((item) => ({
+              product_id: item.product_id ?? null,
+              description: item.description ?? '',
+              quantity: item.quantity ?? 1,
+              unit_price: toIntegerAmount(item.unit_price ?? 0),
+              unit_price_input: formatInitialRupiah(item.unit_price ?? 0),
+          }))
+        : props.sourceInvoice?.items?.length
         ? props.sourceInvoice.items.map((item) => ({
               product_id: item.product_id ?? null,
               description: item.description ?? '',
               quantity: item.quantity ?? 1,
-              unit_price: Number(item.unit_price ?? 0),
+              unit_price: toIntegerAmount(item.unit_price ?? 0),
               unit_price_input: formatInitialRupiah(item.unit_price ?? 0),
           }))
         : [{ product_id: null, description: '', quantity: 1, unit_price: 0, unit_price_input: '0' }],
@@ -107,7 +130,7 @@ const removeItem = (index) => {
 const updateItem = (index, product) => {
     form.items[index].product_id = product.id;
     form.items[index].description = product.name;
-    const parsedPrice = parseRupiah(product.price);
+    const parsedPrice = toIntegerAmount(product.price);
     form.items[index].unit_price = parsedPrice;
     form.items[index].unit_price_input = formatRupiah(parsedPrice);
 };
@@ -176,7 +199,11 @@ const submit = () => {
             ...data,
             items: data.items.map(({ unit_price_input, ...item }) => item),
         }))
-        .post(route('invoices.store'));
+        [isEditMode.value ? 'put' : 'post'](
+            isEditMode.value
+                ? route('invoices.update', props.invoice)
+                : route('invoices.store')
+        );
 };
 
 const submitClient = () => {
@@ -253,9 +280,10 @@ const submitBankAccount = () => {
 };
 
 onMounted(() => {
-    if (props.sourceInvoice?.client_id) {
-        const sourceClient = (props.clients || []).find((client) => client.id === props.sourceInvoice.client_id);
-        clientSearch.value = sourceClient?.name ?? '';
+    const activeClientId = props.invoice?.client_id ?? props.sourceInvoice?.client_id;
+    if (activeClientId) {
+        const selectedClient = (props.clients || []).find((client) => client.id === activeClientId);
+        clientSearch.value = selectedClient?.name ?? '';
     }
     initBankTomSelect();
 });
@@ -286,10 +314,10 @@ watch(
 
 <template>
     <AppLayout>
-        <Head title="Create Invoice" />
+        <Head :title="isEditMode ? `Edit ${form.invoice_number}` : 'Create Invoice'" />
 
         <div class="w-full">
-            <div v-if="sourceInvoice" class="mb-6 rounded-xl border border-sky-100 bg-sky-50 px-5 py-4 text-sm font-semibold text-sky-700">
+            <div v-if="sourceInvoice && !isEditMode" class="mb-6 rounded-xl border border-sky-100 bg-sky-50 px-5 py-4 text-sm font-semibold text-sky-700">
                 Continuation invoice from <span class="font-bold">{{ sourceInvoice.invoice_number }}</span>.
             </div>
             <div class="mb-10 flex items-center justify-between">
@@ -298,8 +326,8 @@ watch(
                         <Icon icon="si:arrow-left-line" :width="18" :height="18"  />
                     </Link>
                     <div>
-                        <h1 class="text-3xl font-semibold text-slate-900 tracking-tight">New Invoice</h1>
-                        <p class="text-slate-500 font-normal">Create a new billable document for your client.</p>
+                        <h1 class="text-3xl font-semibold text-slate-900 tracking-tight">{{ isEditMode ? 'Edit Invoice' : 'New Invoice' }}</h1>
+                        <p class="text-slate-500 font-normal">{{ isEditMode ? 'Update invoice details and save changes.' : 'Create a new billable document for your client.' }}</p>
                     </div>
                 </div>
             </div>
@@ -541,7 +569,7 @@ watch(
                                 class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-[#07304a] shadow-xl shadow-black/10 transition-all hover:bg-slate-100 active:scale-95 disabled:opacity-50"
                             >
                                 <Icon icon="si:archive-line" :width="16" :height="16"  />
-                                <span>{{ form.processing ? 'Saving...' : 'Save Invoice' }}</span>
+                                <span>{{ form.processing ? 'Saving...' : (isEditMode ? 'Update Invoice' : 'Save Invoice') }}</span>
                             </button>
                         </div>
                     </div>

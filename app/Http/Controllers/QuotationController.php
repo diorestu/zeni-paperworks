@@ -190,6 +190,8 @@ class QuotationController extends Controller
     {
         return Inertia::render('Quotations/Show', [
             'quotation' => $quotation->load(['client', 'items.product', 'invoice']),
+            'companyLogoUrl' => $this->resolveCompanyLogoUrl(),
+            'companyProfile' => $this->resolveCompanyProfile(),
         ]);
     }
 
@@ -246,11 +248,17 @@ class QuotationController extends Controller
     public function downloadPdf(Request $request, Quotation $quotation)
     {
         abort_unless($quotation->company_id === $request->user()->company_id, 403);
+        $variant = (string) $request->query('variant', 'classic');
+        if (! in_array($variant, ['classic', 'modern', 'minimal'], true)) {
+            $variant = 'classic';
+        }
 
         $pdf = Pdf::loadView('quotations.pdf', [
             'quotation' => $quotation->load(['client', 'items.product']),
             'logoUrl' => $this->resolveCompanyLogoUrl(),
             'company' => $this->resolveCompanyProfile(),
+            'variant' => $variant,
+            'isFreePlan' => ($request->user()->plan_name ?? 'Free') === 'Free',
         ])->setPaper('a4');
 
         $filename = 'quotation-'.Str::slug($quotation->quotation_number).'.pdf';

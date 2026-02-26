@@ -18,6 +18,7 @@ const props = defineProps({
 });
 const page = usePage();
 const isSendingEmail = ref(false);
+const isDeletingInvoice = ref(false);
 const flashStatus = computed(() => page.props?.flash?.status || '');
 const flashError = computed(() => page.props?.flash?.error || '');
 const isFreePlan = computed(() => {
@@ -136,13 +137,26 @@ const updateStatus = () => {
     if (statusForm.status === lastSavedStatus.value) return;
 
     const nextStatus = statusForm.status;
-    statusForm.patch(route('invoices.update', props.invoice.invoice_number), {
+    statusForm.patch(route('invoices.update-status', props.invoice.invoice_number), {
         preserveScroll: true,
         onSuccess: () => {
             lastSavedStatus.value = nextStatus;
         },
         onError: () => {
             statusForm.status = lastSavedStatus.value;
+        },
+    });
+};
+
+const deleteInvoice = () => {
+    if (isDeletingInvoice.value) return;
+    if (!confirm(`Delete invoice ${props.invoice.invoice_number}? This action cannot be undone.`)) return;
+
+    isDeletingInvoice.value = true;
+    router.delete(route('invoices.destroy', props.invoice.invoice_number), {
+        preserveScroll: true,
+        onFinish: () => {
+            isDeletingInvoice.value = false;
         },
     });
 };
@@ -254,6 +268,13 @@ onMounted(async () => {
                 </div>
 
                 <div class="flex items-center gap-3">
+                    <Link
+                        :href="route('invoices.edit', invoice.invoice_number)"
+                        class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-all"
+                    >
+                        <Icon icon="si:edit-line" :width="18" :height="18" />
+                        <span>Edit</span>
+                    </Link>
                     <Link
                         v-if="invoice.is_down_payment"
                         :href="route('invoices.create', { source_invoice: invoice.invoice_number })"
@@ -493,6 +514,14 @@ onMounted(async () => {
                         >
                             <Icon icon="si:mail-line" :width="16" :height="16" />
                             <span>{{ isSendingEmail ? 'Sending...' : 'Send' }}</span>
+                        </button>
+                        <button
+                            @click="deleteInvoice"
+                            :disabled="isDeletingInvoice"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-50 border border-rose-200 px-4 py-2.5 text-sm font-semibold text-rose-700 hover:bg-rose-100 transition-all disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                            <Icon icon="si:bin-line" :width="16" :height="16" />
+                            <span>{{ isDeletingInvoice ? 'Deleting...' : 'Delete' }}</span>
                         </button>
                     </div>
                     <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Variants</div>

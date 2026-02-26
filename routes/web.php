@@ -56,7 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('verified_account')->group(function () {
         Route::resource('clients', ClientController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('role:admin');
         Route::resource('products', ProductController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('role:admin');
-        Route::resource('invoices', InvoiceController::class)->only(['index', 'create', 'store'])->middleware('role:admin,user');
+        Route::resource('invoices', InvoiceController::class)->only(['index', 'create', 'store', 'edit', 'destroy'])->middleware('role:admin,user');
         Route::get('/invoices/{invoice}/download-pdf', [InvoiceController::class, 'downloadPdf'])
             ->name('invoices.download-pdf')
             ->middleware('role:admin,user')
@@ -69,7 +69,11 @@ Route::middleware('auth')->group(function () {
             ->name('invoices.send')
             ->middleware('role:admin,user')
             ->where('invoice', '.*');
-        Route::patch('/invoices/{invoice}', [InvoiceController::class, 'update'])
+        Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])
+            ->name('invoices.update-status')
+            ->middleware('role:admin,user')
+            ->where('invoice', '.*');
+        Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])
             ->name('invoices.update')
             ->middleware('role:admin,user')
             ->where('invoice', '.*');

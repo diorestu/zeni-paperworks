@@ -1,11 +1,19 @@
 <script setup>
-import { ref, nextTick, computed, onMounted } from 'vue';
+import { ref, nextTick, computed, onMounted, onUnmounted } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     quotation: Object,
+    companyLogoUrl: {
+        type: String,
+        default: null,
+    },
+    companyProfile: {
+        type: Object,
+        default: () => ({}),
+    },
 });
 const page = usePage();
 const isFreePlan = computed(() => {
@@ -42,6 +50,9 @@ const getStatusColor = (status) => {
 
 const variant = ref('classic');
 const printVariant = ref(null);
+const isPrintMode = ref(false);
+const isSwitchingVariant = ref(false);
+let variantTimer = null;
 
 const variantStyles = {
     classic: {
@@ -66,7 +77,11 @@ const printQuotation = async () => {
 };
 
 const downloadQuotationPdf = () => {
-    window.open(route('quotations.download-pdf', props.quotation.quotation_number), '_blank', 'noopener,noreferrer');
+    const url = route('quotations.download-pdf', {
+        quotation: props.quotation.quotation_number,
+        variant: variant.value,
+    });
+    window.open(url, '_blank', 'noopener,noreferrer');
 };
 
 const convertToInvoice = () => {
@@ -76,8 +91,14 @@ const convertToInvoice = () => {
 };
 
 onMounted(async () => {
+    const savedVariant = localStorage.getItem('quotation_variant');
+    if (savedVariant && ['classic', 'modern', 'minimal'].includes(savedVariant) && !isPrintMode.value) {
+        variant.value = savedVariant;
+    }
+
     const params = new URLSearchParams(window.location.search);
     const printMode = params.get('print') === '1';
+    isPrintMode.value = printMode;
     const variantFromQuery = params.get('variant');
 
     if (variantFromQuery && ['classic', 'modern', 'minimal'].includes(variantFromQuery)) {
@@ -89,11 +110,50 @@ onMounted(async () => {
     printVariant.value = variant.value;
     await nextTick();
     setTimeout(() => {
+        const source = document.querySelector('.invoice-print');
+        if (!source) {
+            window.print();
+            return;
+        }
+
+        const clone = source.cloneNode(true);
+        clone.classList.remove('scale-[0.63]', 'origin-top-left', 'invoice-print');
+        clone.classList.add('invoice-print-standalone');
+        clone.style.transform = 'none';
+        clone.style.width = '210mm';
+        clone.style.height = '297mm';
+        clone.style.margin = '0';
+        clone.style.padding = '0';
+        clone.style.position = 'fixed';
+        clone.style.left = '0';
+        clone.style.top = '0';
+
+        document.body.classList.add('print-standalone-mode');
+        document.body.appendChild(clone);
+
         window.print();
         setTimeout(() => {
+            clone.remove();
+            document.body.classList.remove('print-standalone-mode');
             printVariant.value = null;
         }, 50);
     }, 150);
+});
+
+const setVariant = (nextVariant) => {
+    if (variant.value === nextVariant) return;
+    isSwitchingVariant.value = true;
+    variant.value = nextVariant;
+    localStorage.setItem('quotation_variant', nextVariant);
+
+    if (variantTimer) clearTimeout(variantTimer);
+    variantTimer = setTimeout(() => {
+        isSwitchingVariant.value = false;
+    }, 320);
+};
+
+onUnmounted(() => {
+    if (variantTimer) clearTimeout(variantTimer);
 });
 </script>
 
@@ -122,7 +182,7 @@ onMounted(async () => {
 
             <div class="flex items-start gap-10">
                 <div class="flex-1 overflow-visible">
-                    <div class="origin-top-left scale-[0.9] invoice-print">
+                    <div class="origin-top-left scale-[0.63] invoice-print">
                         <div
                             class="overflow-hidden relative"
                             :class="[variantStyles[variant].card, printVariant ? `print-variant-${printVariant}` : '']"
@@ -131,24 +191,23 @@ onMounted(async () => {
                             <div v-if="isFreePlan" class="absolute inset-0 z-[1] pointer-events-none flex items-center justify-center">
                                 <img src="/img/logo/logo_colorful.png" alt="Watermark" class="h-40 w-auto opacity-[0.08] rotate-[-18deg] select-none">
                             </div>
+                            <div v-if="isSwitchingVariant" class="absolute inset-0 z-20 flex items-center justify-center bg-white/65 backdrop-blur-[2px]">
+                                <div class="h-11 w-11 animate-spin rounded-full border-4 border-[#07304a] border-t-transparent"></div>
+                            </div>
                             <div class="relative z-[2] p-10 sm:p-14">
                                 <div class="flex justify-between items-start mb-12">
                                     <div class="flex-1">
                                         <h1 class="text-3xl font-black text-slate-900 tracking-tighter mb-6">QUOTATION</h1>
                                         <div v-if="variant !== 'modern'" class="space-y-1">
-                                            <h2 class="text-xl font-bold text-slate-900 tracking-tight">PT Solusi Usaha Adijaya</h2>
-                                            <p class="text-[11px] text-slate-500 font-normal leading-relaxed max-w-sm mt-2">
-                                                Bimasakti Office, Jl. Ahmad Yani Utara No.319, Peguyangan, Denpasar<br>
-                                                Utara, Kota Denpasar, Bali 80115<br>
-                                                ID<br>
-                                                (+62) 851 8344 0300<br>
-                                                info@konsulin.id
-                                            </p>
+                                            <h2 class="text-[16px] font-semibold text-slate-800 tracking-tight">{{ companyProfile?.name || 'Company Name' }}</h2>
+                                            <div class="mt-2 text-[11px] text-slate-600 leading-relaxed space-y-0.5">
+                                                <p v-if="companyProfile?.address" class="whitespace-pre-line">{{ companyProfile.address }}</p>
+                                                <p v-if="companyProfile?.tax_id">Tax ID: {{ companyProfile.tax_id }}</p>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="flex flex-col items-end">
-                                        <img src="/img/logo/logo_colorful.png" alt="Company Logo" class="h-16 w-auto object-contain">
-                                        <p class="text-[8px] font-bold text-[#07304a] uppercase tracking-[0.2em] mt-2">Accounting | Business | Tax Consulting</p>
+                                        <img :src="companyLogoUrl || '/img/logo/logo_colorful.png'" alt="Company Logo" class="h-16 w-auto object-contain">
                                     </div>
                                 </div>
 
@@ -156,14 +215,14 @@ onMounted(async () => {
                                     <div v-if="variant === 'modern'" class="grid grid-cols-12 gap-6">
                                         <div class="col-span-6">
                                             <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">FROM</p>
-                                            <h3 class="text-xl font-bold text-slate-900 tracking-tight">PT Solusi Usaha Adijaya</h3>
-                                            <p class="mt-2 text-[11px] text-slate-500 leading-relaxed">
-                                                Bimasakti Office, Jl. Ahmad Yani Utara No.319, Peguyangan, Denpasar<br>
-                                                Utara, Kota Denpasar, Bali 80115<br>
-                                                ID<br>
-                                                (+62) 851 8344 0300<br>
-                                                info@konsulin.id
-                                            </p>
+                                            <h3 class="text-[16px] font-semibold text-slate-800 tracking-tight">{{ companyProfile?.name || 'Company Name' }}</h3>
+                                            <div class="mt-2 text-[11px] text-slate-600 leading-relaxed space-y-0.5">
+                                                <p v-if="companyProfile?.address" class="whitespace-pre-line">{{ companyProfile.address }}</p>
+                                                <p v-if="companyProfile?.phone">{{ companyProfile.phone }}</p>
+                                                <p v-if="companyProfile?.email">{{ companyProfile.email }}</p>
+                                                <p v-if="companyProfile?.website">{{ companyProfile.website }}</p>
+                                                <p v-if="companyProfile?.tax_id">Tax ID: {{ companyProfile.tax_id }}</p>
+                                            </div>
                                         </div>
                                         <div class="col-span-6">
                                             <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">QUOTATION FOR</p>
@@ -178,15 +237,15 @@ onMounted(async () => {
                                             <div class="mt-4 space-y-2">
                                                 <div class="flex justify-between items-center">
                                                     <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px]">QUOTATION NUMBER</span>
-                                                    <span class="text-sm font-semibold text-slate-900">{{ quotation.quotation_number.split('/').pop() }}</span>
+                                                    <span class="text-sm font-normal text-slate-900">{{ quotation.quotation_number }}</span>
                                                 </div>
                                                 <div class="flex justify-between items-center">
                                                     <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px]">ISSUED</span>
-                                                    <span class="text-sm font-semibold text-slate-900">{{ formatDate(quotation.quotation_date) }}</span>
+                                                    <span class="text-sm font-normal text-slate-900">{{ formatDate(quotation.quotation_date) }}</span>
                                                 </div>
                                                 <div class="flex justify-between items-center">
                                                     <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px]">VALID UNTIL</span>
-                                                    <span class="text-sm font-semibold text-slate-900">{{ formatDate(quotation.valid_until) }}</span>
+                                                    <span class="text-sm font-normal text-slate-900">{{ formatDate(quotation.valid_until) }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -206,15 +265,15 @@ onMounted(async () => {
                                         <div class="col-span-4 flex flex-col justify-between space-y-4">
                                             <div class="flex justify-between items-center">
                                                 <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px]">QUOTATION NUMBER</span>
-                                                <span class="text-sm font-semibold text-slate-900">{{ quotation.quotation_number.split('/').pop() }}</span>
+                                                <span class="text-sm font-normal text-slate-900">{{ quotation.quotation_number }}</span>
                                             </div>
                                             <div class="flex justify-between items-center">
                                                 <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px]">ISSUED</span>
-                                                <span class="text-sm font-semibold text-slate-900">{{ formatDate(quotation.quotation_date) }}</span>
+                                                <span class="text-sm font-normal text-slate-900">{{ formatDate(quotation.quotation_date) }}</span>
                                             </div>
                                             <div class="flex justify-between items-center">
                                                 <span class="font-bold text-slate-500 uppercase tracking-widest text-[10px]">VALID UNTIL</span>
-                                                <span class="text-sm font-semibold text-slate-900">{{ formatDate(quotation.valid_until) }}</span>
+                                                <span class="text-sm font-normal text-slate-900">{{ formatDate(quotation.valid_until) }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -325,7 +384,7 @@ onMounted(async () => {
                     <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Variants</div>
                     <button
                         type="button"
-                        @click="variant = 'classic'"
+                        @click="setVariant('classic')"
                         class="w-full rounded-xl border px-4 py-3 text-left transition"
                         :class="variant === 'classic' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:border-slate-300'"
                     >
@@ -334,7 +393,7 @@ onMounted(async () => {
                     </button>
                     <button
                         type="button"
-                        @click="variant = 'modern'"
+                        @click="setVariant('modern')"
                         class="w-full rounded-xl border px-4 py-3 text-left transition"
                         :class="variant === 'modern' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:border-slate-300'"
                     >
@@ -343,7 +402,7 @@ onMounted(async () => {
                     </button>
                     <button
                         type="button"
-                        @click="variant = 'minimal'"
+                        @click="setVariant('minimal')"
                         class="w-full rounded-xl border px-4 py-3 text-left transition"
                         :class="variant === 'minimal' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:border-slate-300'"
                     >
@@ -356,43 +415,56 @@ onMounted(async () => {
     </AppLayout>
 </template>
 
-<style scoped>
+<style>
 @media print {
     @page {
         size: A4 portrait;
         margin: 0;
     }
 
-    :global(html),
-    :global(body) {
+    html,
+    body {
         margin: 0 !important;
         padding: 0 !important;
         width: 210mm !important;
         height: 297mm !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 
     .no-print {
         display: none !important;
     }
 
-    :global(body) {
+    body {
         background: #fff !important;
     }
 
-    :global(body *:not(.invoice-print):not(.invoice-print *)) {
-        visibility: hidden !important;
+    body.print-standalone-mode > *:not(.invoice-print-standalone) {
+        display: none !important;
     }
 
-    .invoice-print {
+    .invoice-print-standalone,
+    .invoice-print-standalone * {
         visibility: visible !important;
-        position: absolute;
-        left: 0;
-        top: 0;
+    }
+
+    .invoice-print-standalone {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        z-index: 9999 !important;
         margin: 0 !important;
+        padding: 0 !important;
         width: 210mm !important;
         height: 297mm !important;
-        transform: scale(1) !important;
-        transform-origin: top left !important;
+        transform: none !important;
+        overflow: hidden !important;
+    }
+
+    .invoice-print-standalone > div {
+        box-shadow: none !important;
+        border-radius: 0 !important;
     }
 
     .print-variant-classic {
