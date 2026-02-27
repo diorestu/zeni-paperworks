@@ -56,7 +56,10 @@ Route::middleware('auth')->group(function () {
     Route::middleware('verified_account')->group(function () {
         Route::resource('clients', ClientController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('role:admin');
         Route::resource('products', ProductController::class)->only(['index', 'store', 'update', 'destroy'])->middleware('role:admin');
-        Route::resource('invoices', InvoiceController::class)->only(['index', 'create', 'store', 'edit', 'destroy'])->middleware('role:admin,user');
+        Route::resource('invoices', InvoiceController::class)
+            ->only(['index', 'create', 'store', 'edit', 'destroy'])
+            ->scoped(['invoice' => 'public_id'])
+            ->middleware('role:admin,user');
         Route::get('/invoices/{invoice}/download-pdf', [InvoiceController::class, 'downloadPdf'])
             ->name('invoices.download-pdf')
             ->middleware('role:admin,user')
@@ -73,10 +76,9 @@ Route::middleware('auth')->group(function () {
             ->name('invoices.update-status')
             ->middleware('role:admin,user')
             ->where('invoice', '.*');
-        Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])
+        Route::put('/invoices/{invoice:public_id}', [InvoiceController::class, 'update'])
             ->name('invoices.update')
-            ->middleware('role:admin,user')
-            ->where('invoice', '.*');
+            ->middleware('role:admin,user');
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show')->middleware('role:admin,user')->where('invoice', '.*');
 
         Route::resource('quotations', App\Http\Controllers\QuotationController::class)->only(['index', 'create', 'store'])->middleware('role:admin,user');
@@ -84,8 +86,8 @@ Route::middleware('auth')->group(function () {
             ->name('quotations.download-pdf')
             ->middleware('role:admin,user')
             ->where('quotation', '.*');
-        Route::get('/quotations/{quotation}/edit', [App\Http\Controllers\QuotationController::class, 'edit'])->name('quotations.edit')->middleware('role:admin,user')->where('quotation', '.*');
-        Route::patch('/quotations/{quotation}', [App\Http\Controllers\QuotationController::class, 'update'])->name('quotations.update')->middleware('role:admin,user')->where('quotation', '.*');
+        Route::get('/quotations/{quotation:public_id}/edit', [App\Http\Controllers\QuotationController::class, 'edit'])->name('quotations.edit')->middleware('role:admin,user');
+        Route::patch('/quotations/{quotation:public_id}', [App\Http\Controllers\QuotationController::class, 'update'])->name('quotations.update')->middleware('role:admin,user');
         Route::get('/quotations/{quotation}', [App\Http\Controllers\QuotationController::class, 'show'])->name('quotations.show')->middleware('role:admin,user')->where('quotation', '.*');
         Route::post('/quotations/{quotation}/convert-to-invoice', [App\Http\Controllers\QuotationController::class, 'convertToInvoice'])->name('quotations.convert')->middleware('role:admin,user')->where('quotation', '.*');
 

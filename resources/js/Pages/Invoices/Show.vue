@@ -153,7 +153,7 @@ const deleteInvoice = () => {
     if (!confirm(`Delete invoice ${props.invoice.invoice_number}? This action cannot be undone.`)) return;
 
     isDeletingInvoice.value = true;
-    router.delete(route('invoices.destroy', props.invoice.invoice_number), {
+    router.delete(route('invoices.destroy', props.invoice.public_id), {
         preserveScroll: true,
         onFinish: () => {
             isDeletingInvoice.value = false;
@@ -269,7 +269,7 @@ onMounted(async () => {
 
                 <div class="flex items-center gap-3">
                     <Link
-                        :href="route('invoices.edit', invoice.invoice_number)"
+                        :href="route('invoices.edit', invoice.public_id)"
                         class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-all"
                     >
                         <Icon icon="ri:edit-line" :width="18" :height="18" />
@@ -531,7 +531,10 @@ onMounted(async () => {
                         class="w-full rounded-xl border px-4 py-3 text-left transition"
                         :class="variant === 'classic' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:border-slate-300'"
                     >
-                        <div class="text-sm font-semibold">Classic</div>
+                        <div class="text-sm font-semibold flex items-center gap-2">
+                            <Icon icon="ri:layout-2-line" :width="14" :height="14" />
+                            Classic
+                        </div>
                         <div class="text-xs mt-1">Balanced layout, clean spacing</div>
                     </button>
                     <button
@@ -540,7 +543,10 @@ onMounted(async () => {
                         class="w-full rounded-xl border px-4 py-3 text-left transition"
                         :class="variant === 'modern' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:border-slate-300'"
                     >
-                        <div class="text-sm font-semibold">Modern Edge</div>
+                        <div class="text-sm font-semibold flex items-center gap-2">
+                            <Icon icon="ri:shapes-line" :width="14" :height="14" />
+                            Modern Edge
+                        </div>
                         <div class="text-xs mt-1">Bold header, high contrast</div>
                     </button>
                     <button
@@ -549,7 +555,10 @@ onMounted(async () => {
                         class="w-full rounded-xl border px-4 py-3 text-left transition"
                         :class="variant === 'minimal' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:border-slate-300'"
                     >
-                        <div class="text-sm font-semibold">Minimal</div>
+                        <div class="text-sm font-semibold flex items-center gap-2">
+                            <Icon icon="ri:apps-2-line" :width="14" :height="14" />
+                            Minimal
+                        </div>
                         <div class="text-xs mt-1">Soft borders, airy feel</div>
                     </button>
                 </aside>

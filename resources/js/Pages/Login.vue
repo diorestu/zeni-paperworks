@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { Icon } from '@iconify/vue';
 
 const form = useForm({
     email: '',
@@ -122,9 +123,10 @@ const submit = () => {
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="w-full rounded-xl bg-[#07304a] px-5 py-3.5 text-[13px] font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#012b60] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
+                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#07304a] px-5 py-3.5 text-[13px] font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#012b60] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
                     tabindex="3"
                 >
+                    <Icon icon="ri:login-box-line" :width="16" :height="16" />
                     {{ form.processing ? 'Signing in...' : 'Sign in to Account' }}
                 </button>
             </form>

@@ -63,16 +63,16 @@ const i18n = {
         contactSales: 'Hubungi Penjualan',
         footerTestimonial: 'Testimoni',
         featureMegaMenu: [
-            { title: 'Invoice Otomatis', description: 'Buat invoice profesional dalam hitungan detik.', href: '#fitur', icon: 'si:file-document-line' },
-            { title: 'Penawaran Cepat', description: 'Konversi penawaran ke invoice tanpa input ulang.', href: '#fitur', icon: 'si:briefcase-line' },
-            { title: 'Manajemen Klien', description: 'Semua data klien tersimpan rapi dan terpusat.', href: '#fitur', icon: 'si:user-circle-line' },
-            { title: 'Laporan & Tracking', description: 'Pantau status pembayaran dan performa tim.', href: '#fitur', icon: 'si:chart-bar-line' },
+            { title: 'Invoice Otomatis', description: 'Buat invoice profesional dalam hitungan detik.', href: '#fitur', icon: 'ri:file-text-line' },
+            { title: 'Penawaran Cepat', description: 'Konversi penawaran ke invoice tanpa input ulang.', href: '#fitur', icon: 'ri:briefcase-line' },
+            { title: 'Manajemen Klien', description: 'Semua data klien tersimpan rapi dan terpusat.', href: '#fitur', icon: 'ri:account-circle-line' },
+            { title: 'Laporan & Tracking', description: 'Pantau status pembayaran dan performa tim.', href: '#fitur', icon: 'ri:bar-chart-line' },
         ],
         solutionMegaMenu: [
-            { title: 'Untuk Tim Keuangan', description: 'Otomasi alur penagihan dan kontrol arus kas.', href: '#solusi', icon: 'si:wallet-line' },
-            { title: 'Untuk Pemilik Bisnis', description: 'Lihat performa bisnis dan persetujuan lebih cepat.', href: '#solusi', icon: 'si:building-line' },
-            { title: 'Untuk Tim Penjualan', description: 'Kirim penawaran cepat dan tindak lanjut terukur.', href: '#solusi', icon: 'si:target-line' },
-            { title: 'Untuk Multi Industri', description: 'Template fleksibel untuk berbagai jenis bisnis.', href: '#solusi', icon: 'si:layers-line' },
+            { title: 'Untuk Tim Keuangan', description: 'Otomasi alur penagihan dan kontrol arus kas.', href: '#solusi', icon: 'ri:wallet-3-line' },
+            { title: 'Untuk Pemilik Bisnis', description: 'Lihat performa bisnis dan persetujuan lebih cepat.', href: '#solusi', icon: 'ri:building-line' },
+            { title: 'Untuk Tim Penjualan', description: 'Kirim penawaran cepat dan tindak lanjut terukur.', href: '#solusi', icon: 'ri:focus-3-line' },
+            { title: 'Untuk Multi Industri', description: 'Template fleksibel untuk berbagai jenis bisnis.', href: '#solusi', icon: 'ri:stack-line' },
         ],
         topStats: [
             { label: 'Inv Proses', value: '1000+' },
@@ -126,16 +126,16 @@ const i18n = {
         contactSales: 'Contact Sales',
         footerTestimonial: 'Testimonials',
         featureMegaMenu: [
-            { title: 'Automated Invoices', description: 'Create professional invoices in seconds.', href: '#fitur', icon: 'si:file-document-line' },
-            { title: 'Fast Quotations', description: 'Convert quotations to invoices without re-entry.', href: '#fitur', icon: 'si:briefcase-line' },
-            { title: 'Client Management', description: 'Keep all client data organized and centralized.', href: '#fitur', icon: 'si:user-circle-line' },
-            { title: 'Reports & Tracking', description: 'Monitor payment status and team performance.', href: '#fitur', icon: 'si:chart-bar-line' },
+            { title: 'Automated Invoices', description: 'Create professional invoices in seconds.', href: '#fitur', icon: 'ri:file-text-line' },
+            { title: 'Fast Quotations', description: 'Convert quotations to invoices without re-entry.', href: '#fitur', icon: 'ri:briefcase-line' },
+            { title: 'Client Management', description: 'Keep all client data organized and centralized.', href: '#fitur', icon: 'ri:account-circle-line' },
+            { title: 'Reports & Tracking', description: 'Monitor payment status and team performance.', href: '#fitur', icon: 'ri:bar-chart-line' },
         ],
         solutionMegaMenu: [
-            { title: 'For Finance Teams', description: 'Automate billing flow and control cash flow.', href: '#solusi', icon: 'si:wallet-line' },
-            { title: 'For Business Owners', description: 'See business performance and approvals faster.', href: '#solusi', icon: 'si:building-line' },
-            { title: 'For Sales Teams', description: 'Send quotations quickly and follow up with clarity.', href: '#solusi', icon: 'si:target-line' },
-            { title: 'For Multi-Industry', description: 'Flexible templates for many business types.', href: '#solusi', icon: 'si:layers-line' },
+            { title: 'For Finance Teams', description: 'Automate billing flow and control cash flow.', href: '#solusi', icon: 'ri:wallet-3-line' },
+            { title: 'For Business Owners', description: 'See business performance and approvals faster.', href: '#solusi', icon: 'ri:building-line' },
+            { title: 'For Sales Teams', description: 'Send quotations quickly and follow up with clarity.', href: '#solusi', icon: 'ri:focus-3-line' },
+            { title: 'For Multi-Industry', description: 'Flexible templates for many business types.', href: '#solusi', icon: 'ri:stack-line' },
         ],
         topStats: [
             { label: 'Inv In Progress', value: '1000+' },
@@ -189,16 +189,16 @@ const i18n = {
         contactSales: '联系销售',
         footerTestimonial: '评价',
         featureMegaMenu: [
-            { title: '自动发票', description: '几秒内创建专业发票。', href: '#fitur', icon: 'si:file-document-line' },
-            { title: '快速报价', description: '报价可直接转换为发票，无需重复录入。', href: '#fitur', icon: 'si:briefcase-line' },
-            { title: '客户管理', description: '客户数据统一整理与集中管理。', href: '#fitur', icon: 'si:user-circle-line' },
-            { title: '报表与追踪', description: '实时监控付款状态与团队绩效。', href: '#fitur', icon: 'si:chart-bar-line' },
+            { title: '自动发票', description: '几秒内创建专业发票。', href: '#fitur', icon: 'ri:file-text-line' },
+            { title: '快速报价', description: '报价可直接转换为发票，无需重复录入。', href: '#fitur', icon: 'ri:briefcase-line' },
+            { title: '客户管理', description: '客户数据统一整理与集中管理。', href: '#fitur', icon: 'ri:account-circle-line' },
+            { title: '报表与追踪', description: '实时监控付款状态与团队绩效。', href: '#fitur', icon: 'ri:bar-chart-line' },
         ],
         solutionMegaMenu: [
-            { title: '面向财务团队', description: '自动化收款流程并控制现金流。', href: '#solusi', icon: 'si:wallet-line' },
-            { title: '面向企业主', description: '更快掌握经营表现与审批进度。', href: '#solusi', icon: 'si:building-line' },
-            { title: '面向销售团队', description: '快速发送报价并高效跟进。', href: '#solusi', icon: 'si:target-line' },
-            { title: '适配多行业', description: '灵活模板适用于多种业务类型。', href: '#solusi', icon: 'si:layers-line' },
+            { title: '面向财务团队', description: '自动化收款流程并控制现金流。', href: '#solusi', icon: 'ri:wallet-3-line' },
+            { title: '面向企业主', description: '更快掌握经营表现与审批进度。', href: '#solusi', icon: 'ri:building-line' },
+            { title: '面向销售团队', description: '快速发送报价并高效跟进。', href: '#solusi', icon: 'ri:focus-3-line' },
+            { title: '适配多行业', description: '灵活模板适用于多种业务类型。', href: '#solusi', icon: 'ri:stack-line' },
         ],
         topStats: [
             { label: '处理中发票', value: '1000+' },
@@ -435,7 +435,7 @@ onBeforeUnmount(() => {
                     <div class="group relative flex items-center">
                         <button type="button" class="inline-flex h-10 items-center gap-1 text-xs font-semibold uppercase tracking-widest leading-none transition" :class="navLinkClass">
                             {{ copy.nav.feature }}
-                            <Icon icon="si:arrow-down-line" :width="12" :height="12" />
+                            <Icon icon="ri:arrow-down-line" :width="12" :height="12" />
                         </button>
                         <div class="pointer-events-none absolute left-0 top-full pt-4 opacity-0 transition-all duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
                             <div class="w-[560px] rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl">
@@ -465,7 +465,7 @@ onBeforeUnmount(() => {
                     <div class="group relative flex items-center">
                         <button type="button" class="inline-flex h-10 items-center gap-1 text-xs font-semibold uppercase tracking-widest leading-none transition" :class="navLinkClass">
                             {{ copy.nav.solution }}
-                            <Icon icon="si:arrow-down-line" :width="12" :height="12" />
+                            <Icon icon="ri:arrow-down-line" :width="12" :height="12" />
                         </button>
                         <div class="pointer-events-none absolute left-0 top-full pt-4 opacity-0 transition-all duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
                             <div class="w-[560px] rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl">
@@ -544,7 +544,7 @@ onBeforeUnmount(() => {
                     @click="showMobileMenu = true"
                     aria-label="Buka menu"
                 >
-                    <Icon icon="si:menu-hamburger-line" :width="18" :height="18" />
+                    <Icon icon="ri:menu-line" :width="18" :height="18" />
                 </button>
             </div>
         </header>
@@ -565,7 +565,7 @@ onBeforeUnmount(() => {
                 <div class="mb-8 flex items-center justify-between">
                     <p class="text-sm font-bold tracking-wide text-[#0b2d6b]">{{ copy.mobileNavTitle }}</p>
                     <button type="button" class="rounded-lg bg-slate-100 p-2 text-slate-600" @click="closeMenu">
-                        <Icon icon="si:close-line" :width="16" :height="16" />
+                        <Icon icon="ri:close-line" :width="16" :height="16" />
                     </button>
                 </div>
 
@@ -590,7 +590,7 @@ onBeforeUnmount(() => {
                         @click="(event) => { scrollToSection(event, item.href); closeMenu(); }"
                     >
                         <span>{{ item.label }}</span>
-                        <Icon icon="si:arrow-right-line" :width="14" :height="14" />
+                        <Icon icon="ri:arrow-right-line" :width="14" :height="14" />
                     </a>
                 </div>
 
@@ -631,7 +631,7 @@ onBeforeUnmount(() => {
                 <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 lg:grid-cols-2">
                     <div>
                         <p class="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-4 py-1 text-[10px] font-semibold uppercase tracking-widest text-white">
-                            <Icon icon="si:flash-line" :width="12" :height="12" />
+                            <Icon icon="ri:flashlight-line" :width="12" :height="12" />
                             {{ copy.heroBadge }}
                         </p>
                         <h1 class="hero-title mt-5 text-4xl font-extrabold leading-tight md:text-5xl">
@@ -659,7 +659,7 @@ onBeforeUnmount(() => {
 
                         <div class="mt-8 grid grid-cols-1 gap-2 sm:grid-cols-3">
                             <div v-for="check in heroChecks" :key="check" class="flex items-center gap-2 text-xs font-semibold text-white">
-                                <Icon icon="si:check-line" :width="14" :height="14" class="text-[#8fffd4]" />
+                                <Icon icon="ri:check-line" :width="14" :height="14" class="text-[#8fffd4]" />
                                 <span>{{ check }}</span>
                             </div>
                         </div>
@@ -726,7 +726,7 @@ onBeforeUnmount(() => {
                         class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                     >
                         <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#e9f1ff] text-[#0b2d6b]">
-                            <Icon icon="si:ballot-line" :width="18" :height="18" />
+                            <Icon icon="ri:file-list-3-line" :width="18" :height="18" />
                         </div>
                         <h3 class="mt-4 text-lg font-bold text-slate-900">{{ module.title }}</h3>
                         <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ module.description }}</p>
@@ -782,7 +782,7 @@ onBeforeUnmount(() => {
 
                             <ul class="mt-4 space-y-2">
                                 <li v-for="item in plan.highlights" :key="item" class="flex items-start gap-2 text-xs font-semibold text-slate-600">
-                                    <Icon icon="si:check-line" :width="14" :height="14" class="mt-0.5 text-emerald-500" />
+                                    <Icon icon="ri:check-line" :width="14" :height="14" class="mt-0.5 text-emerald-500" />
                                     <span>{{ translatePlanHighlight(item) }}</span>
                                 </li>
                             </ul>
@@ -818,11 +818,18 @@ onBeforeUnmount(() => {
                             v-for="(item, index) in testimonials"
                             :key="`dot-${index}`"
                             type="button"
-                            class="h-1.5 transition-all"
-                            :class="testimonialIndex === index ? 'w-6 rounded-full bg-white' : 'w-2 rounded-full bg-white/40'"
+                            class="inline-flex h-5 w-5 items-center justify-center rounded-full transition-all"
+                            :class="testimonialIndex === index ? 'bg-white/20' : 'bg-white/10 hover:bg-white/20'"
                             @click="testimonialIndex = index"
                             :aria-label="`${copy.testimonialDotLabel} ${index + 1}`"
-                        ></button>
+                        >
+                            <Icon
+                                icon="ri:record-circle-fill"
+                                :width="testimonialIndex === index ? 10 : 8"
+                                :height="testimonialIndex === index ? 10 : 8"
+                                :class="testimonialIndex === index ? 'text-white' : 'text-white/40'"
+                            />
+                        </button>
                     </div>
 
                     <div class="mt-8 flex flex-wrap items-center gap-3">

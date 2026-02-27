@@ -63,10 +63,11 @@ const formatTime = (value) => {
                 </div>
                 <button
                     type="button"
-                    class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
                     :disabled="(unreadCount || 0) === 0"
                     @click="markAllAsRead"
                 >
+                    <Icon icon="ri:check-double-line" :width="14" :height="14" />
                     Mark all as read
                 </button>
             </div>
@@ -74,18 +75,20 @@ const formatTime = (value) => {
             <div class="flex items-center gap-2">
                 <button
                     type="button"
-                    class="rounded-lg px-3 py-1.5 text-sm font-medium transition"
+                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition"
                     :class="activeStatus === 'all' ? 'bg-[#07304a] text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
                     @click="setStatus('all')"
                 >
+                    <Icon icon="ri:task-line" :width="14" :height="14" />
                     All
                 </button>
                 <button
                     type="button"
-                    class="rounded-lg px-3 py-1.5 text-sm font-medium transition"
+                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition"
                     :class="activeStatus === 'unread' ? 'bg-[#07304a] text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
                     @click="setStatus('unread')"
                 >
+                    <Icon icon="ri:mail-unread-line" :width="14" :height="14" />
                     Unread
                 </button>
                 <span class="ml-2 text-xs font-semibold text-slate-500">Unread: {{ unreadCount || 0 }}</span>
@@ -104,7 +107,7 @@ const formatTime = (value) => {
                     >
                         <div class="flex min-w-0 items-start gap-3">
                             <span class="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-                                <Icon :icon="item.icon || 'si:notifications-line'" :width="16" :height="16" />
+                                <Icon :icon="item.icon || 'ri:notification-3-line'" :width="16" :height="16" />
                             </span>
                             <div class="min-w-0">
                                 <p class="truncate text-sm font-semibold text-slate-800">{{ item.title }}</p>
@@ -123,9 +126,10 @@ const formatTime = (value) => {
                             <button
                                 v-if="!item.is_read"
                                 type="button"
-                                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-[#07304a] transition hover:bg-slate-50"
+                                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-[#07304a] transition hover:bg-slate-50"
                                 @click="markOneAsRead(item.id)"
                             >
+                                <Icon icon="ri:check-line" :width="12" :height="12" />
                                 Mark as read
                             </button>
                         </div>

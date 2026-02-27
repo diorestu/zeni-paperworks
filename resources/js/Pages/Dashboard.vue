@@ -199,7 +199,7 @@ onUnmounted(() => {
                     {{ range?.start }} - {{ range?.end }}
                 </p>
                 <div class="flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm">
-                    <Icon icon="si:clock-line" :width="16" :height="16" class="text-slate-400"  />
+                    <Icon icon="ri:time-line" :width="16" :height="16" class="text-slate-400"  />
                     <select
                         v-model.number="selectedPeriod"
                         class="bg-transparent text-sm font-semibold text-slate-700 outline-none"
@@ -221,9 +221,10 @@ onUnmounted(() => {
                 </div>
                 <button
                     type="button"
-                    class="rounded-xl bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700"
+                    class="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700"
                     @click="router.post(route('verification.send'))"
                 >
+                    <Icon icon="ri:mail-send-line" :width="14" :height="14" />
                     Kirim Ulang Verifikasi
                 </button>
             </div>
@@ -241,7 +242,7 @@ onUnmounted(() => {
                         <div class="flex items-center gap-1.5">
                             <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest leading-none">Total created</span>
                             <span class="group/info relative inline-flex">
-                                <Icon icon="si:info-line" :width="14" :height="14" class="text-slate-300" />
+                                <Icon icon="ri:information-line" :width="14" :height="14" class="text-slate-300" />
                                 <span class="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-44 -translate-x-1/2 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[10px] font-medium normal-case tracking-normal text-slate-600 opacity-0 shadow-lg transition-opacity duration-150 group-hover/info:opacity-100">
                                     Total nominal invoice yang pernah dibuat.
                                 </span>
@@ -261,7 +262,7 @@ onUnmounted(() => {
                         <div class="flex items-center gap-1.5">
                             <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest leading-none">Total paid</span>
                             <span class="group/info relative inline-flex">
-                                <Icon icon="si:info-line" :width="14" :height="14" class="text-slate-300" />
+                                <Icon icon="ri:information-line" :width="14" :height="14" class="text-slate-300" />
                                 <span class="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-44 -translate-x-1/2 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[10px] font-medium normal-case tracking-normal text-slate-600 opacity-0 shadow-lg transition-opacity duration-150 group-hover/info:opacity-100">
                                     Total nominal invoice dengan status paid.
                                 </span>
@@ -281,7 +282,7 @@ onUnmounted(() => {
                     <div class="flex items-center gap-1.5">
                         <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Outstanding ({{ kpis?.outstanding_count || 0 }})</span>
                         <span class="group/info relative inline-flex">
-                            <Icon icon="si:info-line" :width="12" :height="12" class="text-slate-300" />
+                            <Icon icon="ri:information-line" :width="12" :height="12" class="text-slate-300" />
                             <span class="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-44 -translate-x-1/2 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[10px] font-medium normal-case tracking-normal text-slate-600 opacity-0 shadow-lg transition-opacity duration-150 group-hover/info:opacity-100">
                                 Invoice terkirim dan belum dibayar.
                             </span>
@@ -295,7 +296,7 @@ onUnmounted(() => {
                     <div class="flex items-center gap-1.5">
                         <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Overdue ({{ kpis?.overdue_count || 0 }})</span>
                         <span class="group/info relative inline-flex">
-                            <Icon icon="si:info-line" :width="12" :height="12" class="text-slate-300" />
+                            <Icon icon="ri:information-line" :width="12" :height="12" class="text-slate-300" />
                             <span class="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-44 -translate-x-1/2 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[10px] font-medium normal-case tracking-normal text-slate-600 opacity-0 shadow-lg transition-opacity duration-150 group-hover/info:opacity-100">
                                 Invoice lewat jatuh tempo dan belum dibayar.
                             </span>
@@ -309,7 +310,7 @@ onUnmounted(() => {
                     <div class="flex items-center gap-1.5">
                         <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Unpaid ({{ kpis?.unpaid_count || 0 }})</span>
                         <span class="group/info relative inline-flex">
-                            <Icon icon="si:info-line" :width="12" :height="12" class="text-slate-300" />
+                            <Icon icon="ri:information-line" :width="12" :height="12" class="text-slate-300" />
                             <span class="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-44 -translate-x-1/2 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[10px] font-medium normal-case tracking-normal text-slate-600 opacity-0 shadow-lg transition-opacity duration-150 group-hover/info:opacity-100">
                                 Invoice draft dan sent yang belum paid.
                             </span>
@@ -350,7 +351,7 @@ onUnmounted(() => {
                 <div class="flex items-center justify-between gap-2">
                     <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{{ item.title }}</p>
                     <span class="inline-flex" :title="item.hint">
-                        <Icon icon="si:info-line" :width="14" :height="14" class="text-slate-300" />
+                        <Icon icon="ri:information-line" :width="14" :height="14" class="text-slate-300" />
                     </span>
                 </div>
                 <p class="mt-3 text-2xl font-semibold text-slate-900">{{ item.value }}</p>

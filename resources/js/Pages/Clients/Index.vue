@@ -114,7 +114,7 @@ const closeModals = () => {
 };
 
 const submitCreate = () => {
-    form.post('/clients', {
+    form.post(route('clients.store'), {
         onSuccess: () => {
             form.reset();
             showCreate.value = false;
@@ -124,7 +124,7 @@ const submitCreate = () => {
 
 const submitUpdate = () => {
     if (!editForm.id) return;
-    editForm.put(`/clients/${editForm.id}`, {
+    editForm.put(route('clients.update', editForm.id), {
         onSuccess: () => {
             showEdit.value = false;
             editForm.reset();
@@ -135,7 +135,7 @@ const submitUpdate = () => {
 const deleteClient = () => {
     if (!editForm.id) return;
     if (!confirm('Delete this client permanently?')) return;
-    router.delete(`/clients/${editForm.id}`, {
+    router.delete(route('clients.destroy', editForm.id), {
         onSuccess: () => {
             showEdit.value = false;
             editForm.reset();
@@ -159,7 +159,7 @@ const deleteClient = () => {
                 @click="startCreate"
             >
                 <span class="relative z-10 flex items-center gap-2">
-                    <Icon icon="si:add-line" :width="18" :height="18"  />
+                    <Icon icon="ri:add-line" :width="18" :height="18"  />
                     <span>Add New Client</span>
                 </span>
                 <div class="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
@@ -182,12 +182,13 @@ const deleteClient = () => {
                     placeholder="Search by name, email or tax number..."
                     class="w-full rounded-xl border-none bg-slate-50 px-12 py-4 text-sm font-normal text-slate-700 shadow-sm ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] focus:bg-white transition-all outline-none"
                 />
-                <Icon icon="si:search-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#07304a] transition-colors"  />
+                <Icon icon="ri:search-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#07304a] transition-colors"  />
                 <button 
                     v-if="searchQuery" 
                     @click="searchQuery = ''"
-                    class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-semibold px-2 py-1 bg-white rounded-md text-xs border border-slate-100 shadow-sm"
+                    class="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-1 bg-white px-2 py-1 text-xs font-semibold text-slate-400 border border-slate-100 rounded-md shadow-sm hover:text-slate-600"
                 >
+                    <Icon icon="ri:close-line" :width="12" :height="12" />
                     CLEAR
                 </button>
             </div>
@@ -208,9 +209,9 @@ const deleteClient = () => {
                                 <div class="flex items-center gap-2">
                                     Name
                                     <span class="transition-all" :class="sortConfig.key === 'name' ? 'opacity-100 text-[#07304a]' : 'opacity-0 group-hover:opacity-100'">
-                                        <Icon icon="si:arrow-upward-line" v-if="sortConfig.key === 'name' && sortConfig.direction === 'asc'" :width="14" :height="14"  />
-                                        <Icon icon="si:arrow-downward-line" v-else-if="sortConfig.key === 'name' && sortConfig.direction === 'desc'" :width="14" :height="14"  />
-                                        <Icon icon="si:sort-line" v-else :width="14" :height="14"  />
+                                        <Icon icon="ri:arrow-up-line" v-if="sortConfig.key === 'name' && sortConfig.direction === 'asc'" :width="14" :height="14"  />
+                                        <Icon icon="ri:arrow-down-line" v-else-if="sortConfig.key === 'name' && sortConfig.direction === 'desc'" :width="14" :height="14"  />
+                                        <Icon icon="ri:arrow-up-down-line" v-else :width="14" :height="14"  />
                                     </span>
                                 </div>
                             </th>
@@ -218,9 +219,9 @@ const deleteClient = () => {
                                 <div class="flex items-center gap-2">
                                     Email Address
                                     <span class="transition-all" :class="sortConfig.key === 'email' ? 'opacity-100 text-[#07304a]' : 'opacity-0 group-hover:opacity-100'">
-                                        <Icon icon="si:arrow-upward-line" v-if="sortConfig.key === 'email' && sortConfig.direction === 'asc'" :width="14" :height="14"  />
-                                        <Icon icon="si:arrow-downward-line" v-else-if="sortConfig.key === 'email' && sortConfig.direction === 'desc'" :width="14" :height="14"  />
-                                        <Icon icon="si:sort-line" v-else :width="14" :height="14"  />
+                                        <Icon icon="ri:arrow-up-line" v-if="sortConfig.key === 'email' && sortConfig.direction === 'asc'" :width="14" :height="14"  />
+                                        <Icon icon="ri:arrow-down-line" v-else-if="sortConfig.key === 'email' && sortConfig.direction === 'desc'" :width="14" :height="14"  />
+                                        <Icon icon="ri:arrow-up-down-line" v-else :width="14" :height="14"  />
                                     </span>
                                 </div>
                             </th>
@@ -229,9 +230,9 @@ const deleteClient = () => {
                                 <div class="flex items-center gap-2">
                                     Tax Number
                                     <span class="transition-all" :class="sortConfig.key === 'company' ? 'opacity-100 text-[#07304a]' : 'opacity-0 group-hover:opacity-100'">
-                                        <Icon icon="si:arrow-upward-line" v-if="sortConfig.key === 'company' && sortConfig.direction === 'asc'" :width="14" :height="14"  />
-                                        <Icon icon="si:arrow-downward-line" v-else-if="sortConfig.key === 'company' && sortConfig.direction === 'desc'" :width="14" :height="14"  />
-                                        <Icon icon="si:sort-line" v-else :width="14" :height="14"  />
+                                        <Icon icon="ri:arrow-up-line" v-if="sortConfig.key === 'company' && sortConfig.direction === 'asc'" :width="14" :height="14"  />
+                                        <Icon icon="ri:arrow-down-line" v-else-if="sortConfig.key === 'company' && sortConfig.direction === 'desc'" :width="14" :height="14"  />
+                                        <Icon icon="ri:arrow-up-down-line" v-else :width="14" :height="14"  />
                                     </span>
                                 </div>
                             </th>
@@ -263,7 +264,7 @@ const deleteClient = () => {
                     </tbody>
                 </table>
                 <div v-if="!filteredClients.length" class="flex flex-col items-center justify-center py-20 px-4 bg-white">
-                    <Icon icon="si:archive-line" :width="48" :height="48" class="text-slate-200 mb-4"  />
+                    <Icon icon="ri:save-line" :width="48" :height="48" class="text-slate-200 mb-4"  />
                     <p class="text-sm font-semibold text-slate-400">No matching clients found.</p>
                     <p class="text-xs text-slate-300 mt-1">Try adjusting your search query.</p>
                 </div>
@@ -300,7 +301,7 @@ const deleteClient = () => {
                             </h3>
                         </div>
                         <button class="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all active:scale-90" @click="closeModals">
-                            <Icon icon="si:close-line" :width="20" :height="20"  />
+                            <Icon icon="ri:close-line" :width="20" :height="20"  />
                         </button>
                     </div>
 
@@ -341,7 +342,7 @@ const deleteClient = () => {
                         </div>
                         <div class="col-span-2 flex justify-end pt-4">
                             <button type="submit" class="flex items-center gap-3 rounded-xl bg-[#07304a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#07304a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95">
-                                <Icon icon="si:archive-line" :width="18" :height="18"  />
+                                <Icon icon="ri:save-line" :width="18" :height="18"  />
                                 <span>Save Profile</span>
                             </button>
                         </div>
@@ -388,11 +389,11 @@ const deleteClient = () => {
                                 class="flex items-center gap-3 rounded-xl bg-rose-50 px-8 py-5 text-sm font-semibold text-rose-500 hover:bg-rose-100 transition-all"
                                 @click="deleteClient"
                             >
-                                <Icon icon="si:bin-line" :width="18" :height="18"  />
+                                <Icon icon="ri:delete-bin-line" :width="18" :height="18"  />
                                 <span>Delete Client</span>
                             </button>
                             <button type="submit" class="flex items-center gap-3 rounded-xl bg-[#07304a] px-10 py-5 text-sm font-semibold text-white shadow-2xl shadow-[#07304a]/30 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95">
-                                <Icon icon="si:archive-line" :width="18" :height="18"  />
+                                <Icon icon="ri:save-line" :width="18" :height="18"  />
                                 <span>Save Changes</span>
                             </button>
                         </div>

@@ -102,8 +102,8 @@ const submit = () => {
                             :aria-label="showPassword ? 'Hide password' : 'Show password'"
                             tabindex="-1"
                         >
-                            <Icon v-if="showPassword" icon="si:eye-off-line" :width="20" :height="20" />
-                            <Icon v-else icon="si:eye-line" :width="20" :height="20" />
+                            <Icon v-if="showPassword" icon="ri:eye-off-line" :width="20" :height="20" />
+                            <Icon v-else icon="ri:eye-line" :width="20" :height="20" />
                         </button>
                     </div>
                     <p v-if="form.errors.password" class="text-[10px] font-semibold text-rose-500 ml-1">{{ form.errors.password }}</p>
@@ -126,8 +126,8 @@ const submit = () => {
                             :aria-label="showPasswordConfirmation ? 'Hide password confirmation' : 'Show password confirmation'"
                             tabindex="-1"
                         >
-                            <Icon v-if="showPasswordConfirmation" icon="si:eye-off-line" :width="20" :height="20" />
-                            <Icon v-else icon="si:eye-line" :width="20" :height="20" />
+                            <Icon v-if="showPasswordConfirmation" icon="ri:eye-off-line" :width="20" :height="20" />
+                            <Icon v-else icon="ri:eye-line" :width="20" :height="20" />
                         </button>
                     </div>
                 </div>
@@ -135,8 +135,9 @@ const submit = () => {
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="w-full rounded-xl bg-[#07304a] px-5 py-3.5 text-[13px] font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#012b60] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
+                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#07304a] px-5 py-3.5 text-[13px] font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#012b60] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
                 >
+                    <Icon icon="ri:user-add-line" :width="16" :height="16" />
                     {{ form.processing ? 'Creating account...' : 'Create Account' }}
                 </button>
 

@@ -29,27 +29,27 @@ const navItems = computed(() => {
 
     if (!isVerified) {
         return [
-            { name: 'Dashboard', href: '/dashboard', icon: 'ri:bar-chart-line' },
+            { name: 'Dashboard', href: route('dashboard'), icon: 'ri:bar-chart-line' },
         ];
     }
 
     if (role === 'super_admin') {
         return [
-            { name: 'Dashboard', href: '/dashboard', icon: 'ri:bar-chart-line' },
+            { name: 'Dashboard', href: route('dashboard'), icon: 'ri:bar-chart-line' },
         ];
     }
 
     const items = [
-        { name: 'Dashboard', href: '/dashboard', icon: 'ri:bar-chart-line' },
-        { name: 'Invoices', href: '/invoices', icon: 'ri:ballot-line' },
-        { name: 'Quotations', href: '/quotations', icon: 'ri:assignment-line' },
+        { name: 'Dashboard', href: route('dashboard'), icon: 'ri:bar-chart-line' },
+        { name: 'Invoices', href: route('invoices.index'), icon: 'ri:file-list-3-line' },
+        { name: 'Quotations', href: route('quotations.index'), icon: 'ri:draft-line' },
     ];
 
     if (role === 'admin') {
         items.push(
-            { name: 'Clients', href: '/clients', icon: 'ri:user-alt-line' },
-            { name: 'Products', href: '/products', icon: 'ri:inventory-line' },
-            { name: 'Settings', href: '/settings', icon: 'ri:settings-line' }
+            { name: 'Clients', href: route('clients.index'), icon: 'ri:user-line' },
+            { name: 'Products', href: route('products.index'), icon: 'ri:archive-line' },
+            { name: 'Settings', href: route('settings.index'), icon: 'ri:settings-line' }
         );
     }
     
@@ -337,15 +337,6 @@ const submitFeedback = () => {
                     'fixed inset-y-0 bg-white border-r border-slate-100 z-40 transition-all duration-300'
                 ]"
             >
-                <button
-                    @click="toggleSidebar"
-                    class="absolute top-14 -right-5 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-[#07304a] shadow-lg hover:bg-slate-50 transition-all z-50"
-                    :title="isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-                    :aria-label="isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-                >
-                    <Icon :icon="isSidebarCollapsed ? 'ri:chevron-right-line' : 'ri:chevron-left-line'" :width="20" :height="20" />
-                </button>
-
                 <div class="flex h-full flex-col px-6 py-8">
                     <!-- Brand -->
                     <Link
@@ -430,7 +421,17 @@ const submitFeedback = () => {
             <div :style="contentWrapperStyle" class="flex-1 min-h-screen bg-slate-50 transition-all duration-300">
                     <!-- Top Header -->
                 <header class="sticky top-0 z-30 flex h-20 w-full items-center justify-between bg-slate-50/85 px-10 backdrop-blur-md border-b border-slate-100">
-                    <div></div>
+                    <div class="flex items-center">
+                        <button
+                            type="button"
+                            @click="toggleSidebar"
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-[#07304a] shadow-sm transition-colors hover:bg-slate-50"
+                            :title="isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+                            :aria-label="isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+                        >
+                            <Icon :icon="isSidebarCollapsed ? 'ri:arrow-right-s-line' : 'ri:arrow-left-s-line'" :width="20" :height="20" />
+                        </button>
+                    </div>
 
                     <div class="flex items-center gap-6">
                         <div class="relative">
@@ -441,12 +442,12 @@ const submitFeedback = () => {
                                 :aria-expanded="showNotifications ? 'true' : 'false'"
                                 aria-haspopup="menu"
                             >
-                                <Icon icon="ri:notifications-line" :width="18" :height="18"  />
+                                <Icon icon="ri:notification-3-line" :width="18" :height="18"  />
                                 <span
                                     v-if="unreadNotificationCount > 0"
-                                    class="absolute -right-1 -top-1 inline-flex min-w-[18px] items-center justify-center rounded-full bg-rose-500 px-1.5 py-0.5 text-[9px] font-semibold leading-none text-white"
+                                    class="absolute -right-1 -top-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[9px] font-semibold leading-none text-white"
                                 >
-                                    {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
+                                    {{ unreadNotificationCount > 99 ? '99' : unreadNotificationCount }}
                                 </span>
                             </button>
                             <transition name="scale-fade">
@@ -459,10 +460,11 @@ const submitFeedback = () => {
                                         <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Notifications</p>
                                         <button
                                             type="button"
-                                            class="text-[10px] font-semibold text-[#07304a] hover:underline disabled:cursor-not-allowed disabled:text-slate-300"
+                                            class="inline-flex items-center gap-1 text-[10px] font-semibold text-[#07304a] hover:underline disabled:cursor-not-allowed disabled:text-slate-300"
                                             :disabled="unreadNotificationCount <= 0"
                                             @click="markNotificationsAsRead"
                                         >
+                                            <Icon icon="ri:check-double-line" :width="10" :height="10" />
                                             Mark all as read
                                         </button>
                                     </div>
@@ -482,7 +484,7 @@ const submitFeedback = () => {
                                             @click="openNotification(item)"
                                         >
                                             <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-                                                <Icon :icon="item.icon || 'ri:notifications-line'" :width="14" :height="14" />
+                                                <Icon :icon="item.icon || 'ri:notification-3-line'" :width="14" :height="14" />
                                             </span>
                                             <span class="min-w-0 flex-1">
                                                 <span class="block truncate text-[12px] font-semibold text-slate-700">{{ item.title }}</span>
@@ -519,9 +521,11 @@ const submitFeedback = () => {
                                 </div>
                                 <div class="group relative">
                                     <div class="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#07304a] to-sky-400 opacity-20 blur transition duration-300 group-hover:opacity-40"></div>
-                                    <img :src="avatarUrl" alt="avatar" class="relative h-11 w-11 rounded-full border-2 border-white object-cover shadow-md" />
+                                    <div class="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 border-white shadow-md">
+                                        <img :src="avatarUrl" alt="avatar" class="h-full w-full object-cover" />
+                                    </div>
                                     <div class="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-slate-100 text-slate-400">
-                                        <Icon icon="ri:expand-more-line" :width="10" :height="10"  />
+                                        <Icon icon="ri:arrow-down-s-line" :width="10" :height="10"  />
                                     </div>
                                 </div>
                             </button>
@@ -635,10 +639,12 @@ const submitFeedback = () => {
                             </div>
 
                         <div class="flex items-center justify-end gap-2 pt-1">
-                            <button type="button" @click="closeFeedbackModal" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600 hover:bg-slate-50">
+                            <button type="button" @click="closeFeedbackModal" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600 hover:bg-slate-50">
+                                <Icon icon="ri:close-line" :width="12" :height="12" />
                                 Cancel
                             </button>
-                            <button type="submit" :disabled="feedbackForm.processing" class="rounded-xl bg-[#07304a] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-[#0a3f61] disabled:cursor-not-allowed disabled:opacity-60">
+                            <button type="submit" :disabled="feedbackForm.processing" class="inline-flex items-center gap-1.5 rounded-xl bg-[#07304a] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-[#0a3f61] disabled:cursor-not-allowed disabled:opacity-60">
+                                <Icon icon="ri:send-plane-line" :width="12" :height="12" />
                                 {{ feedbackForm.processing ? 'Submitting...' : 'Submit' }}
                             </button>
                         </div>

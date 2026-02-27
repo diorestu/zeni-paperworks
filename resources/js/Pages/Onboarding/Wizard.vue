@@ -74,7 +74,7 @@ const complete = () => {
 
                 <ul class="mt-5 space-y-3">
                     <li v-for="point in current.points" :key="point" class="flex items-start gap-2 text-sm text-slate-700">
-                        <Icon icon="si:check-line" :width="16" :height="16" class="mt-0.5 text-emerald-500" />
+                        <Icon icon="ri:check-line" :width="16" :height="16" class="mt-0.5 text-emerald-500" />
                         <span>{{ point }}</span>
                     </li>
                 </ul>
@@ -83,10 +83,11 @@ const complete = () => {
             <div class="mt-8 flex items-center justify-between">
                 <button
                     type="button"
-                    class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                    class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
                     :disabled="step === 0"
                     @click="prev"
                 >
+                    <Icon icon="ri:arrow-left-line" :width="14" :height="14" />
                     Back
                 </button>
 
@@ -101,18 +102,20 @@ const complete = () => {
                     <button
                         v-if="step < steps.length - 1"
                         type="button"
-                        class="rounded-xl bg-[#07304a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0a3f61]"
+                        class="inline-flex items-center gap-2 rounded-xl bg-[#07304a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0a3f61]"
                         @click="next"
                     >
+                        <Icon icon="ri:arrow-right-line" :width="14" :height="14" />
                         Next
                     </button>
                     <button
                         v-else
                         type="button"
-                        class="rounded-xl bg-[#07304a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0a3f61] disabled:opacity-60"
+                        class="inline-flex items-center gap-2 rounded-xl bg-[#07304a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0a3f61] disabled:opacity-60"
                         :disabled="form.processing"
                         @click="complete"
                     >
+                        <Icon icon="ri:rocket-line" :width="14" :height="14" />
                         {{ form.processing ? 'Processing...' : 'Finish & Go to Dashboard' }}
                     </button>
                 </div>

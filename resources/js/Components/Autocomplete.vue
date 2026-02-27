@@ -130,7 +130,7 @@ onUnmounted(() => {
                 :class="['w-full bg-slate-50 border-none text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none shadow-sm', inputClass]"
             >
              <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                <Icon icon="si:expand-more-line" :width="16" :height="16"  />
+                <Icon icon="ri:arrow-down-s-line" :width="16" :height="16"  />
             </div>
         </div>
 

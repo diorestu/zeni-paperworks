@@ -201,7 +201,7 @@ const submit = () => {
         }))
         [isEditMode.value ? 'put' : 'post'](
             isEditMode.value
-                ? route('invoices.update', props.invoice)
+                ? route('invoices.update', props.invoice.public_id)
                 : route('invoices.store')
         );
 };
@@ -323,7 +323,7 @@ watch(
             <div class="mb-10 flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <Link :href="route('invoices.index')" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 transition-all border border-slate-100">
-                        <Icon icon="si:arrow-left-line" :width="18" :height="18"  />
+                        <Icon icon="ri:arrow-left-line" :width="18" :height="18"  />
                     </Link>
                     <div>
                         <h1 class="text-3xl font-semibold text-slate-900 tracking-tight">{{ isEditMode ? 'Edit Invoice' : 'New Invoice' }}</h1>
@@ -341,7 +341,7 @@ watch(
                             <div class="space-y-2">
                                 <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Client</label>
                                 <div class="relative">
-                                    <Icon icon="si:user-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none"  />
+                                    <Icon icon="ri:user-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none"  />
                                     <Autocomplete
                                         v-model="clientSearch"
                                         :items="clients"
@@ -373,7 +373,7 @@ watch(
                                 <div class="space-y-2">
                                     <label class="block w-3/5 ml-auto text-[10px] font-semibold uppercase tracking-widest text-slate-400">Invoice Date</label>
                                     <div class="relative w-3/5 ml-auto">
-                                        <Icon icon="si:calendar-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10"  />
+                                        <Icon icon="ri:calendar-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10"  />
                                         <VueDatePicker
                                             v-model="form.invoice_date"
                                             model-type="yyyy-MM-dd"
@@ -391,7 +391,7 @@ watch(
                                 <div class="space-y-2">
                                     <label class="block w-3/5 ml-auto text-[10px] font-semibold uppercase tracking-widest text-slate-400">Due Date (Optional)</label>
                                     <div class="relative w-3/5 ml-auto">
-                                        <Icon icon="si:calendar-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10"  />
+                                        <Icon icon="ri:calendar-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10"  />
                                         <VueDatePicker
                                             v-model="form.due_date"
                                             model-type="yyyy-MM-dd"
@@ -451,7 +451,7 @@ watch(
                                         @click="removeItem(index)"
                                         class="p-2 text-rose-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                                     >
-                                        <Icon icon="si:bin-line" :width="18" :height="18"  />
+                                        <Icon icon="ri:delete-bin-line" :width="18" :height="18"  />
                                     </button>
                                 </div>
                             </div>
@@ -460,7 +460,7 @@ watch(
                                 @click="addItem"
                                 class="w-full py-4 border-2 border-dashed border-slate-100 rounded-[1.5rem] text-xs font-semibold text-slate-400 uppercase tracking-widest hover:bg-slate-50 hover:border-slate-200 transition-all flex items-center justify-center gap-2"
                             >
-                                <Icon icon="si:add-line" :width="14" :height="14"  />
+                                <Icon icon="ri:add-line" :width="14" :height="14"  />
                                 Add Item
                             </button>
                         </div>
@@ -470,7 +470,7 @@ watch(
                     <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-xl shadow-slate-200/20">
                         <div class="space-y-4">
                             <label class="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">
-                                <Icon icon="si:ai-note-line" :width="14" :height="14"  />
+                                <Icon icon="ri:sticky-note-line" :width="14" :height="14"  />
                                 Notes / Terms
                             </label>
                             <textarea 
@@ -498,7 +498,7 @@ watch(
                                     @click="isEditingInvoiceNumber = !isEditingInvoiceNumber"
                                     class="inline-flex items-center gap-1 rounded-md bg-white/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-widest text-white/80 hover:bg-white/20"
                                 >
-                                    <Icon :icon="isEditingInvoiceNumber ? 'si:check-line' : 'si:edit-line'" :width="10" :height="10" />
+                                    <Icon :icon="isEditingInvoiceNumber ? 'ri:check-line' : 'ri:edit-line'" :width="10" :height="10" />
                                     {{ isEditingInvoiceNumber ? 'Done' : 'Edit' }}
                                 </button>
                             </div>
@@ -528,7 +528,7 @@ watch(
                                 class="w-full flex justify-between items-center text-sm font-semibold py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
                             >
                                 <div class="flex items-center gap-2">
-                                    <Icon icon="si:checklist-line" :width="16" :height="16" class="text-white" />
+                                    <Icon icon="ri:task-line" :width="16" :height="16" class="text-white" />
                                     <span class="text-white">Tax</span>
                                     <span v-if="selectedTaxes.length > 0" class="px-2 py-0.5 bg-white/20 rounded-md text-xs">
                                         {{ selectedTaxes.length }}
@@ -568,7 +568,7 @@ watch(
                                 :disabled="form.processing"
                                 class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-[#07304a] shadow-xl shadow-black/10 transition-all hover:bg-slate-100 active:scale-95 disabled:opacity-50"
                             >
-                                <Icon icon="si:archive-line" :width="16" :height="16"  />
+                                <Icon icon="ri:archive-line" :width="16" :height="16"  />
                                 <span>{{ form.processing ? 'Saving...' : (isEditMode ? 'Update Invoice' : 'Save Invoice') }}</span>
                             </button>
                         </div>
@@ -579,8 +579,8 @@ watch(
                         <div class="space-y-3">
                             <label class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 ml-1">Bank Account</label>
                             <div class="relative">
-                                <Icon icon="si:building-line" :width="18" :height="18" class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" />
-                                <Icon icon="si:expand-more-line" :width="16" :height="16" class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" />
+                                <Icon icon="ri:building-line" :width="18" :height="18" class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" />
+                                <Icon icon="ri:arrow-down-s-line" :width="16" :height="16" class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" />
                                 <select ref="bankSelectEl" class="bank-tom-select">
                                     <option v-for="option in bankAccountOptions" :key="option.id" :value="option.id">
                                         {{ option.text }}
@@ -594,7 +594,7 @@ watch(
                                 :href="route('profile.bank-accounts.index')"
                                 class="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-[#07304a] hover:underline ml-1"
                             >
-                                <Icon icon="si:arrow-right-line" :width="12" :height="12" />
+                                <Icon icon="ri:arrow-right-line" :width="12" :height="12" />
                                 Manage Bank Accounts
                             </Link>
                         </div>
@@ -625,7 +625,7 @@ watch(
                                 @click="showAddClient = false"
                                 class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
                             >
-                                <Icon icon="si:close-line" :width="18" :height="18" />
+                                <Icon icon="ri:close-line" :width="18" :height="18" />
                             </button>
                         </div>
                         <div class="space-y-4">
@@ -687,16 +687,18 @@ watch(
                                 <button
                                     type="button"
                                     @click="showAddClient = false"
-                                    class="px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700"
+                                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700"
                                 >
+                                    <Icon icon="ri:close-line" :width="14" :height="14" />
                                     Cancel
                                 </button>
                                 <button
                                     type="button"
                                     @click="submitClient"
                                     :disabled="clientForm.processing"
-                                    class="px-5 py-2 rounded-xl bg-[#07304a] text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 hover:bg-[#002d66] disabled:opacity-50"
+                                    class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#07304a] text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 hover:bg-[#002d66] disabled:opacity-50"
                                 >
+                                    <Icon icon="ri:save-line" :width="14" :height="14" />
                                     {{ clientForm.processing ? 'Saving...' : 'Save Client' }}
                                 </button>
                             </div>
@@ -718,7 +720,7 @@ watch(
                                 @click="showAddProduct = false"
                                 class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
                             >
-                                <Icon icon="si:close-line" :width="18" :height="18" />
+                                <Icon icon="ri:close-line" :width="18" :height="18" />
                             </button>
                         </div>
                         <div class="space-y-4">
@@ -762,16 +764,18 @@ watch(
                                 <button
                                     type="button"
                                     @click="showAddProduct = false"
-                                    class="px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700"
+                                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700"
                                 >
+                                    <Icon icon="ri:close-line" :width="14" :height="14" />
                                     Cancel
                                 </button>
                                 <button
                                     type="button"
                                     @click="submitProduct"
                                     :disabled="productForm.processing"
-                                    class="px-5 py-2 rounded-xl bg-[#07304a] text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 hover:bg-[#002d66] disabled:opacity-50"
+                                    class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#07304a] text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 hover:bg-[#002d66] disabled:opacity-50"
                                 >
+                                    <Icon icon="ri:save-line" :width="14" :height="14" />
                                     {{ productForm.processing ? 'Saving...' : 'Save Product' }}
                                 </button>
                             </div>
@@ -789,7 +793,7 @@ watch(
                         <div class="mb-6 flex items-center justify-between">
                             <h3 class="text-lg font-semibold text-slate-900">Add Bank Account</h3>
                             <button type="button" @click="closeAddBankModal" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-                                <Icon icon="si:close-line" :width="18" :height="18" />
+                                <Icon icon="ri:close-line" :width="18" :height="18" />
                             </button>
                         </div>
 
@@ -834,15 +838,17 @@ watch(
                             </label>
 
                             <div class="flex justify-end gap-3 pt-2">
-                                <button type="button" @click="closeAddBankModal" class="px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700">
+                                <button type="button" @click="closeAddBankModal" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700">
+                                    <Icon icon="ri:close-line" :width="14" :height="14" />
                                     Cancel
                                 </button>
                                 <button
                                     type="button"
                                     @click="submitBankAccount"
                                     :disabled="bankAccountForm.processing"
-                                    class="rounded-xl bg-[#07304a] px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 hover:bg-[#002d66] disabled:opacity-50"
+                                    class="inline-flex items-center gap-2 rounded-xl bg-[#07304a] px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 hover:bg-[#002d66] disabled:opacity-50"
                                 >
+                                    <Icon icon="ri:save-line" :width="14" :height="14" />
                                     {{ bankAccountForm.processing ? 'Saving...' : 'Save Bank Account' }}
                                 </button>
                             </div>

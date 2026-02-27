@@ -165,7 +165,7 @@ onUnmounted(() => {
             <div class="mb-10 flex items-center justify-between no-print">
                 <div class="flex items-center gap-4">
                     <Link :href="route('quotations.index')" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 transition-all border border-slate-100">
-                        <Icon icon="si:arrow-left-line" :width="18" :height="18"  />
+                        <Icon icon="ri:arrow-left-line" :width="18" :height="18"  />
                     </Link>
                     <div>
                         <div class="flex items-center gap-3">
@@ -344,24 +344,24 @@ onUnmounted(() => {
                 <aside class="w-64 shrink-0 space-y-3 no-print sticky top-24 self-start">
                     <div class="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
                         <Link
-                            :href="route('quotations.edit', quotation)"
+                            :href="route('quotations.edit', quotation.public_id)"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
                         >
-                            <Icon icon="si:edit-line" :width="16" :height="16" />
+                            <Icon icon="ri:edit-line" :width="16" :height="16" />
                             <span>Edit</span>
                         </Link>
                         <button
                             @click="printQuotation"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
                         >
-                            <Icon icon="si:file-download-line" :width="16" :height="16" />
+                            <Icon icon="ri:file-download-line" :width="16" :height="16" />
                             <span>Print</span>
                         </button>
                         <button
                             @click="downloadQuotationPdf"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
                         >
-                            <Icon icon="si:file-text-line" :width="16" :height="16" />
+                            <Icon icon="ri:file-text-line" :width="16" :height="16" />
                             <span>Download PDF</span>
                         </button>
                         <button
@@ -369,7 +369,7 @@ onUnmounted(() => {
                             @click="convertToInvoice"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#07304a] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95"
                         >
-                            <Icon icon="si:file-export-line" :width="16" :height="16" />
+                            <Icon icon="ri:file-transfer-line" :width="16" :height="16" />
                             <span>Convert to Invoice</span>
                         </button>
                         <Link
@@ -377,7 +377,7 @@ onUnmounted(() => {
                             :href="route('invoices.show', quotation.invoice)"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#07304a] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95"
                         >
-                            <Icon icon="si:text-line" :width="16" :height="16" />
+                            <Icon icon="ri:file-text-line" :width="16" :height="16" />
                             <span>View Invoice</span>
                         </Link>
                     </div>
@@ -388,7 +388,10 @@ onUnmounted(() => {
                         class="w-full rounded-xl border px-4 py-3 text-left transition"
                         :class="variant === 'classic' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:border-slate-300'"
                     >
-                        <div class="text-sm font-semibold">Classic</div>
+                        <div class="text-sm font-semibold flex items-center gap-2">
+                            <Icon icon="ri:layout-2-line" :width="14" :height="14" />
+                            Classic
+                        </div>
                         <div class="text-xs mt-1">Balanced layout, clean spacing</div>
                     </button>
                     <button
@@ -397,7 +400,10 @@ onUnmounted(() => {
                         class="w-full rounded-xl border px-4 py-3 text-left transition"
                         :class="variant === 'modern' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:border-slate-300'"
                     >
-                        <div class="text-sm font-semibold">Modern Edge</div>
+                        <div class="text-sm font-semibold flex items-center gap-2">
+                            <Icon icon="ri:shapes-line" :width="14" :height="14" />
+                            Modern Edge
+                        </div>
                         <div class="text-xs mt-1">Bold header, high contrast</div>
                     </button>
                     <button
@@ -406,7 +412,10 @@ onUnmounted(() => {
                         class="w-full rounded-xl border px-4 py-3 text-left transition"
                         :class="variant === 'minimal' ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500 hover:border-slate-300'"
                     >
-                        <div class="text-sm font-semibold">Minimal</div>
+                        <div class="text-sm font-semibold flex items-center gap-2">
+                            <Icon icon="ri:apps-2-line" :width="14" :height="14" />
+                            Minimal
+                        </div>
                         <div class="text-xs mt-1">Soft borders, airy feel</div>
                     </button>
                 </aside>

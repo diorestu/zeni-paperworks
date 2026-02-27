@@ -1,6 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     kpis: {
@@ -131,9 +132,10 @@ const verifyUser = (user) => {
                                         <button
                                             v-else
                                             type="button"
-                                            class="rounded-lg bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white hover:bg-slate-800"
+                                            class="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white hover:bg-slate-800"
                                             @click="verifyUser(user)"
                                         >
+                                            <Icon icon="ri:verified-badge-line" :width="12" :height="12" />
                                             Auto Verify
                                         </button>
                                     </td>

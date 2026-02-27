@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Quotation extends Model
 {
@@ -17,8 +18,24 @@ class Quotation extends Model
         return 'quotation_number';
     }
 
+    protected static function booted(): void
+    {
+        static::creating(function (self $quotation): void {
+            if (!empty($quotation->public_id)) {
+                return;
+            }
+
+            do {
+                $publicId = (string) Str::ulid();
+            } while (self::query()->where('public_id', $publicId)->exists());
+
+            $quotation->public_id = $publicId;
+        });
+    }
+
     protected $fillable = [
         'company_id',
+        'public_id',
         'client_id',
         'quotation_number',
         'quotation_date',

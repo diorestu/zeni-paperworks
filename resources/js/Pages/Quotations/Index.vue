@@ -57,7 +57,7 @@ const statusCounts = computed(() => {
                 :href="route('quotations.create')"
                 class="flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-4 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95"
             >
-                <Icon icon="si:add-line" :width="18" :height="18"  />
+                <Icon icon="ri:add-line" :width="18" :height="18"  />
                 <span>Create Quotation</span>
             </Link>
         </div>
@@ -79,6 +79,7 @@ const statusCounts = computed(() => {
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                     ]"
                 >
+                    <Icon icon="ri:file-list-3-line" :width="14" :height="14" />
                     <span>All Quotations</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold" :class="statusFilter === 'all' ? 'bg-white/20' : 'bg-slate-200'">
                         {{ statusCounts.all }}
@@ -93,6 +94,7 @@ const statusCounts = computed(() => {
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                     ]"
                 >
+                    <Icon icon="ri:edit-line" :width="14" :height="14" />
                     <span>Draft</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold" :class="statusFilter === 'draft' ? 'bg-white/20' : 'bg-slate-200'">
                         {{ statusCounts.draft }}
@@ -107,6 +109,7 @@ const statusCounts = computed(() => {
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                     ]"
                 >
+                    <Icon icon="ri:mail-send-line" :width="14" :height="14" />
                     <span>Sent</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold" :class="statusFilter === 'sent' ? 'bg-white/20' : 'bg-slate-200'">
                         {{ statusCounts.sent }}
@@ -121,6 +124,7 @@ const statusCounts = computed(() => {
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                     ]"
                 >
+                    <Icon icon="ri:checkbox-circle-line" :width="14" :height="14" />
                     <span>Accepted</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold" :class="statusFilter === 'accepted' ? 'bg-white/20' : 'bg-slate-200'">
                         {{ statusCounts.accepted }}
@@ -135,6 +139,7 @@ const statusCounts = computed(() => {
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                     ]"
                 >
+                    <Icon icon="ri:close-circle-line" :width="14" :height="14" />
                     <span>Rejected</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold" :class="statusFilter === 'rejected' ? 'bg-white/20' : 'bg-slate-200'">
                         {{ statusCounts.rejected }}
@@ -149,6 +154,7 @@ const statusCounts = computed(() => {
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                     ]"
                 >
+                    <Icon icon="ri:time-line" :width="14" :height="14" />
                     <span>Expired</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold" :class="statusFilter === 'expired' ? 'bg-white/20' : 'bg-slate-200'">
                         {{ statusCounts.expired }}
@@ -158,7 +164,7 @@ const statusCounts = computed(() => {
 
             <!-- Search Bar -->
             <div class="relative max-w-md">
-                <Icon icon="si:search-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
+                <Icon icon="ri:search-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                 <input 
                     v-model="searchQuery"
                     type="text" 
@@ -186,7 +192,7 @@ const statusCounts = computed(() => {
                         <td class="px-8 py-6">
                             <div class="flex items-center gap-3">
                                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-[#07304a] group-hover:bg-white group-hover:shadow-sm transition-all">
-                                    <Icon icon="si:quote-line" :width="18" :height="18"  />
+                                    <Icon icon="ri:double-quotes-l" :width="18" :height="18"  />
                                 </div>
                                 <span class="text-sm font-semibold text-slate-900">{{ quotation.quotation_number }}</span>
                             </div>
@@ -221,14 +227,14 @@ const statusCounts = computed(() => {
                             </span>
                         </td>
                         <td class="px-8 py-6 text-right">
-                            <Icon icon="si:chevron-right-line" :width="18" :height="18" class="text-slate-300 group-hover:text-[#07304a] transition-colors inline-block"  />
+                            <Icon icon="ri:chevron-right-line" :width="18" :height="18" class="text-slate-300 group-hover:text-[#07304a] transition-colors inline-block"  />
                         </td>
                     </tr>
                     <tr v-if="filteredQuotations.length === 0">
                         <td colspan="6" class="px-8 py-20 text-center">
                             <div class="flex flex-col items-center gap-4">
                                 <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-300">
-                                    <Icon icon="si:quote-line" :width="32" :height="32"  />
+                                    <Icon icon="ri:double-quotes-l" :width="32" :height="32"  />
                                 </div>
                                 <div>
                                     <p class="text-sm font-semibold text-slate-900">No quotations found</p>

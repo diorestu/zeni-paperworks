@@ -144,8 +144,9 @@ const payPlan = async (plan) => {
                     <button 
                         @click="isYearly = false"
                         :class="[!isYearly ? 'bg-white text-slate-900 shadow-md ring-1 ring-black/[0.05]' : 'text-slate-500 hover:text-slate-700']"
-                        class="px-6 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-widest transition-all"
+                        class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-widest transition-all"
                     >
+                        <Icon icon="ri:calendar-line" :width="14" :height="14" />
                         Monthly
                     </button>
                     <button 
@@ -153,6 +154,7 @@ const payPlan = async (plan) => {
                         :class="[isYearly ? 'bg-white text-slate-900 shadow-md ring-1 ring-black/[0.05]' : 'text-slate-500 hover:text-slate-700']"
                         class="px-6 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-widest transition-all flex items-center gap-2"
                     >
+                        <Icon icon="ri:calendar-2-line" :width="14" :height="14" />
                         Yearly
                         <span class="bg-emerald-500 text-white text-[9px] px-1.5 py-0.5 rounded-md">SAVE 25%</span>
                     </button>
@@ -179,8 +181,9 @@ const payPlan = async (plan) => {
                     <button
                         @click="payPlan(plan)"
                         :disabled="plan.current || plan.name === 'Free' || processingPlan === plan.name"
-                        :class="['w-full py-4.5 rounded-[1.25rem] text-[13px] font-bold tracking-wide transition-all active:scale-95 mb-4', plan.color]"
+                        :class="['inline-flex w-full items-center justify-center gap-2 py-4.5 rounded-[1.25rem] text-[13px] font-bold tracking-wide transition-all active:scale-95 mb-4', plan.color]"
                     >
+                        <Icon icon="ri:wallet-3-line" :width="16" :height="16" />
                         {{ processingPlan === plan.name ? 'Processing...' : (plan.current ? 'Current Plan' : plan.button) }}
                     </button>
 
@@ -212,7 +215,7 @@ const payPlan = async (plan) => {
                         <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-5 px-1">Documents</p>
                         <ul class="space-y-4">
                             <li v-for="doc in plan.docs" :key="doc" class="flex items-center gap-3 text-xs font-semibold text-slate-600">
-                                <Icon icon="si:check-circle-line" :width="18" :height="18" class="text-emerald-500 shrink-0"  />
+                                <Icon icon="ri:checkbox-circle-line" :width="18" :height="18" class="text-emerald-500 shrink-0"  />
                                 {{ doc }}
                             </li>
                         </ul>
@@ -223,7 +226,7 @@ const payPlan = async (plan) => {
                         <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-5 px-1">Features</p>
                         <ul class="space-y-4">
                             <li v-for="feat in plan.features" :key="feat" class="flex items-center gap-3 text-xs font-semibold text-slate-600">
-                                <Icon icon="si:check-circle-line" :width="18" :height="18" class="text-emerald-500 shrink-0"  />
+                                <Icon icon="ri:checkbox-circle-line" :width="18" :height="18" class="text-emerald-500 shrink-0"  />
                                 {{ feat }}
                             </li>
                         </ul>
@@ -236,7 +239,7 @@ const payPlan = async (plan) => {
                 <div class="p-10 border-b border-slate-50 flex items-center justify-between">
                     <div class="flex items-center gap-4">
                         <div class="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
-                            <Icon icon="si:clock-line" :width="24" :height="24"  />
+                            <Icon icon="ri:time-line" :width="24" :height="24"  />
                         </div>
                         <h2 class="text-lg font-semibold text-slate-900">Payment History</h2>
                     </div>
@@ -271,7 +274,7 @@ const payPlan = async (plan) => {
                                         :href="payment.receipt_url"
                                         class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
                                     >
-                                        <Icon icon="si:file-download-line" :width="14" :height="14" />
+                                        <Icon icon="ri:file-download-line" :width="14" :height="14" />
                                         Download
                                     </a>
                                     <span v-else class="text-xs text-slate-400">-</span>

@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     status: {
@@ -38,10 +39,12 @@ const description = computed(() => ({
             <h1 class="mt-2 text-2xl font-semibold text-slate-900">{{ title }}</h1>
             <p class="mt-3 text-sm text-slate-600">{{ description }}</p>
             <div class="mt-6 flex items-center justify-center gap-3">
-                <Link :href="route('landing')" class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                <Link :href="route('landing')" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                    <Icon icon="ri:home-4-line" :width="14" :height="14" />
                     Back to Home
                 </Link>
-                <button type="button" class="rounded-xl bg-[#0b2d6b] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[#0a2558]" @click="window.history.back()">
+                <button type="button" class="inline-flex items-center gap-2 rounded-xl bg-[#0b2d6b] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[#0a2558]" @click="window.history.back()">
+                    <Icon icon="ri:arrow-left-line" :width="14" :height="14" />
                     Go Back
                 </button>
             </div>

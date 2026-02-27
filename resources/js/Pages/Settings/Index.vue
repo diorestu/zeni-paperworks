@@ -183,56 +183,61 @@ const deleteSubUser = (user) => {
                     <button
                         @click="activeTab = 'general'"
                         :class="[
-                            'pb-4 text-sm font-semibold transition-all border-b-2',
+                            'inline-flex items-center gap-2 pb-4 text-sm font-semibold transition-all border-b-2',
                             activeTab === 'general'
                                 ? 'text-[#07304a] border-[#07304a]'
                                 : 'text-slate-500 border-transparent hover:text-slate-700'
                         ]"
                     >
+                        <Icon icon="ri:settings-3-line" :width="14" :height="14" />
                         General
                     </button>
                     <button
                         @click="activeTab = 'company'"
                         :class="[
-                            'pb-4 text-sm font-semibold transition-all border-b-2',
+                            'inline-flex items-center gap-2 pb-4 text-sm font-semibold transition-all border-b-2',
                             activeTab === 'company'
                                 ? 'text-[#07304a] border-[#07304a]'
                                 : 'text-slate-500 border-transparent hover:text-slate-700'
                         ]"
                     >
+                        <Icon icon="ri:building-line" :width="14" :height="14" />
                         Company
                     </button>
                     <button
                         @click="activeTab = 'taxes'"
                         :class="[
-                            'pb-4 text-sm font-semibold transition-all border-b-2',
+                            'inline-flex items-center gap-2 pb-4 text-sm font-semibold transition-all border-b-2',
                             activeTab === 'taxes'
                                 ? 'text-[#07304a] border-[#07304a]'
                                 : 'text-slate-500 border-transparent hover:text-slate-700'
                         ]"
                     >
+                        <Icon icon="ri:percent-line" :width="14" :height="14" />
                         Taxes
                     </button>
                     <button
                         @click="activeTab = 'team'"
                         :class="[
-                            'pb-4 text-sm font-semibold transition-all border-b-2',
+                            'inline-flex items-center gap-2 pb-4 text-sm font-semibold transition-all border-b-2',
                             activeTab === 'team'
                                 ? 'text-[#07304a] border-[#07304a]'
                                 : 'text-slate-500 border-transparent hover:text-slate-700'
                         ]"
                     >
+                        <Icon icon="ri:team-line" :width="14" :height="14" />
                         Team Users
                     </button>
                     <button
                         @click="activeTab = 'profile'"
                         :class="[
-                            'pb-4 text-sm font-semibold transition-all border-b-2',
+                            'inline-flex items-center gap-2 pb-4 text-sm font-semibold transition-all border-b-2',
                             activeTab === 'profile'
                                 ? 'text-[#07304a] border-[#07304a]'
                                 : 'text-slate-500 border-transparent hover:text-slate-700'
                         ]"
                     >
+                        <Icon icon="ri:user-settings-line" :width="14" :height="14" />
                         Profile
                     </button>
                 </nav>
@@ -247,12 +252,15 @@ const deleteSubUser = (user) => {
                         <div class="flex items-center gap-6">
                             <div class="flex-shrink-0">
                                 <div class="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center">
-                                    <Icon icon="si:user-line" :width="32" :height="32" class="text-slate-400"  />
+                                    <Icon icon="ri:user-line" :width="32" :height="32" class="text-slate-400"  />
                                 </div>
                             </div>
                             <div class="flex-1">
                                 <p class="text-sm font-semibold text-slate-900">{{ $page.props.auth.user.name }}</p>
-                                <button class="text-sm text-[#07304a] font-semibold hover:underline">Change</button>
+                                <button class="inline-flex items-center gap-1.5 text-sm text-[#07304a] font-semibold hover:underline">
+                                    <Icon icon="ri:edit-line" :width="12" :height="12" />
+                                    Change
+                                </button>
                             </div>
                         </div>
                         <div class="pt-6 border-t border-slate-100">
@@ -269,7 +277,7 @@ const deleteSubUser = (user) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Invoice Prefix</label>
                             <div class="relative">
-                                <Icon icon="si:text-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
+                                <Icon icon="ri:file-text-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="text" 
                                     v-model="profileForm.invoice_prefix"
@@ -283,7 +291,7 @@ const deleteSubUser = (user) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Quotation Prefix</label>
                             <div class="relative">
-                                <Icon icon="si:text-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
+                                <Icon icon="ri:file-text-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="text" 
                                     v-model="profileForm.quotation_prefix"
@@ -297,7 +305,7 @@ const deleteSubUser = (user) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Currency</label>
                             <div class="relative">
-                                <Icon icon="si:money-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
+                                <Icon icon="ri:money-dollar-circle-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <select
                                     v-model="profileForm.currency"
                                     class="w-full appearance-none bg-slate-50 border-none rounded-xl pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-100 focus:ring-2 focus:ring-[#07304a] transition-all outline-none"
@@ -317,7 +325,7 @@ const deleteSubUser = (user) => {
                                 :disabled="profileForm.processing"
                                 class="flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                             >
-                                <Icon icon="si:archive-line" :width="18" :height="18"  />
+                                <Icon icon="ri:archive-line" :width="18" :height="18"  />
                                 <span>{{ profileForm.processing ? 'Saving...' : 'Save Changes' }}</span>
                             </button>
                         </div>
@@ -350,7 +358,7 @@ const deleteSubUser = (user) => {
                                     >
                                 </div>
                                 <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-widest text-[#07304a] ring-1 ring-slate-200 transition hover:bg-slate-100">
-                                    <Icon icon="si:image-line" :width="16" :height="16" />
+                                    <Icon icon="ri:image-line" :width="16" :height="16" />
                                     <span>Change Logo</span>
                                     <input
                                         type="file"
@@ -372,7 +380,7 @@ const deleteSubUser = (user) => {
                         <div class="space-y-2 md:col-span-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Company Name</label>
                             <div class="relative">
-                                <Icon icon="si:building-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
+                                <Icon icon="ri:building-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="text" 
                                     v-model="companyForm.company_name"
@@ -386,7 +394,7 @@ const deleteSubUser = (user) => {
                         <div class="space-y-2 md:col-span-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Company Address</label>
                             <div class="relative">
-                                <Icon icon="si:pin-line" :width="18" :height="18" class="absolute left-4 top-4 text-slate-400"  />
+                                <Icon icon="ri:map-pin-line" :width="18" :height="18" class="absolute left-4 top-4 text-slate-400"  />
                                 <textarea 
                                     v-model="companyForm.company_address"
                                     rows="3"
@@ -400,7 +408,7 @@ const deleteSubUser = (user) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Phone Number</label>
                             <div class="relative">
-                                <Icon icon="si:phone-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
+                                <Icon icon="ri:phone-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="text" 
                                     v-model="companyForm.company_phone"
@@ -414,7 +422,7 @@ const deleteSubUser = (user) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Email Address</label>
                             <div class="relative">
-                                <Icon icon="si:mail-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
+                                <Icon icon="ri:mail-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="email" 
                                     v-model="companyForm.company_email"
@@ -428,7 +436,7 @@ const deleteSubUser = (user) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Website</label>
                             <div class="relative">
-                                <Icon icon="si:globe-detailed-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
+                                <Icon icon="ri:global-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="url" 
                                     v-model="companyForm.company_website"
@@ -442,7 +450,7 @@ const deleteSubUser = (user) => {
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tax ID / Registration Number</label>
                             <div class="relative">
-                                <Icon icon="si:quote-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
+                                <Icon icon="ri:double-quotes-l" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                                 <input 
                                     type="text" 
                                     v-model="companyForm.company_tax_id"
@@ -459,7 +467,7 @@ const deleteSubUser = (user) => {
                             :disabled="companyForm.processing"
                             class="flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                         >
-                            <Icon icon="si:archive-line" :width="18" :height="18"  />
+                            <Icon icon="ri:archive-line" :width="18" :height="18"  />
                             <span>{{ companyForm.processing ? 'Saving...' : 'Save Company Info' }}</span>
                         </button>
                     </div>
@@ -537,7 +545,7 @@ const deleteSubUser = (user) => {
                             :disabled="subUserForm.processing || !canManageSubUsers || reachedSubUserLimit"
                             class="inline-flex items-center gap-2 rounded-xl bg-[#07304a] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] disabled:opacity-50"
                         >
-                            <Icon icon="si:add-line" :width="16" :height="16" />
+                            <Icon icon="ri:add-line" :width="16" :height="16" />
                             <span>{{ subUserForm.processing ? 'Creating...' : 'Create Sub-user' }}</span>
                         </button>
                     </form>
@@ -574,16 +582,18 @@ const deleteSubUser = (user) => {
                                 <button
                                     v-if="requires_sub_user_approval && !member.approved_at"
                                     type="button"
-                                    class="rounded-lg border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50"
+                                    class="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50"
                                     @click="approveSubUser(member)"
                                 >
+                                    <Icon icon="ri:check-line" :width="12" :height="12" />
                                     Approve
                                 </button>
                                 <button
                                     type="button"
-                                    class="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
+                                    class="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
                                     @click="deleteSubUser(member)"
                                 >
+                                    <Icon icon="ri:delete-bin-line" :width="12" :height="12" />
                                     Delete
                                 </button>
                             </div>
@@ -604,7 +614,7 @@ const deleteSubUser = (user) => {
                             class="group rounded-xl border border-slate-100 bg-slate-50 p-5 transition-all hover:border-[#07304a]/20 hover:bg-white hover:shadow-sm"
                         >
                             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#07304a] ring-1 ring-slate-100">
-                                <Icon icon="si:building-line" :width="18" :height="18" />
+                                <Icon icon="ri:building-line" :width="18" :height="18" />
                             </div>
                             <p class="mt-4 text-sm font-semibold text-slate-900">Bank Accounts</p>
                             <p class="mt-1 text-xs text-slate-500">Manage account number and payout destination.</p>
@@ -615,7 +625,7 @@ const deleteSubUser = (user) => {
                             class="group rounded-xl border border-slate-100 bg-slate-50 p-5 transition-all hover:border-[#07304a]/20 hover:bg-white hover:shadow-sm"
                         >
                             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#07304a] ring-1 ring-slate-100">
-                                <Icon icon="si:credit-card-line" :width="18" :height="18" />
+                                <Icon icon="ri:bank-card-line" :width="18" :height="18" />
                             </div>
                             <p class="mt-4 text-sm font-semibold text-slate-900">Billing</p>
                             <p class="mt-1 text-xs text-slate-500">Review plan, payment status, and receipts.</p>
@@ -626,7 +636,7 @@ const deleteSubUser = (user) => {
                             class="group rounded-xl border border-slate-100 bg-slate-50 p-5 transition-all hover:border-[#07304a]/20 hover:bg-white hover:shadow-sm"
                         >
                             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#07304a] ring-1 ring-slate-100">
-                                <Icon icon="si:shield-line" :width="18" :height="18" />
+                                <Icon icon="ri:shield-line" :width="18" :height="18" />
                             </div>
                             <p class="mt-4 text-sm font-semibold text-slate-900">Reset Password</p>
                             <p class="mt-1 text-xs text-slate-500">Update password and secure account access.</p>
@@ -686,15 +696,16 @@ const deleteSubUser = (user) => {
                                     :disabled="taxForm.processing"
                                     class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                                 >
-                                    <Icon icon="si:archive-line" :width="18" :height="18"  />
+                                    <Icon icon="ri:archive-line" :width="18" :height="18"  />
                                     <span>{{ editingTax ? 'Update' : 'Add Tax' }}</span>
                                 </button>
                                 <button 
                                     v-if="editingTax"
                                     type="button"
                                     @click="cancelEdit"
-                                    class="px-6 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
+                                    class="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
                                 >
+                                    <Icon icon="ri:close-line" :width="14" :height="14" />
                                     Cancel
                                 </button>
                             </div>
@@ -709,7 +720,7 @@ const deleteSubUser = (user) => {
                         </div>
                         <div class="divide-y divide-slate-100">
                             <div v-if="taxes.length === 0" class="p-12 text-center">
-                                <Icon icon="si:checklist-line" :width="48" :height="48" class="mx-auto text-slate-300 mb-4"  />
+                                <Icon icon="ri:task-line" :width="48" :height="48" class="mx-auto text-slate-300 mb-4"  />
                                 <p class="text-sm font-semibold text-slate-900">No taxes configured</p>
                                 <p class="text-xs text-slate-400 mt-1">Add your first tax to get started.</p>
                             </div>
@@ -734,15 +745,16 @@ const deleteSubUser = (user) => {
                                     <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button 
                                             @click="editTax(tax)"
-                                            class="px-4 py-2 text-xs font-semibold text-[#07304a] hover:bg-[#07304a]/10 rounded-lg transition-all"
+                                            class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-[#07304a] hover:bg-[#07304a]/10 rounded-lg transition-all"
                                         >
+                                            <Icon icon="ri:edit-line" :width="12" :height="12" />
                                             Edit
                                         </button>
                                         <button 
                                             @click="deleteTax(tax)"
                                             class="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                                         >
-                                            <Icon icon="si:bin-line" :width="18" :height="18"  />
+                                            <Icon icon="ri:delete-bin-line" :width="18" :height="18"  />
                                         </button>
                                     </div>
                                 </div>

@@ -83,6 +83,7 @@ const formatShortDate = (dateString) => {
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                     ]"
                 >
+                    <Icon icon="ri:file-list-3-line" :width="14" :height="14" />
                     <span>All Invoices</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold" :class="statusFilter === 'all' ? 'bg-white/20' : 'bg-slate-200'">
                         {{ statusCounts.all }}
@@ -97,6 +98,7 @@ const formatShortDate = (dateString) => {
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                     ]"
                 >
+                    <Icon icon="ri:edit-line" :width="14" :height="14" />
                     <span>Draft</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold" :class="statusFilter === 'draft' ? 'bg-white/20' : 'bg-slate-200'">
                         {{ statusCounts.draft }}
@@ -111,6 +113,7 @@ const formatShortDate = (dateString) => {
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                     ]"
                 >
+                    <Icon icon="ri:mail-send-line" :width="14" :height="14" />
                     <span>Sent</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold" :class="statusFilter === 'sent' ? 'bg-white/20' : 'bg-slate-200'">
                         {{ statusCounts.sent }}
@@ -125,6 +128,7 @@ const formatShortDate = (dateString) => {
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                     ]"
                 >
+                    <Icon icon="ri:checkbox-circle-line" :width="14" :height="14" />
                     <span>Paid</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold" :class="statusFilter === 'paid' ? 'bg-white/20' : 'bg-slate-200'">
                         {{ statusCounts.paid }}
@@ -139,6 +143,7 @@ const formatShortDate = (dateString) => {
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                     ]"
                 >
+                    <Icon icon="ri:error-warning-line" :width="14" :height="14" />
                     <span>Overdue</span>
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold" :class="statusFilter === 'overdue' ? 'bg-white/20' : 'bg-slate-200'">
                         {{ statusCounts.overdue }}
@@ -232,7 +237,7 @@ const formatShortDate = (dateString) => {
                         <td colspan="6" class="px-8 py-20 text-center">
                             <div class="flex flex-col items-center gap-4">
                                 <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-300">
-                                    <Icon icon="ri:quote-line" :width="32" :height="32"  />
+                                    <Icon icon="ri:double-quotes-l" :width="32" :height="32"  />
                                 </div>
                                 <div>
                                     <p class="text-sm font-semibold text-slate-900">No invoices found</p>

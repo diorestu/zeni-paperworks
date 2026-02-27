@@ -117,16 +117,18 @@ const deleteAccount = (id) => {
                                 <button 
                                     type="submit"
                                     :disabled="form.processing"
-                                    class="w-full rounded-xl bg-[#07304a] px-5 py-3.5 text-xs font-bold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
+                                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#07304a] px-5 py-3.5 text-xs font-bold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:opacity-50"
                                 >
+                                    <Icon icon="ri:save-line" :width="14" :height="14" />
                                     {{ isEditing ? 'Update Account' : 'Add Bank Account' }}
                                 </button>
                                 <button 
                                     v-if="isEditing"
                                     type="button"
                                     @click="resetForm"
-                                    class="w-full rounded-xl bg-slate-100 px-5 py-3.5 text-xs font-bold text-slate-600 transition-all hover:bg-slate-200"
+                                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 px-5 py-3.5 text-xs font-bold text-slate-600 transition-all hover:bg-slate-200"
                                 >
+                                    <Icon icon="ri:close-line" :width="14" :height="14" />
                                     Cancel
                                 </button>
                             </div>
@@ -142,7 +144,7 @@ const deleteAccount = (id) => {
 
                     <div v-if="bankAccounts.length === 0" class="flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-slate-200 p-20 text-center">
                         <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-300 mb-4">
-                            <Icon icon="si:building-line" :width="32" :height="32"  />
+                            <Icon icon="ri:building-line" :width="32" :height="32"  />
                         </div>
                         <p class="text-sm font-semibold text-slate-900">No bank accounts added</p>
                         <p class="text-xs font-normal text-slate-400 mt-1">Add your bank details to show them on your invoices.</p>
@@ -156,7 +158,7 @@ const deleteAccount = (id) => {
                         <div class="flex items-start justify-between">
                             <div class="flex items-center gap-5">
                                 <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-[#07304a] transition-all group-hover:bg-[#07304a] group-hover:text-white">
-                                    <Icon icon="si:building-line" :width="24" :height="24"  />
+                                    <Icon icon="ri:building-line" :width="24" :height="24"  />
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-3">
@@ -170,10 +172,10 @@ const deleteAccount = (id) => {
                             
                             <div class="flex items-center gap-2">
                                 <button @click="editAccount(account)" class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-all">
-                                    <Icon icon="si:ai-edit-line" :width="16" :height="16"  />
+                                    <Icon icon="ri:edit-line" :width="16" :height="16"  />
                                 </button>
                                 <button @click="deleteAccount(account.id)" class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 text-rose-300 hover:bg-rose-50 hover:text-rose-500 transition-all">
-                                    <Icon icon="si:bin-line" :width="16" :height="16"  />
+                                    <Icon icon="ri:delete-bin-line" :width="16" :height="16"  />
                                 </button>
                             </div>
                         </div>

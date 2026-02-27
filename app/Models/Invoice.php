@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Invoice extends Model
 {
@@ -17,8 +18,24 @@ class Invoice extends Model
         return 'invoice_number';
     }
 
+    protected static function booted(): void
+    {
+        static::creating(function (self $invoice): void {
+            if (!empty($invoice->public_id)) {
+                return;
+            }
+
+            do {
+                $publicId = (string) Str::ulid();
+            } while (self::query()->where('public_id', $publicId)->exists());
+
+            $invoice->public_id = $publicId;
+        });
+    }
+
     protected $fillable = [
         'company_id',
+        'public_id',
         'client_id',
         'bank_account_id',
         'is_down_payment',

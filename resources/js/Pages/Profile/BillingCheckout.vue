@@ -98,7 +98,7 @@ const confirmAndRedirect = async (orderId, pending = false) => {
         <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
             <div class="mb-6 flex items-center gap-3">
                 <Link :href="route('settings.billing')" class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-all">
-                    <Icon icon="si:arrow-left-line" :width="18" :height="18" />
+                    <Icon icon="ri:arrow-left-line" :width="18" :height="18" />
                 </Link>
                 <div>
                     <h1 class="text-2xl font-semibold text-slate-900">Payment Checkout</h1>
@@ -141,7 +141,7 @@ const confirmAndRedirect = async (orderId, pending = false) => {
                         :disabled="processing"
                         class="inline-flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0a3f61] disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        <Icon icon="si:wallet-line" :width="16" :height="16" />
+                        <Icon icon="ri:wallet-3-line" :width="16" :height="16" />
                         {{ processing ? 'Processing...' : 'Pay Now' }}
                     </button>
                     <Link :href="route('settings.billing')" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">
