@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AppNotification;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -63,7 +64,7 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function markRead(Request $request, AppNotification $notification): JsonResponse
+    public function markRead(Request $request, AppNotification $notification): JsonResponse|RedirectResponse
     {
         $user = $request->user();
 
@@ -76,10 +77,15 @@ class NotificationController extends Controller
             $notification->update(['read_at' => now()]);
         }
 
-        return response()->json(['success' => true]);
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        // Inertia form submissions should receive a redirect response.
+        return redirect()->back(303);
     }
 
-    public function markAllRead(Request $request): JsonResponse
+    public function markAllRead(Request $request): JsonResponse|RedirectResponse
     {
         $user = $request->user();
 
@@ -89,9 +95,14 @@ class NotificationController extends Controller
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
-        return response()->json([
-            'success' => true,
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+            ]);
+        }
+
+        // Inertia form submissions should receive a redirect response.
+        return redirect()->back(303);
     }
 
     private function transform(AppNotification $item): array
