@@ -195,6 +195,28 @@ class QuotationController extends Controller
         ]);
     }
 
+    public function destroy(Request $request, Quotation $quotation): RedirectResponse
+    {
+        abort_unless($quotation->company_id === $request->user()->company_id, 403);
+
+        $quotationNumber = $quotation->quotation_number;
+
+        DB::transaction(function () use ($quotation) {
+            $quotation->items()->delete();
+            $quotation->delete();
+        });
+
+        $this->notificationService->notifyUser($request->user(), [
+            'type' => 'quotation.deleted',
+            'title' => 'Quotation deleted',
+            'message' => "Quotation {$quotationNumber} has been deleted.",
+            'href' => route('quotations.index'),
+            'icon' => 'si:bin-line',
+        ]);
+
+        return redirect()->route('quotations.index')->with('status', 'Quotation deleted successfully');
+    }
+
     public function convertToInvoice(Request $request, Quotation $quotation): RedirectResponse
     {
         if ($quotation->invoice_id) {

@@ -88,6 +88,7 @@ Route::middleware('auth')->group(function () {
             ->where('quotation', '.*');
         Route::get('/quotations/{quotation:public_id}/edit', [App\Http\Controllers\QuotationController::class, 'edit'])->name('quotations.edit')->middleware('role:admin,user');
         Route::patch('/quotations/{quotation:public_id}', [App\Http\Controllers\QuotationController::class, 'update'])->name('quotations.update')->middleware('role:admin,user');
+        Route::delete('/quotations/{quotation:public_id}', [App\Http\Controllers\QuotationController::class, 'destroy'])->name('quotations.destroy')->middleware('role:admin,user');
         Route::get('/quotations/{quotation}', [App\Http\Controllers\QuotationController::class, 'show'])->name('quotations.show')->middleware('role:admin,user')->where('quotation', '.*');
         Route::post('/quotations/{quotation}/convert-to-invoice', [App\Http\Controllers\QuotationController::class, 'convertToInvoice'])->name('quotations.convert')->middleware('role:admin,user')->where('quotation', '.*');
 

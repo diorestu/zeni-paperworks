@@ -340,7 +340,7 @@
                     <div class="label-sm">Quotation For</div>
                     <div class="client-name">{{ $quotation->client->name }}</div>
                     <div class="client-info">
-                        @if (!empty($quotation->client->company))
+                        @if (!empty($quotation->client->company) && strcasecmp(trim((string) $quotation->client->company), trim((string) $quotation->client->name)) !== 0)
                             <strong style="color: #1d1f21;">{{ $quotation->client->company }}</strong><br>
                         @endif
                         {!! nl2br(e($quotation->client->address ?? '-')) !!}
@@ -365,10 +365,6 @@
                         <tr>
                             <td class="meta-label">Valid Until</td>
                             <td class="meta-value">{{ optional($quotation->valid_until)->format('d F Y') }}</td>
-                        </tr>
-                        <tr>
-                            <td class="meta-label">Status</td>
-                            <td class="meta-value" style="text-transform: uppercase;">{{ $quotation->status }}</td>
                         </tr>
                     </table>
                     @if ($variant === 'modern')

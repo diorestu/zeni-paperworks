@@ -54,6 +54,14 @@ const getStatusColor = (status) => {
     return colors[status] || 'bg-slate-100 text-slate-600';
 };
 
+const shouldShowClientCompany = (client) => {
+    const company = String(client?.company || '').trim();
+    if (!company) return false;
+
+    const name = String(client?.name || '').trim();
+    return company.toLowerCase() !== name.toLowerCase();
+};
+
 const variant = ref('classic');
 const printVariant = ref(null);
 const isPrintMode = ref(false);
@@ -353,7 +361,7 @@ onMounted(async () => {
                                 <p class="text-[10px] font-normal uppercase tracking-widest text-slate-500 mb-3">BILL TO</p>
                                 <h3 class="text-[16px] font-semibold text-slate-800 tracking-tight">{{ invoice.client.name }}</h3>
                                 <div class="mt-2 text-[11px] text-slate-600 leading-relaxed">
-                                    <div v-if="invoice.client.company">{{ invoice.client.company }}</div>
+                                    <div v-if="shouldShowClientCompany(invoice.client)">{{ invoice.client.company }}</div>
                                     <div v-if="invoice.client.address">{{ invoice.client.address }}</div>
                                     <div v-if="invoice.client.phone">{{ invoice.client.phone }}</div>
                                     <div v-if="invoice.client.email">{{ invoice.client.email }}</div>
@@ -380,7 +388,7 @@ onMounted(async () => {
                                 <p class="text-[10px] font-normal uppercase tracking-widest text-slate-500 mb-4">BILL TO</p>
                                 <h3 class="text-[16px] font-semibold text-slate-800 tracking-tight">{{ invoice.client.name }}</h3>
                                 <div class="mt-2 text-[11px] text-slate-600 leading-relaxed">
-                                    <div v-if="invoice.client.company">{{ invoice.client.company }}</div>
+                                    <div v-if="shouldShowClientCompany(invoice.client)">{{ invoice.client.company }}</div>
                                     <div v-if="invoice.client.address">{{ invoice.client.address }}</div>
                                     <div v-if="invoice.client.phone">{{ invoice.client.phone }}</div>
                                     <div v-if="invoice.client.email">{{ invoice.client.email }}</div>

@@ -48,7 +48,16 @@ const getStatusColor = (status) => {
     return colors[status] || 'bg-slate-100 text-slate-600';
 };
 
+const shouldShowClientCompany = (client) => {
+    const company = String(client?.company || '').trim();
+    if (!company) return false;
+
+    const name = String(client?.name || '').trim();
+    return company.toLowerCase() !== name.toLowerCase();
+};
+
 const variant = ref('classic');
+const isDeletingQuotation = ref(false);
 const printVariant = ref(null);
 const isPrintMode = ref(false);
 const isSwitchingVariant = ref(false);
@@ -88,6 +97,19 @@ const convertToInvoice = () => {
     if (confirm('Are you sure you want to convert this quotation to an invoice?')) {
         router.post(route('quotations.convert', props.quotation));
     }
+};
+
+const deleteQuotation = () => {
+    if (isDeletingQuotation.value) return;
+    if (!confirm(`Delete quotation ${props.quotation.quotation_number}? This action cannot be undone.`)) return;
+
+    isDeletingQuotation.value = true;
+    router.delete(route('quotations.destroy', props.quotation.public_id), {
+        preserveScroll: true,
+        onFinish: () => {
+            isDeletingQuotation.value = false;
+        },
+    });
 };
 
 onMounted(async () => {
@@ -228,7 +250,7 @@ onUnmounted(() => {
                                             <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">QUOTATION FOR</p>
                                             <h3 class="text-xl font-bold text-slate-800 tracking-tight">{{ quotation.client.name }}</h3>
                                             <div class="mt-2 text-[11px] text-slate-500 leading-relaxed">
-                                                <div v-if="quotation.client.company">{{ quotation.client.company }}</div>
+                                                <div v-if="shouldShowClientCompany(quotation.client)">{{ quotation.client.company }}</div>
                                                 <div v-if="quotation.client.address">{{ quotation.client.address }}</div>
                                                 <div v-if="quotation.client.phone">{{ quotation.client.phone }}</div>
                                                 <div v-if="quotation.client.email">{{ quotation.client.email }}</div>
@@ -255,7 +277,7 @@ onUnmounted(() => {
                                             <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">QUOTATION FOR</p>
                                             <h3 class="text-xl font-bold text-slate-800 tracking-tight">{{ quotation.client.name }}</h3>
                                             <div class="mt-2 text-[11px] text-slate-500 leading-relaxed">
-                                                <div v-if="quotation.client.company">{{ quotation.client.company }}</div>
+                                                <div v-if="shouldShowClientCompany(quotation.client)">{{ quotation.client.company }}</div>
                                                 <div v-if="quotation.client.address">{{ quotation.client.address }}</div>
                                                 <div v-if="quotation.client.phone">{{ quotation.client.phone }}</div>
                                                 <div v-if="quotation.client.email">{{ quotation.client.email }}</div>
@@ -363,6 +385,14 @@ onUnmounted(() => {
                         >
                             <Icon icon="ri:file-text-line" :width="16" :height="16" />
                             <span>Download PDF</span>
+                        </button>
+                        <button
+                            @click="deleteQuotation"
+                            :disabled="isDeletingQuotation"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-600 transition-all hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            <Icon icon="ri:delete-bin-line" :width="16" :height="16" />
+                            <span>{{ isDeletingQuotation ? 'Deleting...' : 'Delete' }}</span>
                         </button>
                         <button
                             v-if="!quotation.invoice_id"

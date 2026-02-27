@@ -380,7 +380,7 @@
                     <div class="label-sm">Bill To</div>
                     <div class="client-name">{{ $invoice->client->name }}</div>
                     <div class="client-info">
-                        @if (!empty($invoice->client->company))
+                        @if (!empty($invoice->client->company) && strcasecmp(trim((string) $invoice->client->company), trim((string) $invoice->client->name)) !== 0)
                             <strong style="color: #1d1f21;">{{ $invoice->client->company }}</strong><br>
                         @endif
                         {!! nl2br(e($invoice->client->address ?? '-')) !!}
