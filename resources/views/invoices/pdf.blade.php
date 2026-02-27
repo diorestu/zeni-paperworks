@@ -58,6 +58,8 @@
         label,
         strong {
             font-family: 'Helvetica', 'Arial', sans-serif !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         body {
@@ -400,15 +402,13 @@
                             <td class="meta-label">Date Issued</td>
                             <td class="meta-value">{{ optional($invoice->invoice_date)->format('d F Y') }}</td>
                         </tr>
-                        <tr>
-                            <td class="meta-label">Due Date</td>
-                            <td class="meta-value" style="color: #1d1f21;">
-                                {{ optional($invoice->due_date)->format('d F Y') }}</td>
-                        </tr>
-                        <tr>
-                            <td class="meta-label">Status</td>
-                            <td class="meta-value" style="text-transform: uppercase;">{{ $invoice->status }}</td>
-                        </tr>
+                        @if ($invoice->due_date)
+                            <tr>
+                                <td class="meta-label">Due Date</td>
+                                <td class="meta-value" style="color: #1d1f21;">
+                                    {{ optional($invoice->due_date)->format('d F Y') }}</td>
+                            </tr>
+                        @endif
                     </table>
                     @if ($variant === 'modern')
                         <div
@@ -452,7 +452,18 @@
                                 @endif
                                 @if (!empty($item->product?->description))
                                     @php
-                                        $productDescriptionLines = preg_replace('/\s*-\s*/', "\n", (string) $item->product->description);
+                                        // Replace " - " or "-" with a newline and optional dash for better formatting
+                                        $productDescriptionLines = preg_replace(
+                                            '/\s*-\s+/',
+                                            "\n",
+                                            (string) $item->product->description,
+                                        );
+                                        // Also handle plain "-" if not followed by space
+                                        $productDescriptionLines = preg_replace(
+                                            '/([^\n])\s*-\s*/',
+                                            "$1\n",
+                                            $productDescriptionLines,
+                                        );
                                     @endphp
                                     <div class="item-details" style="font-style: italic; margin-top: 2px;">
                                         {!! nl2br(e($productDescriptionLines)) !!}</div>

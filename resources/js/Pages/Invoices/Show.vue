@@ -246,7 +246,7 @@ onMounted(async () => {
             <div class="mb-10 flex items-center justify-between no-print">
                 <div class="flex items-center gap-4">
                     <Link :href="route('invoices.index')" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 transition-all border border-slate-100">
-                        <Icon icon="si:arrow-left-line" :width="18" :height="18"  />
+                        <Icon icon="ri:arrow-left-line" :width="18" :height="18"  />
                     </Link>
                     <div>
                         <div class="flex items-center gap-3">
@@ -272,7 +272,7 @@ onMounted(async () => {
                         :href="route('invoices.edit', invoice.invoice_number)"
                         class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-all"
                     >
-                        <Icon icon="si:edit-line" :width="18" :height="18" />
+                        <Icon icon="ri:edit-line" :width="18" :height="18" />
                         <span>Edit</span>
                     </Link>
                     <Link
@@ -280,7 +280,7 @@ onMounted(async () => {
                         :href="route('invoices.create', { source_invoice: invoice.invoice_number })"
                         class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-all"
                     >
-                        <Icon icon="si:add-line" :width="18" :height="18" />
+                        <Icon icon="ri:add-line" :width="18" :height="18" />
                         <span>Create Continuation</span>
                     </Link>
                     <div class="flex items-center gap-2">
@@ -426,8 +426,8 @@ onMounted(async () => {
                                         <div v-if="item.description.includes('\n')" class="text-[11px] text-slate-600 font-normal leading-relaxed whitespace-pre-line">
                                             {{ item.description.split('\n').slice(1).join('\n') }}
                                         </div>
-                                        <p v-if="item.product?.description" class="mt-1 text-[11px] text-slate-600 font-normal leading-relaxed">
-                                            {{ item.product.description }}
+                                        <p v-if="item.product?.description" class="mt-1 text-[11px] text-slate-600 font-normal leading-relaxed whitespace-pre-line">
+                                            {{ item.product.description.replace(/\s*-\s*/g, '\n') }}
                                         </p>
                                     </td>
                                     <td class="px-6 py-5 text-right text-sm font-normal text-slate-900">
@@ -488,14 +488,14 @@ onMounted(async () => {
                             @click="printInvoice"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
                         >
-                            <Icon icon="si:file-download-line" :width="16" :height="16" />
+                            <Icon icon="ri:file-download-line" :width="16" :height="16" />
                             <span>Print</span>
                         </button>
                         <button
                             @click="downloadInvoicePdf"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
                         >
-                            <Icon icon="si:file-download-line" :width="16" :height="16" />
+                            <Icon icon="ri:file-download-line" :width="16" :height="16" />
                             <span>Download PDF</span>
                         </button>
                         <button
@@ -503,7 +503,7 @@ onMounted(async () => {
                             @click="downloadReceipt"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-all"
                         >
-                            <Icon icon="si:receipt-line" :width="16" :height="16" />
+                            <Icon icon="ri:receipt-line" :width="16" :height="16" />
                             <span>Download Receipt</span>
                         </button>
                         <button
@@ -512,7 +512,7 @@ onMounted(async () => {
                             :title="invoice.client?.email ? 'Send invoice email to client' : 'Client email is missing'"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#07304a] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#07304a]/20 transition-all hover:bg-[#002d66] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                            <Icon icon="si:mail-line" :width="16" :height="16" />
+                            <Icon icon="ri:mail-line" :width="16" :height="16" />
                             <span>{{ isSendingEmail ? 'Sending...' : 'Send' }}</span>
                         </button>
                         <button
@@ -520,7 +520,7 @@ onMounted(async () => {
                             :disabled="isDeletingInvoice"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-50 border border-rose-200 px-4 py-2.5 text-sm font-semibold text-rose-700 hover:bg-rose-100 transition-all disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                            <Icon icon="si:bin-line" :width="16" :height="16" />
+                            <Icon icon="ri:delete-bin-line" :width="16" :height="16" />
                             <span>{{ isDeletingInvoice ? 'Deleting...' : 'Delete' }}</span>
                         </button>
                     </div>

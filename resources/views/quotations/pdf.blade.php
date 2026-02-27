@@ -1,5 +1,6 @@
 <!doctype html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Quotation {{ $quotation->quotation_number }}</title>
@@ -57,6 +58,8 @@
         label,
         strong {
             font-family: 'Helvetica', 'Arial', sans-serif !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         body {
@@ -369,7 +372,8 @@
                         </tr>
                     </table>
                     @if ($variant === 'modern')
-                        <div style="margin-top: 15px; border-top: 1px solid {{ $theme['box_border'] }}; padding-top: 12px;">
+                        <div
+                            style="margin-top: 15px; border-top: 1px solid {{ $theme['box_border'] }}; padding-top: 12px;">
                             <div class="label-sm">From</div>
                             <div class="client-info" style="color: #1d1f21; font-weight: bold;">
                                 {{ $company['name'] ?: 'Company Name' }}<br>
@@ -411,7 +415,8 @@
                                         {{ $item->product->description }}</div>
                                 @endif
                             </td>
-                            <td style="text-align: right;">Rp{{ number_format((float) $item->unit_price, 0, ',', '.') }}</td>
+                            <td style="text-align: right;">
+                                Rp{{ number_format((float) $item->unit_price, 0, ',', '.') }}</td>
                             <td style="text-align: center;">{{ $item->quantity }}</td>
                             <td style="text-align: right; font-weight: 700; color: #1d1f21;">
                                 Rp{{ number_format((float) $item->subtotal, 0, ',', '.') }}</td>
@@ -431,7 +436,8 @@
                     @if ($quotation->tax_total != 0)
                         <tr>
                             <td class="sum-label">Tax Total</td>
-                            <td class="sum-value">Rp{{ number_format((float) $quotation->tax_total, 0, ',', '.') }}</td>
+                            <td class="sum-value">Rp{{ number_format((float) $quotation->tax_total, 0, ',', '.') }}
+                            </td>
                         </tr>
                     @endif
                     <tr class="sum-total">

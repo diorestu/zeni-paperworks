@@ -29,27 +29,27 @@ const navItems = computed(() => {
 
     if (!isVerified) {
         return [
-            { name: 'Dashboard', href: '/dashboard', icon: 'si:bar-chart-line' },
+            { name: 'Dashboard', href: '/dashboard', icon: 'ri:bar-chart-line' },
         ];
     }
 
     if (role === 'super_admin') {
         return [
-            { name: 'Dashboard', href: '/dashboard', icon: 'si:bar-chart-line' },
+            { name: 'Dashboard', href: '/dashboard', icon: 'ri:bar-chart-line' },
         ];
     }
 
     const items = [
-        { name: 'Dashboard', href: '/dashboard', icon: 'si:bar-chart-line' },
-        { name: 'Invoices', href: '/invoices', icon: 'si:ballot-line' },
-        { name: 'Quotations', href: '/quotations', icon: 'si:assignment-line' },
+        { name: 'Dashboard', href: '/dashboard', icon: 'ri:bar-chart-line' },
+        { name: 'Invoices', href: '/invoices', icon: 'ri:ballot-line' },
+        { name: 'Quotations', href: '/quotations', icon: 'ri:assignment-line' },
     ];
 
     if (role === 'admin') {
         items.push(
-            { name: 'Clients', href: '/clients', icon: 'si:user-alt-line' },
-            { name: 'Products', href: '/products', icon: 'si:inventory-line' },
-            { name: 'Settings', href: '/settings', icon: 'si:settings-line' }
+            { name: 'Clients', href: '/clients', icon: 'ri:user-alt-line' },
+            { name: 'Products', href: '/products', icon: 'ri:inventory-line' },
+            { name: 'Settings', href: '/settings', icon: 'ri:settings-line' }
         );
     }
     
@@ -343,7 +343,7 @@ const submitFeedback = () => {
                     :title="isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
                     :aria-label="isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
                 >
-                    <Icon :icon="isSidebarCollapsed ? 'si:chevron-right-line' : 'si:chevron-left-line'" :width="20" :height="20" />
+                    <Icon :icon="isSidebarCollapsed ? 'ri:chevron-right-line' : 'ri:chevron-left-line'" :width="20" :height="20" />
                 </button>
 
                 <div class="flex h-full flex-col px-6 py-8">
@@ -400,7 +400,7 @@ const submitFeedback = () => {
                         </div>
                         <div v-else class="flex justify-center">
                             <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white border border-slate-100 text-[#07304a] shadow-sm" :title="`${currentPackage} package`">
-                                <Icon icon="si:award-line" :width="20" :height="20" />
+                                <Icon icon="ri:award-line" :width="20" :height="20" />
                             </div>
                         </div>
 
@@ -420,7 +420,7 @@ const submitFeedback = () => {
                             title="Feedback"
                             aria-label="Feedback"
                         >
-                            <Icon icon="si:chat-line" :width="18" :height="18" />
+                            <Icon icon="ri:chat-line" :width="18" :height="18" />
                         </button>
                     </div>
                 </div>
@@ -441,7 +441,7 @@ const submitFeedback = () => {
                                 :aria-expanded="showNotifications ? 'true' : 'false'"
                                 aria-haspopup="menu"
                             >
-                                <Icon icon="si:notifications-line" :width="18" :height="18"  />
+                                <Icon icon="ri:notifications-line" :width="18" :height="18"  />
                                 <span
                                     v-if="unreadNotificationCount > 0"
                                     class="absolute -right-1 -top-1 inline-flex min-w-[18px] items-center justify-center rounded-full bg-rose-500 px-1.5 py-0.5 text-[9px] font-semibold leading-none text-white"
@@ -482,7 +482,7 @@ const submitFeedback = () => {
                                             @click="openNotification(item)"
                                         >
                                             <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-                                                <Icon :icon="item.icon || 'si:notifications-line'" :width="14" :height="14" />
+                                                <Icon :icon="item.icon || 'ri:notifications-line'" :width="14" :height="14" />
                                             </span>
                                             <span class="min-w-0 flex-1">
                                                 <span class="block truncate text-[12px] font-semibold text-slate-700">{{ item.title }}</span>
@@ -498,7 +498,7 @@ const submitFeedback = () => {
                                             @click="showNotifications = false"
                                         >
                                             View all notifications
-                                            <Icon icon="si:arrow-right-line" :width="12" :height="12" />
+                                            <Icon icon="ri:arrow-right-line" :width="12" :height="12" />
                                         </Link>
                                     </div>
                                 </div>
@@ -521,7 +521,7 @@ const submitFeedback = () => {
                                     <div class="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#07304a] to-sky-400 opacity-20 blur transition duration-300 group-hover:opacity-40"></div>
                                     <img :src="avatarUrl" alt="avatar" class="relative h-11 w-11 rounded-full border-2 border-white object-cover shadow-md" />
                                     <div class="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-slate-100 text-slate-400">
-                                        <Icon icon="si:expand-more-line" :width="10" :height="10"  />
+                                        <Icon icon="ri:expand-more-line" :width="10" :height="10"  />
                                     </div>
                                 </div>
                             </button>
@@ -538,19 +538,19 @@ const submitFeedback = () => {
                                     </div>
                                     <template v-if="isVerifiedUser">
                                         <Link :href="route('profile.edit')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
-                                            <Icon icon="si:user-line" :width="18" :height="18"  />
+                                            <Icon icon="ri:user-line" :width="18" :height="18"  />
                                             My Profile
                                         </Link>
                                         <Link :href="route('settings.billing')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
-                                            <Icon icon="si:credit-card-line" :width="18" :height="18"  />
+                                            <Icon icon="ri:credit-card-line" :width="18" :height="18"  />
                                             Billing
                                         </Link>
                                         <Link :href="route('profile.bank-accounts.index')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
-                                            <Icon icon="si:building-line" :width="18" :height="18"  />
+                                            <Icon icon="ri:building-line" :width="18" :height="18"  />
                                             Bank Accounts
                                         </Link>
                                         <Link :href="route('settings.reset-password')" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#07304a]">
-                                            <Icon icon="si:shield-line" :width="18" :height="18"  />
+                                            <Icon icon="ri:shield-line" :width="18" :height="18"  />
                                             Security
                                         </Link>
                                         <div class="my-1 border-t border-slate-50"></div>
@@ -559,7 +559,7 @@ const submitFeedback = () => {
                                         Verify email to unlock menus
                                     </p>
                                     <Link :href="route('logout')" method="post" as="button" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-500 transition hover:bg-rose-50">
-                                        <Icon icon="si:arrow-left-line" :width="18" :height="18"  />
+                                        <Icon icon="ri:arrow-left-line" :width="18" :height="18"  />
                                         Log out
                                     </Link>
                                 </div>
@@ -591,7 +591,7 @@ const submitFeedback = () => {
                             <p class="text-xs text-slate-500">Tell us about your experience using Paperwork.</p>
                         </div>
                         <button type="button" @click="closeFeedbackModal" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-                            <Icon icon="si:close-line" :width="18" :height="18" />
+                            <Icon icon="ri:close-line" :width="18" :height="18" />
                         </button>
                     </div>
 

@@ -16,6 +16,8 @@
             font-family: system-ui, -apple-system, sans-serif !important;
             font-weight: 400 !important;
             font-style: normal !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         body {

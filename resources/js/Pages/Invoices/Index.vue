@@ -61,7 +61,7 @@ const formatShortDate = (dateString) => {
                 :href="route('invoices.create')"
                 class="flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-4 text-sm font-semibold text-white shadow-xl shadow-[#07304a]/20 transition-all hover:bg-[#002d66] hover:-translate-y-1 active:scale-95"
             >
-                <Icon icon="si:add-line" :width="18" :height="18"  />
+                <Icon icon="ri:add-line" :width="18" :height="18"  />
                 <span>Create Invoice</span>
             </Link>
         </div>
@@ -148,7 +148,7 @@ const formatShortDate = (dateString) => {
 
             <!-- Search Bar -->
             <div class="relative max-w-md">
-                <Icon icon="si:search-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
+                <Icon icon="ri:search-line" :width="18" :height="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"  />
                 <input 
                     v-model="searchQuery"
                     type="text" 
@@ -179,19 +179,19 @@ const formatShortDate = (dateString) => {
                                     v-if="invoice.status === 'paid'"
                                     class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"
                                 >
-                                    <Icon icon="si:check-line" :width="12" :height="12" />
+                                    <Icon icon="ri:check-line" :width="12" :height="12" />
                                 </span>
                                 <span
                                     v-else-if="invoice.status === 'cancelled'"
                                     class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-slate-500"
                                 >
-                                    <Icon icon="si:close-line" :width="12" :height="12" />
+                                    <Icon icon="ri:close-line" :width="12" :height="12" />
                                 </span>
                                 <span
                                     v-else-if="invoice.status === 'overdue'"
                                     class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 text-rose-500"
                                 >
-                                    <Icon icon="si:warning-line" :width="12" :height="12" />
+                                    <Icon icon="ri:error-warning-line" :width="12" :height="12" />
                                 </span>
                                 <span class="text-sm font-normal text-slate-900">{{ invoice.invoice_number }}</span>
                             </div>
@@ -225,14 +225,14 @@ const formatShortDate = (dateString) => {
                             </span>
                         </td>
                         <td class="px-8 py-6 text-right">
-                            <Icon icon="si:chevron-right-line" :width="18" :height="18" class="text-slate-300 group-hover:text-[#07304a] transition-colors inline-block"  />
+                            <Icon icon="ri:chevron-right-line" :width="18" :height="18" class="text-slate-300 group-hover:text-[#07304a] transition-colors inline-block"  />
                         </td>
                     </tr>
                     <tr v-if="filteredInvoices.length === 0">
                         <td colspan="6" class="px-8 py-20 text-center">
                             <div class="flex flex-col items-center gap-4">
                                 <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-300">
-                                    <Icon icon="si:quote-line" :width="32" :height="32"  />
+                                    <Icon icon="ri:quote-line" :width="32" :height="32"  />
                                 </div>
                                 <div>
                                     <p class="text-sm font-semibold text-slate-900">No invoices found</p>
