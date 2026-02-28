@@ -1,6 +1,6 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
@@ -9,6 +9,10 @@ const props = defineProps({
         default: () => ({}),
     },
     plans: {
+        type: Array,
+        default: () => [],
+    },
+    packageCatalog: {
         type: Array,
         default: () => [],
     },
@@ -27,6 +31,15 @@ const props = defineProps({
 });
 
 const formatCurrency = (value) => `Rp${Number(value || 0).toLocaleString('id-ID')}`;
+
+const packageForm = useForm({
+    packages: (props.packageCatalog || []).map((item) => ({
+        plan_name: item.plan_name,
+        monthly_price: Number(item.monthly_price || 0),
+        yearly_price: Number(item.yearly_price || 0),
+        invoice_limit: item.invoice_limit ?? null,
+    })),
+});
 
 const statusBadgeClass = (status) => {
     const map = {
@@ -47,6 +60,23 @@ const verifyUser = (user) => {
         preserveScroll: true,
     });
 };
+
+const savePackageCatalog = () => {
+    packageForm
+        .transform((data) => ({
+            packages: data.packages.map((item) => ({
+                plan_name: item.plan_name,
+                monthly_price: Number(item.monthly_price || 0),
+                yearly_price: Number(item.yearly_price || 0),
+                invoice_limit: item.invoice_limit === '' || item.invoice_limit === null
+                    ? null
+                    : Number(item.invoice_limit),
+            })),
+        }))
+        .put(route('super-admin.packages.update'), {
+            preserveScroll: true,
+        });
+};
 </script>
 
 <template>
@@ -57,6 +87,75 @@ const verifyUser = (user) => {
             <div>
                 <h1 class="text-3xl font-semibold tracking-tight text-slate-900">Super Admin Dashboard</h1>
                 <p class="mt-1 text-sm text-slate-500">Monitoring user growth, plan adoption, subscription history, and feedback.</p>
+            </div>
+
+            <div v-if="$page.props.flash.status" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                {{ $page.props.flash.status }}
+            </div>
+            <div v-if="$page.props.flash.error" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+                {{ $page.props.flash.error }}
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-base font-semibold text-slate-900">Package Pricing & Limits</h2>
+                        <p class="mt-1 text-xs text-slate-500">Set monthly price, yearly monthly-equivalent price, and invoice limit per package. Leave limit empty for unlimited.</p>
+                    </div>
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-[#07304a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0a3f61] disabled:cursor-not-allowed disabled:opacity-60"
+                        :disabled="packageForm.processing"
+                        @click="savePackageCatalog"
+                    >
+                        <Icon icon="ri:save-line" :width="16" :height="16" />
+                        {{ packageForm.processing ? 'Saving...' : 'Save Package Config' }}
+                    </button>
+                </div>
+
+                <div class="mt-4 overflow-x-auto">
+                    <table class="min-w-full text-left text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-100 text-[11px] uppercase tracking-widest text-slate-400">
+                                <th class="px-3 py-2 font-semibold">Package</th>
+                                <th class="px-3 py-2 font-semibold">Monthly Price (IDR)</th>
+                                <th class="px-3 py-2 font-semibold">Yearly Price (IDR/month)</th>
+                                <th class="px-3 py-2 font-semibold">Invoice Limit / Month</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, index) in packageForm.packages" :key="item.plan_name" class="border-b border-slate-50">
+                                <td class="px-3 py-3 font-semibold text-slate-700">{{ item.plan_name }}</td>
+                                <td class="px-3 py-3">
+                                    <input
+                                        v-model.number="packageForm.packages[index].monthly_price"
+                                        type="number"
+                                        min="0"
+                                        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#07304a]"
+                                    >
+                                </td>
+                                <td class="px-3 py-3">
+                                    <input
+                                        v-model.number="packageForm.packages[index].yearly_price"
+                                        type="number"
+                                        min="0"
+                                        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#07304a]"
+                                    >
+                                </td>
+                                <td class="px-3 py-3">
+                                    <input
+                                        v-model="packageForm.packages[index].invoice_limit"
+                                        type="number"
+                                        min="1"
+                                        placeholder="Unlimited"
+                                        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#07304a]"
+                                    >
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p v-if="packageForm.errors.packages" class="mt-3 text-xs font-semibold text-rose-600">{{ packageForm.errors.packages }}</p>
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

@@ -6,14 +6,20 @@ use App\Models\Feedback;
 use App\Models\Invoice;
 use App\Models\SubscriptionInvoice;
 use App\Models\User;
+use App\Services\PackageCatalogService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
+    public function __construct(private readonly PackageCatalogService $packageCatalogService)
+    {
+    }
+
     public function index(Request $request): Response|RedirectResponse
     {
         $user = $request->user();
@@ -207,10 +213,41 @@ class DashboardController extends Controller
                 'feedback_count' => Feedback::query()->count(),
             ],
             'plans' => $planBreakdown,
+            'packageCatalog' => $this->packageCatalogService->toRows(),
             'users' => $users,
             'subscriptionHistory' => $subscriptionHistory,
             'feedbacks' => $feedbacks,
         ]);
+    }
+
+    public function updatePackages(Request $request): RedirectResponse
+    {
+        abort_unless($request->user()?->isSuperAdmin(), 403);
+
+        $allowedPlans = array_keys($this->packageCatalogService->defaults());
+
+        $validated = $request->validate([
+            'packages' => ['required', 'array', 'min:1'],
+            'packages.*.plan_name' => ['required', 'string', Rule::in($allowedPlans)],
+            'packages.*.monthly_price' => ['required', 'integer', 'min:0'],
+            'packages.*.yearly_price' => ['required', 'integer', 'min:0'],
+            'packages.*.invoice_limit' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $rows = collect($validated['packages'])
+            ->keyBy('plan_name')
+            ->map(fn (array $row) => [
+                'plan_name' => $row['plan_name'],
+                'monthly_price' => (int) $row['monthly_price'],
+                'yearly_price' => (int) $row['yearly_price'],
+                'invoice_limit' => $row['invoice_limit'] !== null ? (int) $row['invoice_limit'] : null,
+            ])
+            ->values()
+            ->all();
+
+        $this->packageCatalogService->upsertRows($rows);
+
+        return redirect()->back()->with('status', 'Package pricing and limits updated successfully.');
     }
 
     public function verifyUser(Request $request, User $user): RedirectResponse

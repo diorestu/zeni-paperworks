@@ -230,6 +230,10 @@ const secondaryAction = computed(() =>
         : { label: copy.value.secondaryGuest, href: '#bantuan' }
 );
 
+const pricingActionHref = computed(() =>
+    props.isAuthenticated ? route('settings.billing') : route('login')
+);
+
 const navLinks = computed(() => [
     { label: copy.value.nav.feature, href: '#fitur' },
     { label: copy.value.nav.solution, href: '#solusi' },
@@ -768,8 +772,8 @@ onBeforeUnmount(() => {
                         <article
                             v-for="plan in plans"
                             :key="plan.name"
-                            class="rounded-2xl border p-5"
-                            :class="plan.name === 'Pro' ? 'border-[#0b2d6b] bg-[#f3f7ff] shadow-md' : 'border-slate-200 bg-white'"
+                            class="plan-card group rounded-2xl border p-5"
+                            :class="plan.name === 'Pro' ? 'border-[#0b2d6b] bg-[#f3f7ff] shadow-md' : 'border-slate-200 bg-white shadow-sm'"
                         >
                             <p class="text-xs font-semibold uppercase tracking-widest" :class="plan.name === 'Pro' ? 'text-[#0b2d6b]' : 'text-slate-500'">{{ plan.name }}</p>
                             <div class="mt-3 flex items-end gap-1">
@@ -788,8 +792,8 @@ onBeforeUnmount(() => {
                             </ul>
 
                             <Link
-                                :href="primaryAction.href"
-                                class="mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-xs font-semibold uppercase tracking-widest transition"
+                                :href="pricingActionHref"
+                                class="plan-card-cta mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-xs font-semibold uppercase tracking-widest transition"
                                 :class="plan.name === 'Pro' ? 'bg-[#0b2d6b] text-white hover:bg-[#0a2558]' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'"
                             >
                                 {{ copy.choosePlan }}
@@ -980,6 +984,46 @@ onBeforeUnmount(() => {
     font-weight: 600;
     color: #33415c;
     white-space: nowrap;
+}
+
+.plan-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 260ms ease, border-color 260ms ease;
+}
+
+.plan-card::before {
+    content: '';
+    position: absolute;
+    left: -35%;
+    top: -95%;
+    width: 170%;
+    height: 170%;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0), rgba(111, 210, 255, 0.2), rgba(255, 255, 255, 0));
+    transform: translateX(-35%) rotate(18deg);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 420ms ease, opacity 320ms ease;
+    z-index: -1;
+}
+
+.plan-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 18px 34px -24px rgba(11, 45, 107, 0.55);
+}
+
+.plan-card:hover::before {
+    transform: translateX(35%) rotate(18deg);
+    opacity: 1;
+}
+
+.plan-card-cta {
+    transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.plan-card:hover .plan-card-cta {
+    transform: translateY(-1px);
 }
 
 @keyframes industry-scroll {

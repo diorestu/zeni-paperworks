@@ -31,6 +31,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'wizard_completed',
         'plan_name',
         'plan_renews_at',
+        'pending_plan_name',
+        'pending_plan_effective_at',
         'notification_last_seen_at',
     ];
 
@@ -56,6 +58,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'approved_at' => 'datetime',
             'password' => 'hashed',
             'plan_renews_at' => 'date',
+            'pending_plan_effective_at' => 'date',
             'notification_last_seen_at' => 'datetime',
         ];
     }

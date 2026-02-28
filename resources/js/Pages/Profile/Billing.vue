@@ -1,13 +1,29 @@
 <script setup>
 import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
     currentPlan: {
         type: String,
         default: 'Free',
+    },
+    currentPlanRenewsAt: {
+        type: String,
+        default: null,
+    },
+    pendingDowngrade: {
+        type: Object,
+        default: null,
+    },
+    currentMonthInvoiceCount: {
+        type: Number,
+        default: 0,
+    },
+    packageCatalog: {
+        type: Array,
+        default: () => [],
     },
     paymentHistory: {
         type: Array,
@@ -19,10 +35,16 @@ const props = defineProps({
     },
 });
 
+const page = usePage();
 const isYearly = ref(false);
-const processingPlan = ref(null);
-const flashMessage = ref('');
-const errorMessage = ref('');
+const processingAction = ref(null);
+
+const defaultPlanConfig = {
+    Free: { monthly: 0, yearly: 0, invoice_limit: 10 },
+    Basic: { monthly: 49000, yearly: 38000, invoice_limit: 10 },
+    Pro: { monthly: 139000, yearly: 106000, invoice_limit: 500 },
+    Enterprise: { monthly: 199000, yearly: 151000, invoice_limit: null },
+};
 
 const basePlans = [
     { 
@@ -71,10 +93,49 @@ const basePlans = [
     },
 ];
 
-const plans = computed(() => basePlans.map((plan) => ({
-    ...plan,
-    current: plan.name === props.currentPlan,
-})));
+const catalogByPlan = computed(() => Object.fromEntries(
+    (props.packageCatalog || []).map((item) => [item.plan_name, item])
+));
+
+const plans = computed(() => basePlans.map((plan) => {
+    const fallback = defaultPlanConfig[plan.name] || { monthly: 0, yearly: 0, invoice_limit: null };
+    const source = catalogByPlan.value[plan.name] || {};
+
+    const monthlyNumeric = Number(source.monthly_price ?? fallback.monthly ?? 0);
+    const yearlyNumeric = Number(source.yearly_price ?? fallback.yearly ?? 0);
+    const invoiceLimit = source.invoice_limit ?? fallback.invoice_limit ?? null;
+    const invoiceDoc = invoiceLimit === null
+        ? 'Unlimited Invoices / month'
+        : `${Number(invoiceLimit).toLocaleString('id-ID')} Invoices / month`;
+
+    return {
+        ...plan,
+        monthly: monthlyNumeric.toLocaleString('id-ID'),
+        yearly: yearlyNumeric.toLocaleString('id-ID'),
+        docs: [invoiceDoc, ...plan.docs.slice(1)],
+        current: plan.name === props.currentPlan,
+    };
+}));
+
+const planOrder = computed(() => (props.packageCatalog || []).map((item) => item.plan_name));
+const planRank = computed(() => Object.fromEntries(planOrder.value.map((name, index) => [name, index])));
+
+const getPlanActionType = (planName) => {
+    const currentRank = planRank.value[props.currentPlan];
+    const targetRank = planRank.value[planName];
+
+    if (planName === props.currentPlan) {
+        return 'current';
+    }
+
+    if (typeof currentRank !== 'number' || typeof targetRank !== 'number') {
+        return 'upgrade';
+    }
+
+    return targetRank < currentRank ? 'downgrade' : 'upgrade';
+};
+
+const isPendingDowngradeTarget = (planName) => props.pendingDowngrade?.plan_name === planName;
 
 const getPrice = (plan) => isYearly.value ? plan.yearly : plan.monthly;
 const getDayPrice = (plan) => {
@@ -110,14 +171,75 @@ const statusClass = (status) => {
 };
 
 const payPlan = async (plan) => {
-    if (plan.current || plan.name === 'Free') {
+    const actionType = getPlanActionType(plan.name);
+    if (actionType !== 'upgrade') {
         return;
     }
 
+    processingAction.value = `upgrade:${plan.name}`;
     router.visit(route('settings.billing.checkout.page', {
         plan: plan.name,
         billing_cycle: isYearly.value ? 'yearly' : 'monthly',
-    }));
+    }), {
+        onFinish: () => {
+            processingAction.value = null;
+        },
+    });
+};
+
+const requestDowngrade = (plan) => {
+    if (getPlanActionType(plan.name) !== 'downgrade') {
+        return;
+    }
+
+    processingAction.value = `downgrade:${plan.name}`;
+    router.post(route('settings.billing.downgrade'), {
+        plan: plan.name,
+    }, {
+        preserveScroll: true,
+        onFinish: () => {
+            processingAction.value = null;
+        },
+    });
+};
+
+const cancelDowngrade = () => {
+    processingAction.value = 'downgrade:cancel';
+    router.delete(route('settings.billing.downgrade.cancel'), {
+        preserveScroll: true,
+        onFinish: () => {
+            processingAction.value = null;
+        },
+    });
+};
+
+const planButtonLabel = (plan) => {
+    const actionType = getPlanActionType(plan.name);
+    if (actionType === 'current') return 'Current Plan';
+    if (isPendingDowngradeTarget(plan.name)) return 'Downgrade Scheduled';
+    return actionType === 'downgrade' ? `Downgrade ${plan.name}` : plan.button;
+};
+
+const planButtonIcon = (plan) => {
+    const actionType = getPlanActionType(plan.name);
+    if (actionType === 'current') return 'ri:checkbox-circle-line';
+    if (actionType === 'downgrade') return 'ri:arrow-down-circle-line';
+    return 'ri:wallet-3-line';
+};
+
+const planButtonClass = (plan) => {
+    const actionType = getPlanActionType(plan.name);
+    if (actionType === 'current' || isPendingDowngradeTarget(plan.name)) {
+        return 'border border-slate-200 bg-slate-100 text-slate-500';
+    }
+    if (actionType === 'downgrade') {
+        return 'bg-amber-500 text-white hover:bg-amber-600';
+    }
+    return plan.color;
+};
+
+const planActionLoading = (plan) => {
+    return processingAction.value === `upgrade:${plan.name}` || processingAction.value === `downgrade:${plan.name}`;
 };
 </script>
 
@@ -126,11 +248,35 @@ const payPlan = async (plan) => {
         <Head title="Billing & Plans" />
 
         <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <div v-if="errorMessage" class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
-                {{ errorMessage }}
+            <div v-if="page.props.flash?.error" class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-700">
+                {{ page.props.flash.error }}
             </div>
-            <div v-if="flashMessage" class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700">
-                {{ flashMessage }}
+            <div v-if="page.props.flash?.status" class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700">
+                {{ page.props.flash.status }}
+            </div>
+
+            <div
+                v-if="pendingDowngrade"
+                class="mb-6 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800 md:flex-row md:items-center md:justify-between"
+            >
+                <div class="flex items-start gap-3">
+                    <Icon icon="ri:time-line" :width="18" :height="18" class="mt-0.5 shrink-0 text-amber-600" />
+                    <div>
+                        <p class="font-semibold">Downgrade scheduled to {{ pendingDowngrade.plan_name }}</p>
+                        <p class="mt-1 text-xs text-amber-700">
+                            Effective date {{ formatDate(pendingDowngrade.effective_at) }}. Current month invoices: {{ Number(currentMonthInvoiceCount).toLocaleString('id-ID') }}.
+                        </p>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-amber-700 transition hover:bg-amber-100"
+                    :disabled="processingAction === 'downgrade:cancel'"
+                    @click="cancelDowngrade"
+                >
+                    <Icon icon="ri:close-circle-line" :width="14" :height="14" />
+                    {{ processingAction === 'downgrade:cancel' ? 'Cancelling...' : 'Cancel downgrade' }}
+                </button>
             </div>
 
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
@@ -179,13 +325,20 @@ const payPlan = async (plan) => {
                     </div>
 
                     <button
-                        @click="payPlan(plan)"
-                        :disabled="plan.current || plan.name === 'Free' || processingPlan === plan.name"
-                        :class="['inline-flex w-full items-center justify-center gap-2 py-4.5 rounded-[1.25rem] text-[13px] font-bold tracking-wide transition-all active:scale-95 mb-4', plan.color]"
+                        @click="getPlanActionType(plan.name) === 'downgrade' ? requestDowngrade(plan) : payPlan(plan)"
+                        :disabled="getPlanActionType(plan.name) === 'current' || isPendingDowngradeTarget(plan.name) || planActionLoading(plan)"
+                        :class="['inline-flex w-full items-center justify-center gap-2 py-4.5 rounded-[1.25rem] text-[13px] font-bold tracking-wide transition-all active:scale-95 mb-4', planButtonClass(plan)]"
                     >
-                        <Icon icon="ri:wallet-3-line" :width="16" :height="16" />
-                        {{ processingPlan === plan.name ? 'Processing...' : (plan.current ? 'Current Plan' : plan.button) }}
+                        <Icon :icon="planButtonIcon(plan)" :width="16" :height="16" />
+                        {{ planActionLoading(plan) ? 'Processing...' : planButtonLabel(plan) }}
                     </button>
+
+                    <p
+                        v-if="getPlanActionType(plan.name) === 'downgrade' && !isPendingDowngradeTarget(plan.name) && currentPlanRenewsAt"
+                        class="mb-4 text-[11px] font-semibold text-amber-600"
+                    >
+                        Effective on {{ formatDate(currentPlanRenewsAt) }}
+                    </p>
 
                     <p class="text-[11px] font-semibold text-slate-400 mb-8">{{ plan.info }}</p>
 

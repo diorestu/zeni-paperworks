@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Icon } from '@iconify/vue';
@@ -14,10 +14,71 @@ const props = defineProps({
 
 const processing = ref(false);
 const errorMessage = ref('');
+const snapLoading = ref(false);
 
 const isYearly = computed(() => props.billingCycle === 'yearly');
 
 const formatCurrency = (amount) => `Rp${Number(amount || 0).toLocaleString('id-ID')}`;
+
+const waitForSnapReady = async (timeoutMs = 8000) => {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+        if (typeof window.snap?.pay === 'function') {
+            return true;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    return false;
+};
+
+const ensureSnapLoaded = async () => {
+    if (typeof window.snap?.pay === 'function') {
+        return true;
+    }
+
+    if (snapLoading.value) {
+        return waitForSnapReady();
+    }
+
+    snapLoading.value = true;
+
+    try {
+        const { data } = await window.axios.get(route('settings.billing.snap-config'));
+        const snapUrl = String(data?.snap_url || '');
+        const clientKey = String(data?.client_key || '');
+
+        if (!snapUrl || !clientKey) {
+            throw new Error('Midtrans Snap configuration is missing.');
+        }
+
+        const existingScript = document.getElementById('midtrans-snap-script');
+        if (!existingScript) {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.id = 'midtrans-snap-script';
+                script.src = snapUrl;
+                script.async = true;
+                script.setAttribute('data-client-key', clientKey);
+                script.onload = () => {
+                    script.removeAttribute('data-client-key');
+                    resolve(true);
+                };
+                script.onerror = () => reject(new Error('Failed to load Midtrans Snap.js'));
+                document.head.appendChild(script);
+            });
+        }
+
+        return waitForSnapReady();
+    } catch (error) {
+        errorMessage.value = error?.response?.data?.message ?? 'Failed to load Midtrans Snap.js.';
+        return false;
+    } finally {
+        snapLoading.value = false;
+    }
+};
 
 const startPayment = async () => {
     errorMessage.value = '';
@@ -27,8 +88,9 @@ const startPayment = async () => {
         return;
     }
 
-    if (typeof window.snap?.pay !== 'function') {
-        errorMessage.value = 'Midtrans Snap.js is not loaded. Please refresh the page.';
+    const snapReady = await ensureSnapLoaded();
+    if (!snapReady) {
+        errorMessage.value = errorMessage.value || 'Midtrans Snap.js is not loaded. Please try again.';
         return;
     }
 
@@ -89,6 +151,11 @@ const confirmAndRedirect = async (orderId, pending = false) => {
         processing.value = false;
     }
 };
+
+onMounted(async () => {
+    if (!props.midtransEnabled) return;
+    await ensureSnapLoaded();
+});
 </script>
 
 <template>
@@ -138,11 +205,11 @@ const confirmAndRedirect = async (orderId, pending = false) => {
                     <button
                         type="button"
                         @click="startPayment"
-                        :disabled="processing"
+                        :disabled="processing || snapLoading"
                         class="inline-flex items-center gap-2 rounded-xl bg-[#07304a] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0a3f61] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         <Icon icon="ri:wallet-3-line" :width="16" :height="16" />
-                        {{ processing ? 'Processing...' : 'Pay Now' }}
+                        {{ snapLoading ? 'Preparing Payment...' : (processing ? 'Processing...' : 'Pay Now') }}
                     </button>
                     <Link :href="route('settings.billing')" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">
                         Back to Billing

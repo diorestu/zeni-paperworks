@@ -49,6 +49,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/super-admin/users/{user}/verify', [DashboardController::class, 'verifyUser'])
         ->name('super-admin.users.verify')
         ->middleware('role:super_admin');
+    Route::put('/super-admin/packages', [DashboardController::class, 'updatePackages'])
+        ->name('super-admin.packages.update')
+        ->middleware('role:super_admin');
 
     // Unverified users can still access dashboard.
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -108,6 +111,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/billing', [ProfileController::class, 'billing'])->name('billing')->middleware('role:admin,user');
             Route::get('/billing/checkout', [ProfileController::class, 'billingCheckout'])->name('billing.checkout.page')->middleware('role:admin,user');
             Route::get('/billing/success', [ProfileController::class, 'billingSuccess'])->name('billing.success')->middleware('role:admin,user');
+            Route::post('/billing/downgrade', [ProfileController::class, 'requestDowngrade'])->name('billing.downgrade')->middleware('role:admin,user');
+            Route::delete('/billing/downgrade', [ProfileController::class, 'cancelDowngrade'])->name('billing.downgrade.cancel')->middleware('role:admin,user');
+            Route::get('/billing/snap-config', [BillingPaymentController::class, 'snapConfig'])->name('billing.snap-config')->middleware('role:admin,user');
             Route::post('/billing/checkout', [BillingPaymentController::class, 'createTransaction'])->name('billing.checkout')->middleware('role:admin,user');
             Route::post('/billing/confirm', [BillingPaymentController::class, 'confirmTransaction'])->name('billing.confirm')->middleware('role:admin,user');
             Route::get('/billing/receipts/{invoice}/download', [BillingPaymentController::class, 'downloadReceipt'])->name('billing.receipts.download')->middleware('role:admin,user');

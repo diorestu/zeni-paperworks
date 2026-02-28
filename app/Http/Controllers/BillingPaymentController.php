@@ -7,6 +7,7 @@ use App\Mail\SubscriptionPaymentSuccessMail;
 use App\Models\AuditLog;
 use App\Models\SubscriptionInvoice;
 use App\Services\MidtransService;
+use App\Services\PackageCatalogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -19,18 +20,39 @@ use Throwable;
 
 class BillingPaymentController extends Controller
 {
-    public function __construct(private readonly MidtransService $midtransService) {}
+    public function __construct(
+        private readonly MidtransService $midtransService,
+        private readonly PackageCatalogService $packageCatalogService
+    ) {}
+
+    public function snapConfig(): JsonResponse
+    {
+        $clientKey = (string) config('services.midtrans.client_key');
+        $snapUrl = (string) config('services.midtrans.snap_url');
+
+        if ($clientKey === '' || $snapUrl === '') {
+            return response()->json([
+                'message' => 'Midtrans is not configured.',
+            ], 422);
+        }
+
+        return response()->json([
+            'client_key' => $clientKey,
+            'snap_url' => $snapUrl,
+        ]);
+    }
 
     public function createTransaction(Request $request): JsonResponse
     {
         $user = $request->user();
+        $priceMap = $this->packageCatalogService->checkoutPriceMap();
 
         $validated = $request->validate([
-            'plan' => ['required', Rule::in(array_keys($this->priceMap()))],
+            'plan' => ['required', Rule::in(array_keys($priceMap))],
             'billing_cycle' => ['required', Rule::in(['monthly', 'yearly'])],
         ]);
 
-        $amount = $this->priceMap()[$validated['plan']][$validated['billing_cycle']];
+        $amount = $priceMap[$validated['plan']][$validated['billing_cycle']];
         $startDate = Carbon::today();
         $endDate = $validated['billing_cycle'] === 'yearly'
             ? $startDate->copy()->addYear()
@@ -229,10 +251,23 @@ class BillingPaymentController extends Controller
         ]);
 
         if ($normalizedStatus === 'paid') {
-            $invoice->user()->update([
-                'plan_name' => $invoice->plan_name,
-                'plan_renews_at' => $invoice->period_end,
-            ]);
+            $periodStart = $invoice->period_start
+                ? Carbon::parse($invoice->period_start)->startOfDay()
+                : null;
+
+            if ($periodStart && $periodStart->isFuture()) {
+                $invoice->user()->update([
+                    'pending_plan_name' => $invoice->plan_name,
+                    'pending_plan_effective_at' => $periodStart->toDateString(),
+                ]);
+            } else {
+                $invoice->user()->update([
+                    'plan_name' => $invoice->plan_name,
+                    'plan_renews_at' => $invoice->period_end,
+                    'pending_plan_name' => null,
+                    'pending_plan_effective_at' => null,
+                ]);
+            }
 
             if ($previousStatus !== 'paid' && !empty($invoice->user?->email)) {
                 Mail::to($invoice->user->email)->send(new SubscriptionPaymentSuccessMail(
@@ -255,24 +290,6 @@ class BillingPaymentController extends Controller
             'cancel', 'deny', 'failure' => 'cancelled',
             default => 'sent',
         };
-    }
-
-    private function priceMap(): array
-    {
-        return [
-            'Basic' => [
-                'monthly' => 49000,
-                'yearly' => 38000 * 12,
-            ],
-            'Pro' => [
-                'monthly' => 139000,
-                'yearly' => 106000 * 12,
-            ],
-            'Enterprise' => [
-                'monthly' => 199000,
-                'yearly' => 151000 * 12,
-            ],
-        ];
     }
 
     private function generateInvoiceNumber(): string

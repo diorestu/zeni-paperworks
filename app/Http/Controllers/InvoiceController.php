@@ -14,6 +14,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Setting;
 use App\Services\NotificationService;
+use App\Services\PackageCatalogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +25,10 @@ use Illuminate\Validation\ValidationException;
 
 class InvoiceController extends Controller
 {
-    public function __construct(private readonly NotificationService $notificationService)
+    public function __construct(
+        private readonly NotificationService $notificationService,
+        private readonly PackageCatalogService $packageCatalogService
+    )
     {
     }
 
@@ -392,13 +396,7 @@ class InvoiceController extends Controller
 
     private function planInvoiceLimit(string $planName): ?int
     {
-        $limits = config('plans.invoice_limits', []);
-
-        if (! array_key_exists($planName, $limits)) {
-            return $limits['Free'] ?? 10;
-        }
-
-        return $limits[$planName];
+        return $this->packageCatalogService->invoiceLimit($planName);
     }
 
     private function generateInvoiceNumber(): string

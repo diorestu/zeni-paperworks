@@ -6,12 +6,17 @@ use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Quotation;
+use App\Services\PackageCatalogService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class LandingController extends Controller
 {
+    public function __construct(private readonly PackageCatalogService $packageCatalogService)
+    {
+    }
+
     public function index(Request $request): Response
     {
         $invoiceStatus = Invoice::query()
@@ -23,6 +28,12 @@ class LandingController extends Controller
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
+
+        $catalog = $this->packageCatalogService->all();
+        $freeLimit = $catalog['Free']['invoice_limit'] ?? 10;
+        $basicLimit = $catalog['Basic']['invoice_limit'] ?? 10;
+        $proLimit = $catalog['Pro']['invoice_limit'] ?? 500;
+        $enterpriseLimit = $catalog['Enterprise']['invoice_limit'] ?? null;
 
         return Inertia::render('Landing', [
             'stats' => [
@@ -48,25 +59,25 @@ class LandingController extends Controller
                     'name' => 'Free',
                     'price' => 'Rp0',
                     'period' => 'selamanya',
-                    'highlights' => ['10 Invoice / bulan', '10 Penawaran / bulan', '10 Klien'],
+                    'highlights' => ["{$freeLimit} Invoice / bulan", '10 Penawaran / bulan', '10 Klien'],
                 ],
                 [
                     'name' => 'Basic',
-                    'price' => 'Rp49.000',
+                    'price' => 'Rp'.number_format((int) ($catalog['Basic']['monthly_price'] ?? 49000), 0, ',', '.'),
                     'period' => '/ bulan',
-                    'highlights' => ['100 Invoice / bulan', '10 Penawaran / bulan', '100 Klien'],
+                    'highlights' => ["{$basicLimit} Invoice / bulan", '10 Penawaran / bulan', '100 Klien'],
                 ],
                 [
                     'name' => 'Pro',
-                    'price' => 'Rp139.000',
+                    'price' => 'Rp'.number_format((int) ($catalog['Pro']['monthly_price'] ?? 139000), 0, ',', '.'),
                     'period' => '/ bulan',
-                    'highlights' => ['500 Invoice / bulan', 'Penawaran tanpa batas', '500 Klien'],
+                    'highlights' => ["{$proLimit} Invoice / bulan", 'Penawaran tanpa batas', '500 Klien'],
                 ],
                 [
                     'name' => 'Enterprise',
-                    'price' => 'Rp199.000',
+                    'price' => 'Rp'.number_format((int) ($catalog['Enterprise']['monthly_price'] ?? 199000), 0, ',', '.'),
                     'period' => '/ bulan',
-                    'highlights' => ['Invoice tanpa batas', 'Penawaran tanpa batas', 'Klien tanpa batas'],
+                    'highlights' => [$enterpriseLimit === null ? 'Invoice tanpa batas' : "{$enterpriseLimit} Invoice / bulan", 'Penawaran tanpa batas', 'Klien tanpa batas'],
                 ],
             ],
             'isAuthenticated' => $request->user() !== null,

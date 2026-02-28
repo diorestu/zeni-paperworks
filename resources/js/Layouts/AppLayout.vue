@@ -6,6 +6,26 @@ import { Icon } from '@iconify/vue';
 const page = usePage();
 const userName = computed(() => page.props.auth?.user?.name || 'Ava Moore');
 const currentPackage = computed(() => page.props.auth?.user?.plan_name || 'Free');
+const hasActiveEnterprisePlan = computed(() => {
+    const user = page.props.auth?.user;
+    if ((user?.plan_name || '').toLowerCase() !== 'enterprise') {
+        return false;
+    }
+
+    if (!user?.plan_renews_at) {
+        return true;
+    }
+
+    const renewalDate = new Date(user.plan_renews_at);
+    if (Number.isNaN(renewalDate.getTime())) {
+        return true;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return renewalDate >= today;
+});
 const showDropdown = ref(false);
 const showNotifications = ref(false);
 const notifications = ref([]);
@@ -383,6 +403,7 @@ const submitFeedback = () => {
                                 Current: <span class="text-[#07304a]">{{ currentPackage }}</span>
                             </p>
                             <Link
+                                v-if="!hasActiveEnterprisePlan"
                                 :href="route('settings.billing')"
                                 class="mt-4 block w-full rounded-xl bg-[#07304a] px-4 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:bg-[#0a3f61]"
                             >
